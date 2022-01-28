@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+FILE=server/database/db.json
+if test -f "$FILE"; then
+    exit
+fi
+
+echo '{}' > server/database/db.json
