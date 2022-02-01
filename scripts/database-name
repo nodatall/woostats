@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+require('../environment.js')
+
+console.log(process.env.DATABASE_URL.split('/')[3])
+process.exit()

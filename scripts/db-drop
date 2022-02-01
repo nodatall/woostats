@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+DATABASE_NAME=`./scripts/database-name`
+echo dropping database: $DATABASE_NAME
+dropdb $DATABASE_NAME --if-exists

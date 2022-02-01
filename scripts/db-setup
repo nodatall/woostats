@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-FILE=server/database/db.json
-if test -f "$FILE"; then
-    exit
-fi
-
-echo '{}' > server/database/db.json
+./scripts/db-drop
+./scripts/db-create
+./scripts/db-migrate up

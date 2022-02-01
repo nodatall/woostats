@@ -1,5 +1,4 @@
 node_modules
-dist
-server/database/*.json
+client/dist
 error.log
 .env

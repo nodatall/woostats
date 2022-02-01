@@ -4,7 +4,9 @@
       "module": "commonjs",
       "baseUrl": "./",
       "paths": {
-        "components/*": ["client/components/*"]
+        "components/*": ["client/components/*"],
+        "lib/*": ["client/lib/*"],
+        "assets/*": ["client/assets/*"]
       }
   },
   "include": [

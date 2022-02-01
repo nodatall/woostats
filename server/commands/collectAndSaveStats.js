@@ -1,36 +1,42 @@
 const coinGecko =  require('coingecko-api')
-const dayjs = require('../lib/dayjs')
+const delay = require('delay')
 
+const dayjs = require('../lib/dayjs')
 const db = require('../database')
 const nomicsRequest = require('../lib/nomicsApi')
 const logger = require('../lib/logger')
 
 const CoinGeckoClient = new coinGecko()
 
-module.exports = async function collectAndSaveStats() {
-  await getWooNetworkVolume()
-  await getTotalMarketVolume()
+module.exports = async function collectAndSaveStats(socket) {
+  const newWoo = await getWooNetworkVolume()
+  const newTotal = await getTotalMarketVolume()
+
+  if (!newWoo && !newTotal) return
+  const allStats = db.get()
+  socket.emit('send', { allStats })
 }
 
 async function getTotalMarketVolume() {
-  if (!db.get('wooVolumes')) return
+  const wooMarketVolumes = db.get('wooVolumes') || []
+
+  if (wooMarketVolumes.length === 0) return
+  const wooStart = dayjs(wooMarketVolumes[0][0]).format('YYYY-MM-DD')
 
   const totalVolumes = db.get('totalVolumes') || []
   const noRecords = totalVolumes.length === 0
-  const today = dayjs.utc().format('YYYY-MM-DD')
-  const start = noRecords ? '2021-06-26' : today
-  const aFewDaysAgo = '2022-01-20'
+  const start = noRecords ? wooStart : dayjs.utc().format('YYYY-MM-DD')
 
   if (
     !noRecords &&
-    (dayjs.utc(totalVolumes[totalVolumes.length - 1][0]).format('MM-DD-YYYY') === today)
+    totalVolumes[totalVolumes.length - 1][0] === dayjs.utc().format('MM-DD-YYYY')
   ) return
 
   let totalMarketVolumeHistory
   try {
     totalMarketVolumeHistory = await nomicsRequest(
       '/volume/history',
-      `start=${aFewDaysAgo}T00%3A00%3A00Z&end=${dayjs.utc().format('YYYY-MM-DD')}T00%3A00%3A00Z`
+      `start=${start}T00%3A00%3A00Z&end=${dayjs.utc().format('YYYY-MM-DD')}T00%3A00%3A00Z`
     )
   } catch(error) {
     logger.log(
@@ -40,7 +46,33 @@ async function getTotalMarketVolume() {
     return
   }
 
-  console.log(`totalMarketVolumeHistory ==>`, totalMarketVolumeHistory)
+  const append = []
+  const appendMemo = {}
+  totalMarketVolumeHistory.reverse().forEach(volumeDay => {
+    const { timestamp, volume } = volumeDay
+    const formatedDate = dayjs.utc(timestamp).format('MM-DD-YYYY')
+    if (formatedDate === '11-01-2021') {
+      console.log(`volumeDay ==>`, volumeDay)
+    }
+    if (appendMemo[formatedDate]) return
+    appendMemo[formatedDate] = true
+
+    appendMemo[timestamp] = true
+    append.unshift([
+      dayjs.utc(formatedDate).format('MM-DD-YYYY'),
+      volume,
+    ])
+  })
+
+  db.set(
+    'totalVolumes',
+    [
+      ...totalVolumes,
+      ...append,
+    ]
+  )
+
+  return true
 }
 
 async function getWooNetworkVolume() {
@@ -59,6 +91,7 @@ async function getWooNetworkVolume() {
 
   try {
     woo = await CoinGeckoClient.exchanges.fetchVolumeChart('wootrade', { days })
+    await delay(1200)
     btcPrice = await CoinGeckoClient.simple.price({ ids: ['bitcoin'] })
   } catch(error) {
     logger.log(
@@ -68,11 +101,17 @@ async function getWooNetworkVolume() {
     return
   }
 
-  const append = woo.data.map(([date, volume]) => {
-    return [
-      dayjs.utc(date).format('MM-DD-YYYY'),
+  const append = []
+  const appendMemo = {}
+  woo.data.reverse().forEach(([date, volume]) => {
+    const formatedDate = dayjs.utc(date).format('MM-DD-YYYY')
+    if (appendMemo[formatedDate]) return
+    appendMemo[formatedDate] = true
+
+    append.unshift([
+      formatedDate,
       volume * btcPrice.data.bitcoin.usd,
-    ]
+    ])
   })
 
   db.set(
@@ -82,4 +121,6 @@ async function getWooNetworkVolume() {
       ...append,
     ]
   )
+
+  return true
 }

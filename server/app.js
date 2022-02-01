@@ -7,10 +7,8 @@ const path = require('path')
 
 const app = express()
 const server = require('http').createServer(app)
-const startSocket = require('./socket')
-const worker = require('./worker')
+const socket = require('socket.io')(server)
 
-startSocket(server)
 app.use(compression())
 app.use(sslRedirect())
 app.use(express.static('client/dist'))
@@ -28,6 +26,8 @@ app.use(function (err, req, res) {
   res.status(500).json({ error: err.message })
 })
 
-worker.start()
+require('./socket').initializeSocket(socket)
+require('./worker').start(socket)
 
 module.exports = { server }
+

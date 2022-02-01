@@ -1,12 +1,10 @@
 const cron = require('./lib/cron')
 const collectAndSaveStats = require('./commands/collectAndSaveStats')
 
-function start(){
-  collectAndSaveStats()
-
-  const schedule = cron.intervalToSchedule(60)
+function start(socket){
+  const schedule = cron.intervalToSchedule(20)
   cron.schedule(schedule, () => {
-    collectAndSaveStats()
+    collectAndSaveStats(socket)
   })
 }
 
