@@ -19,9 +19,15 @@ const logger = winston.createLogger({
     new winston.transports.Console(),
     new winston.transports.File({
       filename: 'error.log',
-      level: 'debug',
+      level: 'error',
     }),
   ],
 })
+
+logger.msg = function(msg) {
+  const msgString = JSON.stringify(msg)
+  if (msgString.length < 200) return msgString
+  return msgString.slice(0, 200) + '...'
+}
 
 module.exports = logger

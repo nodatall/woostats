@@ -1,11 +1,13 @@
-import React, { render } from 'react'
+import React from 'react'
+import ReactDOM from "react-dom"
+
 import App from './App.js'
 import "@babel/polyfill"
 
 import './index.sass'
 
-render(
+ReactDOM.render(
   <App />,
-  document.querySelector('body')
+  document.querySelector('main')
 )
 

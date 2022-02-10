@@ -1,10 +1,10 @@
-const db = require('./database')
+const statsCache = require('./lib/statsCache')
 
 function initializeSocket(socket) {
   socket.on('connection', function (socketConnection) {
     socketConnection.on('get', async function () {
-      const allStats = db.get()
-      socketConnection.emit('send', { allStats })
+      const { wooVolume, aggregateVolume } = await statsCache.get()
+      socketConnection.emit('send', { wooVolume, aggregateVolume })
     })
   })
 }

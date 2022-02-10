@@ -1,11 +1,25 @@
 import React from 'react'
+import { ThemeProvider } from '@mui/material/styles'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
-import ExampleComponent from 'components/ExampleComponent'
+import theme from './theme'
 import useSocket from 'lib/useSocketHook'
+import Layout from 'components/Layout'
+import VolumePage from './pages/VolumePage'
 
 export default function App() {
 
   useSocket()
 
-  return <ExampleComponent />
+  return (
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route exact path="/" component={VolumePage} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </ThemeProvider>
+  )
 }

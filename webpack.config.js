@@ -32,8 +32,6 @@ const config = {
   context: srcPath,
   resolve: {
     alias: {
-      react: 'preact/compat',
-      'react-dom': 'preact/compat',
       components: `${srcPath}/components`,
       assets: `${srcPath}/assets`,
       lib: `${srcPath}/lib`,
