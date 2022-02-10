@@ -5,6 +5,9 @@ import { createTheme } from '@mui/material/styles'
 let theme = createTheme({
   typography: {
     fontFamily: ['Maven Pro', 'Avenir', 'Helvetica', 'sans-serif'].join(','),
+    allVariants: {
+      color: 'white',
+    }
   },
   palette: {
     mode: 'dark',

@@ -16,7 +16,7 @@ export default function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route exact path="/" component={VolumePage} />
+            <Route exact path="/" element={<VolumePage />} />
           </Routes>
         </Layout>
       </BrowserRouter>
