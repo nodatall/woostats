@@ -1,0 +1,36 @@
+.Spinner
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: transparent
+  height: 100vh
+  height: -webkit-fill-available
+  height: fill-available
+  z-index: 99991
+  position: relative
+  &-border
+    width: 150px
+    height: 150px
+    padding: 3px
+    display: flex
+    justify-content: center
+    align-items: center
+    border-radius: 50%
+    background: #8CFAAA
+    background: linear-gradient(0deg, rgba(63,249,220,0.1) 33%, #8CFAAA 100%)
+    animation: spin .8s linear 0s infinite
+    z-index: 99992
+    position: absolute
+  &-core
+    width: 150px
+    height: 150px
+    background-color: #181c23
+    border-radius: 50%
+    z-index: 99993
+    position: absolute
+
+@keyframes spin
+  from
+    transform: rotate(0)
+  to
+    transform: rotate(359deg)

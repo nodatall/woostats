@@ -17,12 +17,13 @@ let theme = createTheme({
     },
     background: {
       default: '#181c23',
-      paper: '#141824',
+      paper: '#15181D',
       dark: 'rgba(13,14,17,.85)',
     },
     text: {
       primary: 'rgb(213, 213, 213)',
       light: 'rgb(213, 213, 213, .5)',
+      grey: '#57585A',
     },
     success: {
       main: '#34815e',
@@ -62,24 +63,9 @@ theme = createTheme(theme, {
     MuiTypography: {
       styleOverrides: {
         caption: {
-          color: theme.palette.text.light,
+          color: theme.palette.text.grey,
         },
       },
-    },
-    MuiButton: {
-      variants: [
-        {
-          props: { variant: 'topnav' },
-          style: {
-            border: '2px solid transparent',
-            borderRadius: '10px',
-            // backgroundImage: `linear-gradient(${theme.palette.background.default},${theme.palette.background.default}),radial-gradient(circle at left top, ${theme.palette.primary.main},${theme.palette.primary.second})`,
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box,border-box',
-            marginLeft: '15px',
-          },
-        },
-      ],
     },
   },
 })
