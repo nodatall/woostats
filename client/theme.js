@@ -13,7 +13,9 @@ let theme = createTheme({
     mode: 'dark',
     primary: {
       main: '#73BEF4',
-      second: '#8CFAAA',
+    },
+    secondary: {
+      main: '#8CFAAA',
     },
     background: {
       default: '#181c23',

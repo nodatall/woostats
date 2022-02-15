@@ -62,17 +62,7 @@ export default function LineChart({ labels, datasets, options = {}, modifyOption
     },
     plugins: {
       tooltip: {
-        titleFontSize: 16,
-        bodyFontSize: 14,
-        padding: 12,
-        displayColors: false,
-        bodyAlign: 'center',
-        backgroundColor: '#182024',
-        borderColor: '#bfbfc9',
-        borderWidth: .5,
-        callbacks: {
-          label: item => `$${item.formattedValue}`,
-        },
+        enabled: false,
       },
       legend: {
         display: false,
@@ -82,5 +72,29 @@ export default function LineChart({ labels, datasets, options = {}, modifyOption
   }
   if (modifyOptions) modifyOptions(options)
 
-  return <Line data={data} options={options} />
+  const plugins = [
+    {
+      afterDraw: (chart) => {
+        if (chart.tooltip._active && chart.tooltip._active.length) {
+          const activePoint = chart.tooltip._active[0]
+          const { ctx } = chart
+          const { x } = activePoint.element
+          const topY = chart.scales.y.top
+          const bottomY = chart.scales.y.bottom
+
+          // draw vertical line
+          ctx.save()
+          ctx.beginPath()
+          ctx.moveTo(x, topY)
+          ctx.lineTo(x, bottomY)
+          ctx.lineWidth = 1
+          ctx.strokeStyle = '#57585A'
+          ctx.stroke()
+          ctx.restore()
+        }
+      },
+    },
+  ]
+
+  return <Line data={data} options={options} plugins={plugins} />
 }

@@ -4,6 +4,7 @@ import AppBar from "@mui/material/AppBar"
 import Box from "@mui/material/Box"
 import Toolbar from "@mui/material/Toolbar"
 import Button from "@mui/material/Button"
+import Link from "@mui/material/Link"
 import wooLogo from "../assets/woo-logo-small.png"
 import EqualizerIcon from '@mui/icons-material/Equalizer'
 
@@ -35,17 +36,17 @@ export default function TopNav() {
         >
           <Button sx={{ display: "flex", alignItems: "center", ml: -1, pr: 0 }} to="/">
             <img src={wooLogo} style={{ marginRight: "10px" }} />
-            <EqualizerIcon fontSize="large" />
+            <EqualizerIcon fontSize="large" color="secondary" />
           </Button>
-          <Button variant="text" to="/" sx={{ ml: 'auto' }}>
+          <Link underline="none" variant="h6" color="text.light" to="/" sx={{ ml: 'auto' }}>
             Volume
-          </Button>
-          <Button variant="text" to="/dao" disabled>
+          </Link>
+          <Link underline="none" variant="h6" color="text.light" to="/dao" disabled sx={{ pl: 2 }}>
             DAO
-          </Button>
-          <Button variant="text" to="/token" sx={{ pr: 0 }} disabled>
+          </Link>
+          <Link underline="none" variant="h6" color="text.light" to="/token" sx={{ pr: 0, pl: 2 }} disabled>
             Token
-          </Button>
+          </Link>
         </Toolbar>
       </AppBar>
     </Box>
