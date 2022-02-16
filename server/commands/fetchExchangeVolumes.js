@@ -28,8 +28,9 @@ module.exports = async function fetchExchangeVolumes() {
 
     let previousDate
     const insertExchangeVolumes = exchangeVolumes.map(([date, volumeInBTC]) => {
-      let formattedDate = dayjs.utc(date).format('MM-DD-YYYY')
-      if (previousDate === formattedDate) formattedDate = dayjs.utc(formattedDate).add(1, 'day').format('MM-DD-YYYY')
+      const dateFormat = 'YYYY-MM-DD'
+      let formattedDate = dayjs.utc(date).format(dateFormat)
+      if (previousDate === formattedDate) formattedDate = dayjs.utc(formattedDate).add(1, 'day').format(dateFormat)
       previousDate = formattedDate
       return {
         date: formattedDate,

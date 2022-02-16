@@ -52,7 +52,7 @@ export default function LineChart({ labels, datasets, options = {}, modifyOption
         },
         type: 'time',
         time: {
-          parser: 'MM-DD-YYYY',
+          parser: 'YYYY-MM-DD',
           unit: labels.length > 45 ? 'month' : 'day',
           displayFormats: {
             day: 'MM/DD'

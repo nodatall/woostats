@@ -6,6 +6,7 @@ import theme from './theme'
 import useSocket from 'lib/useSocketHook'
 import Layout from 'components/Layout'
 import VolumePage from './pages/VolumePage'
+import DaoPage from './pages/DaoPage'
 
 export default function App() {
 
@@ -17,6 +18,7 @@ export default function App() {
         <Layout>
           <Routes>
             <Route exact path="/" element={<VolumePage />} />
+            <Route exact path="/dao" element={<DaoPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>

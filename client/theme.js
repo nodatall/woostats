@@ -16,6 +16,7 @@ let theme = createTheme({
     },
     secondary: {
       main: '#8CFAAA',
+      subtle: '#73c689',
     },
     background: {
       default: '#181c23',
@@ -64,6 +65,9 @@ theme = createTheme(theme, {
     },
     MuiTypography: {
       styleOverrides: {
+        root: {
+          color: '#c8c8c8',
+        },
         caption: {
           color: theme.palette.text.grey,
         },

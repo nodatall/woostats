@@ -56,8 +56,8 @@ export default function VolumePage() {
 
   return <Box ref={boxRef}>
     <Card sx={{p:2}}>
-      <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 2, height: '50px'}}>
-        <Typography variant="h6" sx={{ textAlign: 'right', opacity: .9 }} color="primary.main">
+      <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, height: '50px'}}>
+        <Typography variant="h6" sx={{ textAlign: 'right' }}>
           Daily WOO Network volume
         </Typography>
         {tooltip && <Tooltip {...{tooltip}} />}
@@ -78,7 +78,6 @@ export default function VolumePage() {
           },
         ]}
         modifyOptions={options => {
-          // options.plugins.tooltip.callbacks.title = item => item[0].label.replace(', 12:00:00 am', '')
           options.plugins.tooltip.external = tooltipSetter
         }}
       />

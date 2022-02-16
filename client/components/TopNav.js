@@ -1,11 +1,12 @@
-import React from "react"
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 
-import AppBar from "@mui/material/AppBar"
-import Box from "@mui/material/Box"
-import Toolbar from "@mui/material/Toolbar"
-import Button from "@mui/material/Button"
-import Link from "@mui/material/Link"
-import wooLogo from "../assets/woo-logo-small.png"
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import Toolbar from '@mui/material/Toolbar'
+import Button from '@mui/material/Button'
+import Link from '@mui/material/Link'
+import wooLogo from '../assets/woo-logo-small.png'
 import EqualizerIcon from '@mui/icons-material/Equalizer'
 
 export default function TopNav() {
@@ -21,6 +22,9 @@ export default function TopNav() {
       pl: 1,
     }
   })
+
+  const { pathname } = useLocation()
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -38,17 +42,32 @@ export default function TopNav() {
             <img src={wooLogo} style={{ marginRight: "10px" }} />
             <EqualizerIcon fontSize="large" color="secondary" />
           </Button>
-          <Link underline="none" variant="h6" color="text.light" to="/" sx={{ ml: 'auto' }}>
-            Volume
-          </Link>
-          <Link underline="none" variant="h6" color="text.light" to="/dao" disabled sx={{ pl: 2 }}>
-            DAO
-          </Link>
-          <Link underline="none" variant="h6" color="text.light" to="/token" sx={{ pr: 0, pl: 2 }} disabled>
-            Token
-          </Link>
+          <TopNavLink {...{ to: '/', sx: { ml: 'auto' }, pathname, text: 'Volume' }} />
+          <TopNavLink {...{ to: '/dao', sx: { ml: 2 }, pathname, text: 'DAO' }} />
+          <TopNavLink {...{ to: '/token', sx: { mr: -2, ml: 2 }, pathname, text: 'Token' }} />
         </Toolbar>
       </AppBar>
     </Box>
   )
+}
+
+function TopNavLink({ text, pathname, sx = {}, to }) {
+  const styles = { py: 1, px: 2, ...sx }
+  if (pathname === to) {
+    Object.assign(styles, {
+      color: 'secondary.subtle',
+      background: '#1c1c1c',
+      borderRadius: '10px',
+    })
+  }
+
+  return <Link {...{
+    underline: 'none',
+    variant: 'body1',
+    color: 'text.light',
+    to,
+    sx: styles,
+  }}>
+    {text}
+  </Link>
 }
