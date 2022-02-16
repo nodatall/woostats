@@ -23,6 +23,7 @@ export default function TopNav() {
     }
   })
 
+
   const { pathname } = useLocation()
 
   return (
@@ -40,11 +41,14 @@ export default function TopNav() {
         >
           <Button sx={{ display: "flex", alignItems: "center", ml: -1, pr: 0 }} to="/">
             <img src={wooLogo} style={{ marginRight: "10px" }} />
-            <EqualizerIcon fontSize="large" color="secondary" />
+            <EqualizerIcon
+              fontSize="large"
+              color="primary"
+            />
           </Button>
           <TopNavLink {...{ to: '/', sx: { ml: 'auto' }, pathname, text: 'Volume' }} />
-          <TopNavLink {...{ to: '/dao', sx: { ml: 2 }, pathname, text: 'DAO' }} />
-          <TopNavLink {...{ to: '/token', sx: { ml: 2 }, pathname, text: 'Token' }} />
+          <TopNavLink {...{ to: '/dao', pathname, text: 'DAO' }} />
+          <TopNavLink {...{ to: '/token', pathname, text: 'Token' }} />
         </Toolbar>
       </AppBar>
     </Box>
@@ -56,6 +60,7 @@ function TopNavLink({ text, pathname, sx = {}, to }) {
     const styles = {
       py: 1,
       px: 2,
+      ml: 2,
       [theme.breakpoints.down('sm')]: {
         py: .5,
         px: 1,

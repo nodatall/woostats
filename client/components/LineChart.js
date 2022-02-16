@@ -1,10 +1,34 @@
-import React from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Line } from 'react-chartjs-2'
 import numeral from 'numeral'
 
 require('lib/chart')
 
-export default function LineChart({ labels, datasets, options = {}, modifyOptions }) {
+export default function LineChart({
+  labels, datasets, options = {}, modifyOptions, parentRef, setTooltip, tooltip,
+}) {
+  useEffect(
+    () => {
+      if (parentRef.current) parentRef.current.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+          if (tooltip) setTooltip({})
+        }, 50)
+      })
+    },
+    [parentRef.current]
+  )
+
+  const tooltipSetter = useCallback(
+    context => {
+      if (context.tooltip.title[0] === tooltip.title) return
+      setTooltip({
+        title: context.tooltip.title[0],
+        body: context.tooltip.dataPoints[0].formattedValue,
+      })
+    },
+    [tooltip]
+  )
+
   const defaultDataset = {
     fill: true,
     backgroundColor: '#363c4f',
@@ -63,6 +87,7 @@ export default function LineChart({ labels, datasets, options = {}, modifyOption
     plugins: {
       tooltip: {
         enabled: false,
+        external: tooltipSetter,
       },
       legend: {
         display: false,
@@ -81,8 +106,6 @@ export default function LineChart({ labels, datasets, options = {}, modifyOption
           const { x } = activePoint.element
           const topY = chart.scales.y.top
           const bottomY = chart.scales.y.bottom
-
-          // draw vertical line
           ctx.save()
           ctx.beginPath()
           ctx.moveTo(x, topY)

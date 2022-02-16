@@ -12,31 +12,8 @@ import LineChart from 'components/LineChart'
 import TextWithCaption from 'components/TextWithCaption'
 
 export default function VolumePage() {
-  const [tooltip, setTooltip] = useState({})
   const boxRef = useRef()
   const { wooVolume, aggregateVolume } = useAppState(['wooVolume', 'aggregateVolume'])
-
-  useEffect(
-    () => {
-      if (boxRef.current) boxRef.current.addEventListener('mouseleave', () => {
-        setTimeout(() => {
-          if (tooltip) setTooltip({})
-        }, 50)
-      })
-    },
-    [boxRef.current]
-  )
-
-  const tooltipSetter = useCallback(
-    context => {
-      if (context.tooltip.title[0] === tooltip.title) return
-      setTooltip({
-        title: context.tooltip.title[0],
-        body: context.tooltip.dataPoints[0].formattedValue,
-      })
-    },
-    [tooltip]
-  )
 
   if (!wooVolume) return <Box sx={{ display: 'flex', justifyContent: 'center', height: '100vh', mt: -30 }}>
     <Spinner />
@@ -55,34 +32,46 @@ export default function VolumePage() {
   )
 
   return <Box ref={boxRef}>
-    <Card sx={{p:2}}>
-      <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, height: '50px'}}>
-        <Typography variant="h6" sx={{ textAlign: 'right' }}>
-          Daily WOO Network volume
-        </Typography>
-        {tooltip && <Tooltip {...{tooltip}} />}
-      </Stack>
-      <LineChart
-        labels={wooVolumeLabels}
-        datasets={[
-          {
-            label: 'Daily WOO Network Volume',
-            data: wooVolumeSeries,
-            borderColor: function(context) {
-              const chart = context.chart
-              const {ctx, chartArea} = chart
-              if (!chartArea) return
-              return getGradient(ctx, chartArea)
-            },
-            backgroundColor: 'rgb(25, 29, 35)',
+    <VolumeChart {...{
+      title: 'Daily WOO Network volume',
+      labels: wooVolumeLabels,
+      datasets: [
+        {
+          label: 'Daily WOO Network Volume',
+          data: wooVolumeSeries,
+          borderColor: function(context) {
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+            if (!chartArea) return
+            return getGradient(ctx, chartArea, ['rgb(0, 156, 181)', 'rgb(178, 118, 0)', 'rgb(86, 0, 178)'])
           },
-        ]}
-        modifyOptions={options => {
-          options.plugins.tooltip.external = tooltipSetter
-        }}
-      />
-    </Card>
+          backgroundColor: 'rgb(25, 29, 35)',
+        },
+      ],
+      parentRef: boxRef,
+    }} />
   </Box>
+}
+
+function VolumeChart({ title, labels, datasets, parentRef }) {
+  const [tooltip, setTooltip] = useState({})
+
+  return <Card sx={{p:2}}>
+    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, height: '50px'}}>
+      <Typography variant="h6" sx={{ textAlign: 'right' }}>
+        {title}
+      </Typography>
+      {tooltip && <Tooltip {...{tooltip}} />}
+    </Stack>
+    <LineChart {...{
+      labels,
+      datasets,
+      tooltip,
+      setTooltip,
+      parentRef,
+    }}
+    />
+  </Card>
 }
 
 function Tooltip({ tooltip }) {
@@ -97,16 +86,16 @@ function Tooltip({ tooltip }) {
 }
 
 let width, height, gradient
-function getGradient(ctx, chartArea) {
+function getGradient(ctx, chartArea, colors) {
   const chartWidth = chartArea.right - chartArea.left
   const chartHeight = chartArea.bottom - chartArea.top
   if (!gradient || width !== chartWidth || height !== chartHeight) {
     width = chartWidth
     height = chartHeight
     gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
-    gradient.addColorStop(0, 'rgb(0, 156, 181)')
-    gradient.addColorStop(0.5, 'rgb(178, 118, 0)')
-    gradient.addColorStop(1, 'rgb(86, 0, 178)')
+    gradient.addColorStop(0, colors[0])
+    gradient.addColorStop(0.5, colors[1])
+    gradient.addColorStop(1, colors[2])
   }
 
   return gradient
