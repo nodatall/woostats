@@ -44,7 +44,7 @@ export default function TopNav() {
           </Button>
           <TopNavLink {...{ to: '/', sx: { ml: 'auto' }, pathname, text: 'Volume' }} />
           <TopNavLink {...{ to: '/dao', sx: { ml: 2 }, pathname, text: 'DAO' }} />
-          <TopNavLink {...{ to: '/token', sx: { mr: -2, ml: 2 }, pathname, text: 'Token' }} />
+          <TopNavLink {...{ to: '/token', sx: { ml: 2 }, pathname, text: 'Token' }} />
         </Toolbar>
       </AppBar>
     </Box>
@@ -52,13 +52,24 @@ export default function TopNav() {
 }
 
 function TopNavLink({ text, pathname, sx = {}, to }) {
-  const styles = { py: 1, px: 2, ...sx }
-  if (pathname === to) {
-    Object.assign(styles, {
-      color: 'secondary.subtle',
-      background: '#1c1c1c',
-      borderRadius: '10px',
-    })
+  const styles = theme => {
+    const styles = {
+      py: 1,
+      px: 2,
+      [theme.breakpoints.down('sm')]: {
+        py: .5,
+        px: 1,
+      },
+      ...sx
+    }
+    if (pathname === to) {
+      Object.assign(styles, {
+        color: 'secondary.subtle',
+        background: '#1c1c1c',
+        borderRadius: '10px',
+      })
+    }
+    return styles
   }
 
   return <Link {...{

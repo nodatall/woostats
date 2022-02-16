@@ -7,6 +7,7 @@ import useSocket from 'lib/useSocketHook'
 import Layout from 'components/Layout'
 import VolumePage from './pages/VolumePage'
 import DaoPage from './pages/DaoPage'
+import TokenPage from './pages/TokenPage'
 
 export default function App() {
 
@@ -19,6 +20,7 @@ export default function App() {
           <Routes>
             <Route exact path="/" element={<VolumePage />} />
             <Route exact path="/dao" element={<DaoPage />} />
+            <Route exact path="/token" element={<TokenPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>
