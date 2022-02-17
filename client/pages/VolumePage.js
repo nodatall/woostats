@@ -12,7 +12,6 @@ import LineChart from 'components/LineChart'
 import TextWithCaption from 'components/TextWithCaption'
 
 export default function VolumePage() {
-  const boxRef = useRef()
   const { wooVolume, aggregateVolume } = useAppState(['wooVolume', 'aggregateVolume'])
 
   if (!wooVolume) return <Box sx={{ display: 'flex', justifyContent: 'center', height: '100vh', mt: -30 }}>
@@ -30,8 +29,36 @@ export default function VolumePage() {
       series: [],
     }
   )
+  const { percentSeries, aggregateVolumeSeries } = aggregateVolume.reduce(
+    (acc, { sum }, index) => {
+      acc.aggregateVolumeSeries.push(sum)
+      acc.percentSeries.push((wooVolumeSeries[index] / sum) * 100)
+      return acc
+    },
+    {
+      aggregateVolumeSeries: [],
+      percentSeries: [],
+    }
+  )
 
-  return <Box ref={boxRef}>
+  return <Box>
+    <VolumeChart {...{
+      title: 'WOO % of total market volume',
+      labels: wooVolumeLabels,
+      datasets: [
+        {
+          label: 'WOO % of total market volume',
+          data: percentSeries,
+          borderColor: function(context) {
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+            if (!chartArea) return
+            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
+          },
+          backgroundColor: 'rgb(25, 29, 35)',
+        },
+      ],
+    }} />
     <VolumeChart {...{
       title: 'Daily WOO Network volume',
       labels: wooVolumeLabels,
@@ -48,15 +75,34 @@ export default function VolumePage() {
           backgroundColor: 'rgb(25, 29, 35)',
         },
       ],
-      parentRef: boxRef,
+      sx: { mt: 6 },
+    }} />
+    <VolumeChart {...{
+      title: 'Total crypto market volume',
+      labels: wooVolumeLabels,
+      datasets: [
+        {
+          label: 'Total crypto market volume',
+          data: aggregateVolumeSeries,
+          borderColor: function(context) {
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+            if (!chartArea) return
+            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
+          },
+          backgroundColor: 'rgb(25, 29, 35)',
+        },
+      ],
+      sx: { mt: 6 }
     }} />
   </Box>
 }
 
-function VolumeChart({ title, labels, datasets, parentRef }) {
+function VolumeChart({ title, labels, datasets, sx = {} }) {
+  const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
-  return <Card sx={{p:2}}>
+  return <Card sx={{ p:2, ...sx }} ref={containerRef}>
     <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, height: '50px'}}>
       <Typography variant="h6" sx={{ textAlign: 'right' }}>
         {title}
@@ -68,7 +114,7 @@ function VolumeChart({ title, labels, datasets, parentRef }) {
       datasets,
       tooltip,
       setTooltip,
-      parentRef,
+      parentRef: containerRef,
     }}
     />
   </Card>

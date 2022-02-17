@@ -1,10 +1,12 @@
 const delay = require('delay')
+const fs = require('fs')
 
 const knex = require('../database/knex')
 const coingecko = require('../lib/coingecko')
 const dayjs = require('../lib/dayjs')
 const client = require('../database')
-const coingeckoExchangeList = require('../../shared/coingeckoExchangeList.js')
+const coingeckoExchangeList = require('../../shared/coingeckoExchangeList')
+const inactiveExchangeList = require('../../shared/inactiveExchanges')
 
 module.exports = async function fetchExchangeVolumes() {
   const btcPriceResponse = await coingecko.request(
@@ -13,8 +15,10 @@ module.exports = async function fetchExchangeVolumes() {
   )
   if (!btcPriceResponse) return
   const btcPrice = btcPriceResponse.bitcoin.usd
+  const inactiveExchanges = []
 
   for (const exchange of coingeckoExchangeList) {
+    if (inactiveExchanges.includes(exchange.id)) continue
     const volumeRecords = await client.query('SELECT * FROM volume_by_exchange WHERE exchange = $1', [exchange.id])
     const days = volumeRecords.length === 0
       ? dayjs().utc().diff('2021-06-24', 'day')
@@ -25,6 +29,7 @@ module.exports = async function fetchExchangeVolumes() {
       `&days=${days}`
     )
     if (!exchangeVolumes) continue
+    if (exchangeVolumes.length === 0) inactiveExchanges.push(exchange.id)
 
     let previousDate
     const insertExchangeVolumes = exchangeVolumes.map(([date, volumeInBTC]) => {
@@ -42,6 +47,11 @@ module.exports = async function fetchExchangeVolumes() {
     const query = knex.raw(
       `? ON CONFLICT (date, exchange) DO UPDATE SET volume = EXCLUDED.volume;`,
       [knex('volume_by_exchange').insert(insertExchangeVolumes)],
+    )
+
+    fs.writeFileSync(
+      '../../shared/inactiveExchanges.js',
+      `module.exports = ${JSON.stringify([...inactiveExchangeList, ...inactiveExchanges])}`
     )
 
     await client.query(`${query}`)

@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Line } from 'react-chartjs-2'
 import numeral from 'numeral'
 
 require('lib/chart')
 
 export default function LineChart({
-  labels, datasets, options = {}, modifyOptions, parentRef, setTooltip, tooltip,
+  labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef,
 }) {
   useEffect(
     () => {
