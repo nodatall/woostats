@@ -5,8 +5,8 @@ const knex = require('../database/knex')
 const coingecko = require('../lib/coingecko')
 const dayjs = require('../lib/dayjs')
 const client = require('../database')
-const coingeckoExchangeList = require('../../shared/coingeckoExchangeList')
-const inactiveExchangeList = require('../../shared/inactiveExchanges')
+const coingeckoExchangeList = require('../../shared/coingeckoExchangeList.js')
+const inactiveExchangeList = require('../../shared/inactiveExchanges.js')
 
 module.exports = async function fetchExchangeVolumes() {
   const btcPriceResponse = await coingecko.request(
@@ -29,7 +29,10 @@ module.exports = async function fetchExchangeVolumes() {
       `&days=${days}`
     )
     if (!exchangeVolumes) continue
-    if (exchangeVolumes.length === 0) inactiveExchanges.push(exchange.id)
+    if (exchangeVolumes.length === 0) {
+      inactiveExchanges.push(exchange.id)
+      continue
+    }
 
     let previousDate
     const insertExchangeVolumes = exchangeVolumes.map(([date, volumeInBTC]) => {
@@ -49,8 +52,9 @@ module.exports = async function fetchExchangeVolumes() {
       [knex('volume_by_exchange').insert(insertExchangeVolumes)],
     )
 
+
     fs.writeFileSync(
-      '../../shared/inactiveExchanges.js',
+      './shared/inactiveExchanges.js',
       `module.exports = ${JSON.stringify([...inactiveExchangeList, ...inactiveExchanges])}`
     )
 
