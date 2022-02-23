@@ -18,7 +18,7 @@ export default function VolumePage() {
     <Spinner />
   </Box>
 
-  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume.reduce(
+  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume.slice(0, -1).reduce(
     (acc, { date, volume }) => {
       acc.labels.push(date)
       acc.series.push(volume)
@@ -29,9 +29,9 @@ export default function VolumePage() {
       series: [],
     }
   )
-  const { percentSeries, aggregateVolumeSeries } = aggregateVolume.reduce(
+  const { percentSeries, aggregateVolumeSeries } = aggregateVolume.slice(0, -1).reduce(
     (acc, { volume }, index) => {
-      acc.aggregateVolumeSeries.push(+volume + +wooVolumeSeries[index])
+      acc.aggregateVolumeSeries.push(+volume)
       acc.percentSeries.push((wooVolumeSeries[index] / volume) * 100)
       return acc
     },
@@ -45,6 +45,7 @@ export default function VolumePage() {
     <VolumeChart {...{
       title: 'WOO % of total market volume',
       labels: wooVolumeLabels,
+      denominator: '%',
       datasets: [
         {
           label: 'WOO % of total market volume',
@@ -70,7 +71,7 @@ export default function VolumePage() {
             const chart = context.chart
             const {ctx, chartArea} = chart
             if (!chartArea) return
-            return getGradient(ctx, chartArea, ['rgb(86, 0, 178)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'])
+            return getGradient(ctx, chartArea, ['rgb(147, 91, 211)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'])
           },
           backgroundColor: 'rgb(25, 29, 35)',
         },
@@ -98,7 +99,7 @@ export default function VolumePage() {
   </Box>
 }
 
-function VolumeChart({ title, labels, datasets, sx = {} }) {
+function VolumeChart({ title, labels, datasets, sx = {}, denominator }) {
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
@@ -107,7 +108,7 @@ function VolumeChart({ title, labels, datasets, sx = {} }) {
       <Typography variant="h6" sx={{ textAlign: 'right' }}>
         {title}
       </Typography>
-      {tooltip && <Tooltip {...{tooltip}} />}
+      {tooltip && <Tooltip {...{tooltip, denominator}} />}
     </Stack>
     <LineChart {...{
       labels,
@@ -120,12 +121,15 @@ function VolumeChart({ title, labels, datasets, sx = {} }) {
   </Card>
 }
 
-function Tooltip({ tooltip }) {
+function Tooltip({ tooltip, denominator = '$' }) {
   if (!tooltip.title) return null
+  const text = denominator === '%'
+    ? `${tooltip.body}${denominator}`
+    : `${denominator}${tooltip.body}`
   return <TextWithCaption
     {...{
       caption: dayjs(tooltip.title).format('MMM D, YYYY'),
-      text: `$${tooltip.body}`,
+      text,
       sx: { mr: 'auto' },
     }}
   />

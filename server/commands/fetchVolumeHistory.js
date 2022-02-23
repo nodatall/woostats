@@ -12,8 +12,8 @@ module.exports = async function fetchVolumeHistory({ btcPrice }) {
 async function fetchAndSaveTotalMarketVolumeHistory() {
   const volumeRecords = await client.query('SELECT * FROM total_market_volume')
   const start = volumeRecords.length === 0
-    ? dayjs('2021-06-24').utc().format('YYYY-MM-DD')
-    : dayjs.utc().format('YYYY-MM-DD')
+    ? dayjs('2021-06-26').utc().format('YYYY-MM-DD')
+    : dayjs.utc().subtract(3, 'days').format('YYYY-MM-DD')
 
   const volumeHistory = await nomicsRequest(
     '/volume/history',
