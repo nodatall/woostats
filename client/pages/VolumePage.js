@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import dayjs from 'dayjs'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
+import { SMA } from 'technicalindicators'
 
 import { useAppState } from 'lib/appState'
 
@@ -21,7 +22,7 @@ export default function VolumePage() {
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume.slice(0, -1).reduce(
     (acc, { date, volume }) => {
       acc.labels.push(date)
-      acc.series.push(volume)
+      acc.series.push(+volume)
       return acc
     },
     {
@@ -61,6 +62,25 @@ export default function VolumePage() {
       ],
     }} />
     <VolumeChart {...{
+      title: 'WOO % of total 50 day MA',
+      labels: wooVolumeLabels.slice(49),
+      denominator: '%',
+      datasets: [
+        {
+          label: 'WOO % of total 50 day MA',
+          data: SMA.calculate({ period: 50, values: percentSeries }),
+          borderColor: function(context) {
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+            if (!chartArea) return
+            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
+          },
+          backgroundColor: 'rgb(25, 29, 35)',
+        },
+      ],
+      sx: { mt: 6 },
+    }} />
+    <VolumeChart {...{
       title: 'Daily WOO Network volume',
       labels: wooVolumeLabels,
       datasets: [
@@ -79,12 +99,48 @@ export default function VolumePage() {
       sx: { mt: 6 },
     }} />
     <VolumeChart {...{
+      title: 'Daily WOO volume 50 day MA',
+      labels: wooVolumeLabels.slice(49),
+      datasets: [
+        {
+          label: 'Daily WOO volume 50 day MA',
+          data: SMA.calculate({ period: 50, values: wooVolumeSeries }),
+          borderColor: function(context) {
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+            if (!chartArea) return
+            return getGradient(ctx, chartArea, ['rgb(147, 91, 211)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'])
+          },
+          backgroundColor: 'rgb(25, 29, 35)',
+        },
+      ],
+      sx: { mt: 6 },
+    }} />
+    <VolumeChart {...{
       title: 'Total crypto market volume',
       labels: wooVolumeLabels,
       datasets: [
         {
           label: 'Total crypto market volume',
           data: aggregateVolumeSeries,
+          borderColor: function(context) {
+            const chart = context.chart
+            const {ctx, chartArea} = chart
+            if (!chartArea) return
+            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
+          },
+          backgroundColor: 'rgb(25, 29, 35)',
+        },
+      ],
+      sx: { mt: 6 }
+    }} />
+    <VolumeChart {...{
+      title: 'Total market volume 50 day MA',
+      labels: wooVolumeLabels.slice(49),
+      datasets: [
+        {
+          label: 'Total market volume 50 day MA',
+          data: SMA.calculate({ period: 50, values: aggregateVolumeSeries }),
           borderColor: function(context) {
             const chart = context.chart
             const {ctx, chartArea} = chart
