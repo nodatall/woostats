@@ -1,5 +1,5 @@
 const getExchangeVolume = require('../queries/getExchangeVolume')
-const getAggregateExchangeVolume = require('../queries/getAggregateExchangeVolume')
+const getTotalMarketVolumeHistory = require('../queries/getTotalMarketVolumeHistory')
 
 let statsCache
 
@@ -11,7 +11,7 @@ async function get() {
 
 async function update() {
   const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
-  const aggregateVolume = await getAggregateExchangeVolume()
+  const aggregateVolume = await getTotalMarketVolumeHistory()
 
   statsCache = {
     wooVolume,

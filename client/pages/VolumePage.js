@@ -30,9 +30,9 @@ export default function VolumePage() {
     }
   )
   const { percentSeries, aggregateVolumeSeries } = aggregateVolume.reduce(
-    (acc, { sum }, index) => {
-      acc.aggregateVolumeSeries.push(sum)
-      acc.percentSeries.push((wooVolumeSeries[index] / sum) * 100)
+    (acc, { volume }, index) => {
+      acc.aggregateVolumeSeries.push(+volume + +wooVolumeSeries[index])
+      acc.percentSeries.push((wooVolumeSeries[index] / volume) * 100)
       return acc
     },
     {
@@ -70,7 +70,7 @@ export default function VolumePage() {
             const chart = context.chart
             const {ctx, chartArea} = chart
             if (!chartArea) return
-            return getGradient(ctx, chartArea, ['rgb(0, 156, 181)', 'rgb(178, 118, 0)', 'rgb(86, 0, 178)'])
+            return getGradient(ctx, chartArea, ['rgb(86, 0, 178)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'])
           },
           backgroundColor: 'rgb(25, 29, 35)',
         },
