@@ -42,51 +42,21 @@ export default function VolumePage() {
     }
   )
 
-  return <Box>
-    <VolumeChart {...{
-      title: 'WOO % of total market volume',
+  const charts = [
+    { title: 'WOO % of total market volume', data: percentSeries },
+    { title: 'WOO % of total 50 day MA', data: percentSeries },
+    { title: 'Daily WOO Network volume', data: wooVolumeSeries },
+    { title: 'Daily WOO volume 50 day MA', data: wooVolumeSeries },
+    { title: 'Total crypto market volume', data: aggregateVolumeSeries },
+    { title: 'Total market volume 50 day MA', data: aggregateVolumeSeries },
+  ].map(({ title, data }) => {
+    const props = {
+      title,
       labels: wooVolumeLabels,
-      denominator: '%',
       datasets: [
         {
           label: 'WOO % of total market volume',
-          data: percentSeries,
-          borderColor: function(context) {
-            const chart = context.chart
-            const {ctx, chartArea} = chart
-            if (!chartArea) return
-            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
-          },
-          backgroundColor: 'rgb(25, 29, 35)',
-        },
-      ],
-    }} />
-    <VolumeChart {...{
-      title: 'WOO % of total 50 day MA',
-      labels: wooVolumeLabels.slice(49),
-      denominator: '%',
-      datasets: [
-        {
-          label: 'WOO % of total 50 day MA',
-          data: SMA.calculate({ period: 50, values: percentSeries }),
-          borderColor: function(context) {
-            const chart = context.chart
-            const {ctx, chartArea} = chart
-            if (!chartArea) return
-            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
-          },
-          backgroundColor: 'rgb(25, 29, 35)',
-        },
-      ],
-      sx: { mt: 6 },
-    }} />
-    <VolumeChart {...{
-      title: 'Daily WOO Network volume',
-      labels: wooVolumeLabels,
-      datasets: [
-        {
-          label: 'Daily WOO Network Volume',
-          data: wooVolumeSeries,
+          data,
           borderColor: function(context) {
             const chart = context.chart
             const {ctx, chartArea} = chart
@@ -96,62 +66,19 @@ export default function VolumePage() {
           backgroundColor: 'rgb(25, 29, 35)',
         },
       ],
-      sx: { mt: 6 },
-    }} />
-    <VolumeChart {...{
-      title: 'Daily WOO volume 50 day MA',
-      labels: wooVolumeLabels.slice(49),
-      datasets: [
-        {
-          label: 'Daily WOO volume 50 day MA',
-          data: SMA.calculate({ period: 50, values: wooVolumeSeries }),
-          borderColor: function(context) {
-            const chart = context.chart
-            const {ctx, chartArea} = chart
-            if (!chartArea) return
-            return getGradient(ctx, chartArea, ['rgb(147, 91, 211)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'])
-          },
-          backgroundColor: 'rgb(25, 29, 35)',
-        },
-      ],
-      sx: { mt: 6 },
-    }} />
-    <VolumeChart {...{
-      title: 'Total crypto market volume',
-      labels: wooVolumeLabels,
-      datasets: [
-        {
-          label: 'Total crypto market volume',
-          data: aggregateVolumeSeries,
-          borderColor: function(context) {
-            const chart = context.chart
-            const {ctx, chartArea} = chart
-            if (!chartArea) return
-            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
-          },
-          backgroundColor: 'rgb(25, 29, 35)',
-        },
-      ],
-      sx: { mt: 6 }
-    }} />
-    <VolumeChart {...{
-      title: 'Total market volume 50 day MA',
-      labels: wooVolumeLabels.slice(49),
-      datasets: [
-        {
-          label: 'Total market volume 50 day MA',
-          data: SMA.calculate({ period: 50, values: aggregateVolumeSeries }),
-          borderColor: function(context) {
-            const chart = context.chart
-            const {ctx, chartArea} = chart
-            if (!chartArea) return
-            return getGradient(ctx, chartArea, ['#23578e', '#5c238e', '#b3c61d'])
-          },
-          backgroundColor: 'rgb(25, 29, 35)',
-        },
-      ],
-      sx: { mt: 6 }
-    }} />
+      sx: { mb: 6 },
+    }
+    if (title.includes('%')) props.denominator = '%'
+    if (title.includes('MA')) {
+      props.datasets[0].data =  SMA.calculate({ period: 50, values: data })
+      props.labels =  wooVolumeLabels.slice(49)
+
+    }
+    return <VolumeChart {...props} />
+  })
+
+  return <Box>
+    {charts}
   </Box>
 }
 

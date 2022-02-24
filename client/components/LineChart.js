@@ -62,7 +62,7 @@ export default function LineChart({
         },
         ticks: {
           fontColor: '#bfbfc9',
-          callback: num =>  numeral(num).format('0a'),
+          callback: num => num < 1000 ? num : numeral(num).format('0a'),
           lineHeight: 2,
         },
       },
