@@ -32,8 +32,10 @@ export default function VolumePage() {
   )
   const { percentSeries, aggregateVolumeSeries } = aggregateVolume.slice(0, -1).reduce(
     (acc, { volume }, index) => {
-      acc.aggregateVolumeSeries.push(+volume)
-      acc.percentSeries.push((wooVolumeSeries[index] / volume) * 100)
+      const wooVolume = wooVolumeSeries[index]
+      const aggregatePlusWoo = +volume + wooVolume
+      acc.aggregateVolumeSeries.push(aggregatePlusWoo)
+      acc.percentSeries.push((wooVolumeSeries[index] / aggregatePlusWoo) * 100)
       return acc
     },
     {
@@ -49,9 +51,10 @@ export default function VolumePage() {
     { title: 'Daily WOO volume 50 day MA', data: wooVolumeSeries },
     { title: 'Total crypto market volume', data: aggregateVolumeSeries },
     { title: 'Total market volume 50 day MA', data: aggregateVolumeSeries },
-  ].map(({ title, data }) => {
+  ].map(({ title, data },) => {
     const props = {
       title,
+      key: title,
       labels: wooVolumeLabels,
       datasets: [
         {
