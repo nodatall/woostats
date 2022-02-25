@@ -44,7 +44,11 @@ export default function TopNav() {
             justifyContent: "flex-start",
           }}
         >
-          <Button sx={{ display: "flex", alignItems: "center", ml: -1, pr: 0 }} to="/">
+          <Button {...{
+            sx: { display: "flex", alignItems: "center", ml: -1, pr: 0 },
+            to: '/',
+            onClick: () => { if (pathname === '/') window.scrollTo(0, 0) },
+          }}>
             <img src={wooLogo} style={{ marginRight: "10px" }} />
             <EqualizerIcon
               fontSize="large"
@@ -85,12 +89,17 @@ function TopNavLink({ text, pathname, sx = {}, to }) {
     return styles
   }
 
+  const onClick = () => {
+    if (pathname === to) window.scrollTo(0, 0)
+  }
+
   return <Link {...{
     underline: 'none',
     variant: 'body1',
     color: 'text.light',
     to,
     sx: styles,
+    onClick,
   }}>
     {text}
   </Link>
