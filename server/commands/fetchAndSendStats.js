@@ -1,13 +1,13 @@
 const statsCache = require('../lib/statsCache')
 const fetchVolumeHistory = require('./fetchVolumeHistory')
-const getTokenPrice = require('../queries/getTokenPrice')
+const getTokenPrices = require('../queries/getTokenPrices')
 
 module.exports = async function fetchAndSendStats(socket) {
-  const btcPrice = await getTokenPrice({ token: 'bitcoin' })
-  if (!btcPrice) return
-  await fetchVolumeHistory({ btcPrice })
+  const { bitcoin, ['woo-network']: wooPrice } = await getTokenPrices(['bitcoin', 'woo-network'])
+  if (!bitcoin) return
+  await fetchVolumeHistory({ btcPrice: bitcoin })
 
-  await statsCache.update()
+  await statsCache.update(wooPrice)
   const { wooVolume, aggregateVolume } = await statsCache.get()
-  socket.emit('send', { wooVolume, aggregateVolume })
+  socket.emit('send', { wooVolume, aggregateVolume, wooPrice })
 }

@@ -12,21 +12,19 @@ module.exports = async function fetchVolumeHistory({ btcPrice }) {
 async function fetchAndSaveTotalMarketVolumeHistory() {
   const volumeRecords = await client.query('SELECT * FROM total_market_volume')
   const start = volumeRecords.length === 0
-    ? dayjs('2021-06-26').utc().format('YYYY-MM-DD')
-    : dayjs.utc().subtract(3, 'days').format('YYYY-MM-DD')
+    ? dayjs('2021-06-25').format('YYYY-MM-DD')
+    : dayjs().subtract(3, 'days').format('YYYY-MM-DD')
 
   const volumeHistory = await nomicsRequest(
     '/volume/history',
-    `&start=${start}T00%3A00%3A00Z&end=${dayjs.utc().format('YYYY-MM-DD')}T00%3A00%3A00Z`
+    `&start=${start}T00%3A00%3A00Z&end=${dayjs().format('YYYY-MM-DD')}T00%3A00%3A00Z`
   )
   if (!volumeHistory) return
 
-  const volumeHistoryInsert = volumeHistory.map(({ timestamp, volume }) => {
-    return {
-      date: dayjs.utc(timestamp).format('YYYY-MM-DD'),
-      volume,
-    }
-  })
+  const volumeHistoryInsert = volumeHistory.map(({ timestamp, volume }) => ({
+    date: dayjs(timestamp).tz('Atlantic/St_Helena').format('YYYY-MM-DD'),
+    volume,
+  }))
 
   const query = knex.raw(
     `? ON CONFLICT (date) DO UPDATE SET volume = EXCLUDED.volume;`,
@@ -38,7 +36,7 @@ async function fetchAndSaveTotalMarketVolumeHistory() {
 async function fetchAndSaveExchangeVolumeHistory({ exchangeId = 'wootrade', btcPrice }) {
   const volumeRecords = await client.query('SELECT * FROM volume_by_exchange WHERE exchange = $1', [exchangeId])
   const days = volumeRecords.length === 0
-    ? dayjs().utc().diff('2021-06-24', 'day')
+    ? dayjs().diff('2021-06-24', 'day')
     : 3
 
   const volumeHistory = await coingeckoRequest(
@@ -47,18 +45,11 @@ async function fetchAndSaveExchangeVolumeHistory({ exchangeId = 'wootrade', btcP
   )
   if (!volumeHistory) return
 
-  let previousDate
-  const volumeHistoryInsert = volumeHistory.map(([date, volumeInBTC]) => {
-    const dateFormat = 'YYYY-MM-DD'
-    let formattedDate = dayjs.utc(date).format(dateFormat)
-    if (previousDate === formattedDate) formattedDate = dayjs.utc(formattedDate).add(1, 'day').format(dateFormat)
-    previousDate = formattedDate
-    return {
-      date: formattedDate,
-      exchange: exchangeId,
-      volume: Math.round(volumeInBTC * btcPrice),
-    }
-  })
+  const volumeHistoryInsert = volumeHistory.map(([date, volumeInBTC]) => ({
+    date: dayjs(date).format('YYYY-MM-DD'),
+    exchange: exchangeId,
+    volume: Math.round(volumeInBTC * btcPrice),
+  }))
 
   const query = knex.raw(
     `? ON CONFLICT (date, exchange) DO UPDATE SET volume = EXCLUDED.volume;`,

@@ -9,13 +9,14 @@ async function get() {
   return statsCache
 }
 
-async function update() {
+async function update(wooPrice) {
   const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
   const aggregateVolume = await getTotalMarketVolumeHistory()
 
   statsCache = {
     wooVolume,
     aggregateVolume,
+    wooPrice,
   }
 }
 

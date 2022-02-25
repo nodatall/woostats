@@ -1,6 +1,8 @@
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 
+import { useAppState } from 'lib/appState'
+
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
@@ -8,8 +10,11 @@ import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
 import wooLogo from '../assets/woo-logo-small.png'
 import EqualizerIcon from '@mui/icons-material/Equalizer'
+import Typography from '@mui/material/Typography'
 
 export default function TopNav() {
+  const { wooPrice } = useAppState(['wooPrice'])
+
   const appBarStyles = theme => ({
     p: 1,
     pr: 4,
@@ -27,7 +32,7 @@ export default function TopNav() {
   const { pathname } = useLocation()
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, position: 'fixed', width: '100%' }}>
       <AppBar
         position="static"
         sx={appBarStyles}
@@ -46,7 +51,10 @@ export default function TopNav() {
               color="primary"
             />
           </Button>
-          <TopNavLink {...{ to: '/', sx: { ml: 'auto' }, pathname, text: 'Volume' }} />
+          <Typography variant="h6" sx={{ ml: 'auto', color: 'primary.main', mr: 1 }}>
+            {wooPrice && `$${wooPrice.toFixed(3)}`}
+          </Typography>
+          <TopNavLink {...{ to: '/', pathname, text: 'Volume' }} />
           <TopNavLink {...{ to: '/dao', pathname, text: 'DAO' }} />
           <TopNavLink {...{ to: '/token', pathname, text: 'Token' }} />
         </Toolbar>

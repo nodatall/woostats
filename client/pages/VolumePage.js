@@ -5,6 +5,7 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import { SMA } from 'technicalindicators'
+import numeral from 'numeral'
 
 import { useAppState } from 'lib/appState'
 
@@ -81,6 +82,16 @@ export default function VolumePage() {
   })
 
   return <Box>
+    <Card sx={{ p: 4, mb: 6 }}>
+      <Stack sx={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+        <Typography variant="h4" sx={{ color: 'secondary.main', mr: 2 }}>
+          ${numeral(wooVolume[wooVolume.length - 1].volume).format('0,0')}
+        </Typography>
+        <Typography variant="h5" sx={{ textAlign: 'right' }}>
+          24hr Network Volume
+        </Typography>
+      </Stack>
+    </Card>
     {charts}
   </Box>
 }
