@@ -5,7 +5,7 @@ module.exports = async function getTokenPricess(tokens) {
     '/simple/price',
     `&ids=${encodeURIComponent(tokens.join(','))}&vs_currencies=usd`
   )
-  if (!response) return
+  if (!response) return {}
   const result = {}
   tokens.forEach(token => {
     result[token] = response[token].usd
