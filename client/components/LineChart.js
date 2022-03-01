@@ -5,7 +5,7 @@ import numeral from 'numeral'
 require('lib/chart')
 
 export default function LineChart({
-  labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef,
+  labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef, denominator = '',
 }) {
   useEffect(
     () => {
@@ -62,7 +62,10 @@ export default function LineChart({
         },
         ticks: {
           fontColor: '#bfbfc9',
-          callback: num => num < 1000 ? num : numeral(num).format('0a'),
+          callback: num => {
+            const value = num < 1000 ? num : numeral(num).format('0a')
+            return denominator === '%' ? `${value}${denominator}` : `${denominator}${value}`
+          },
           lineHeight: 2,
         },
       },

@@ -96,7 +96,7 @@ export default function VolumePage() {
   </Box>
 }
 
-function VolumeChart({ title, labels, datasets, sx = {}, denominator }) {
+function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$' }) {
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
@@ -113,6 +113,7 @@ function VolumeChart({ title, labels, datasets, sx = {}, denominator }) {
       tooltip,
       setTooltip,
       parentRef: containerRef,
+      denominator,
     }}
     />
   </Card>
