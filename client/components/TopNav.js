@@ -9,6 +9,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
 import wooLogo from '../assets/woo-logo-small.png'
+import wooTokenIcon from '../assets/woo-token.png'
 import EqualizerIcon from '@mui/icons-material/Equalizer'
 import Typography from '@mui/material/Typography'
 
@@ -28,6 +29,15 @@ export default function TopNav() {
     }
   })
 
+  const wooPriceStyles = theme => ({
+    color: 'primary.main',
+    mr: 1,
+    display: 'flex',
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+      display: 'none',
+    }
+  })
 
   const { pathname } = useLocation()
 
@@ -45,7 +55,7 @@ export default function TopNav() {
           }}
         >
           <Button {...{
-            sx: { display: "flex", alignItems: "center", ml: -1, pr: 0 },
+            sx: { display: "flex", alignItems: "center", ml: -1, pr: 0, mr: 'auto' },
             to: '/',
             onClick: () => { if (pathname === '/') window.scrollTo(0, 0) },
           }}>
@@ -55,9 +65,15 @@ export default function TopNav() {
               color="primary"
             />
           </Button>
-          <Typography variant="h6" sx={{ ml: 'auto', color: 'primary.main', mr: 1 }}>
-            {wooPrice && `$${wooPrice.toFixed(3)}`}
-          </Typography>
+          {wooPrice &&
+            <Typography
+              variant="h6"
+              sx={wooPriceStyles}
+            >
+              <img src={wooTokenIcon} style={{ marginRight: '10px', width: '36px', height: '36px' }} />
+              {`$${wooPrice.toFixed(3)}`}
+            </Typography>
+          }
           <TopNavLink {...{ to: '/', pathname, text: 'Volume' }} />
           <TopNavLink {...{ to: '/dao', pathname, text: 'DAO' }} />
           <TopNavLink {...{ to: '/token', pathname, text: 'Token' }} />
