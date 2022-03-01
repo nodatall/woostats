@@ -45,16 +45,21 @@ async function fetchAndSaveExchangeVolumeHistory({ exchangeId = 'wootrade', btcP
   )
   if (!volumeHistory) return
 
+  const exchangeStatsToday = await coingeckoRequest(`/exchanges/${exchangeId}`)
+  if (!exchangeStatsToday) return
+  const todaysVolume = Math.round(exchangeStatsToday.trade_volume_24h_btc * btcPrice)
+
   let previousDate
-  const volumeHistoryInsert = volumeHistory.map(([date, volumeInBTC]) => {
+  const volumeHistoryInsert = volumeHistory.map(([date, volumeInBTC], index) => {
     const dateFormat = 'YYYY-MM-DD'
     let formattedDate = dayjs.utc(date).format(dateFormat)
     if (previousDate === formattedDate) formattedDate = dayjs.utc(formattedDate).add(1, 'day').format(dateFormat)
     previousDate = formattedDate
+    const volume = index === volumeHistory.length - 1 ? todaysVolume : Math.round(volumeInBTC * btcPrice)
     return {
       date: formattedDate,
       exchange: exchangeId,
-      volume: Math.round(volumeInBTC * btcPrice),
+      volume,
     }
   })
 
