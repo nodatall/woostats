@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import { createTheme } from '@mui/material/styles'
+import { createTheme, responsiveFontSizes } from '@mui/material/styles'
 
 let theme = createTheme({
   typography: {
@@ -75,5 +75,7 @@ theme = createTheme(theme, {
     },
   },
 })
+
+theme = responsiveFontSizes(theme)
 
 export default theme
