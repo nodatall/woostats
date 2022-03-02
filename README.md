@@ -13,7 +13,7 @@ The contents of the file should be:
 DATABASE_URL=postgresql://localhost/woostats
 PORT=1337
 NODE_ENV=development
-COINGECKO_APIKEY=<get from coingecko.com>
+COINGECKO_API_KEY=<get from coingecko.com>
 NOMICS_API_KEY=<get from nomics.com>
 ```
 
