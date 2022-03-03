@@ -46,8 +46,8 @@ export default function VolumePage() {
   )
 
   const charts = [
-    { title: 'WOO % of total market volume', data: percentSeries },
-    { title: 'WOO % of total 50 day MA', data: percentSeries },
+    { title: 'WOO Network % of total market volume', data: percentSeries },
+    { title: 'WOO Network % of total 50 day MA', data: percentSeries },
     { title: 'Daily WOO Network volume', data: wooVolumeSeries },
     { title: 'Daily WOO volume 50 day MA', data: wooVolumeSeries },
     { title: 'Total crypto market volume', data: aggregateVolumeSeries },
