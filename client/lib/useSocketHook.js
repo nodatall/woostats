@@ -10,9 +10,11 @@ export default function useSocket() {
   const { setState } = useAppState()
   useEffect(() => {
     socket.emit('get', {})
-    socket.on('send', function({ wooVolume, aggregateVolume, wooPrice }) {
-      const newState = { wooVolume, aggregateVolume }
-      if (wooPrice) newState.wooPrice = wooPrice
+    socket.on('send', function(incomingState) {
+      const newState = { ...incomingState }
+      Object.keys(newState).forEach(key => {
+        if (newState[key] === undefined) delete newState[key]
+      })
       setState(newState)
     })
     onReturnToStaleApp(

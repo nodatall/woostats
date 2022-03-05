@@ -15,6 +15,7 @@ PORT=1337
 NODE_ENV=development
 COINGECKO_API_KEY=<get from coingecko.com>
 NOMICS_API_KEY=<get from nomics.com>
+ETHERSCAN_API_KEY=<get from etherscan.com>
 ```
 
 ### Database

@@ -10,6 +10,7 @@
     "start:dev": "npm run build:dev & nodemon ./scripts/start",
     "start": "./scripts/start",
     "heroku-postbuild": "npm run build",
+    "heroku-cleanup": "npm run db:migrate up",
     "db:migrate": "./scripts/db-migrate"
   },
   "author": "",

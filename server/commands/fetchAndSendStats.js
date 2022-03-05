@@ -7,7 +7,7 @@ module.exports = async function fetchAndSendStats(socket) {
   if (!bitcoin) return
   await fetchVolumeHistory({ btcPrice: bitcoin })
 
-  await statsCache.update(wooPrice)
+  await statsCache.update({ wooPrice })
   const { wooVolume, aggregateVolume } = await statsCache.get()
   socket.emit('send', { wooVolume, aggregateVolume, wooPrice })
 }

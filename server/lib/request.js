@@ -1,7 +1,7 @@
 const axios = require('axios')
 const logger = require('./logger')
 
-async function request({ name, method = 'get', serverUrl, keyString, path, params }) {
+async function request({ name, method = 'get', serverUrl, keyString, path = '', params }) {
   let result
 
   try {
