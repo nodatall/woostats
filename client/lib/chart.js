@@ -3,6 +3,7 @@ import {
   Chart as ChartJS,
   LineElement,
   PointElement,
+  BarElement,
   LinearScale,
   Title,
   CategoryScale,
@@ -15,6 +16,7 @@ import {
 ChartJS.register(
   LineElement,
   PointElement,
+  BarElement,
   LinearScale,
   Title,
   CategoryScale,

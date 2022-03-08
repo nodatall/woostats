@@ -9,16 +9,14 @@ import numeral from 'numeral'
 
 import { useAppState } from 'lib/appState'
 
-import Spinner from 'components/Spinner'
+import Loading from 'components/Loading'
 import LineChart from 'components/LineChart'
 import TextWithCaption from 'components/TextWithCaption'
 
 export default function VolumePage() {
   const { wooVolume, aggregateVolume } = useAppState(['wooVolume', 'aggregateVolume'])
 
-  if (!wooVolume) return <Box sx={{ display: 'flex', justifyContent: 'center', height: '100vh', mt: -30 }}>
-    <Spinner />
-  </Box>
+  if (!wooVolume) return <Loading />
 
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume.slice(0, -1).reduce(
     (acc, { date, volume }) => {

@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { Line } from 'react-chartjs-2'
 import numeral from 'numeral'
-
-require('lib/chart')
+import 'lib/chart'
 
 export default function LineChart({
   labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef, denominator = '',
