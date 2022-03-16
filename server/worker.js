@@ -6,6 +6,7 @@ const updateDailyExchangeVolume = require('./commands/updateDailyExchangeVolume'
 const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHistory')
 const updateWooTokenBurns = require('./commands/updateWooTokenBurns')
 const getExchangeVolume = require('./queries/getExchangeVolume')
+const getWooTokenBurns = require('./queries/getWooTokenBurns')
 const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHistory')
 
 function start(socket){
