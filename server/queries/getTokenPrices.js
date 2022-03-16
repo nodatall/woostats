@@ -1,14 +1,15 @@
-const coingeckoRequest = require('../lib/coingecko')
+const logger = require('../lib/logger')
+const client = require('../database')
 
-module.exports = async function getTokenPricess(tokens) {
-  const response = await coingeckoRequest(
-    '/simple/price',
-    `&ids=${encodeURIComponent(tokens.join(','))}&vs_currencies=usd`
-  )
-  if (!response) return {}
-  const result = {}
-  tokens.forEach(token => {
-    result[token] = response[token].usd
-  })
-  return result
+module.exports = async function getTokenPrices() {
+  logger.log('debug', `getTokenPrices`)
+
+  const records = await client.query(`SELECT * FROM token_prices`)
+
+  logger.log('debug', `result ${logger.msg(records)}`)
+
+  return records.reduce((acc, {token, price}) => {
+    acc[token] = price
+    return acc
+  }, {})
 }
