@@ -120,7 +120,7 @@ function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$', subt
 }
 
 function MAChart({ ...props }) {
-  const [maLength, setMaLength] = useLocalStorage('maLength', 50)
+  const [maLength = 50, setMaLength] = useLocalStorage('maLength')
 
   props.datasets[0].data = SMA.calculate({ period: maLength, values: props.datasets[0].data })
   props.labels = props.labels.slice(maLength - 1)
