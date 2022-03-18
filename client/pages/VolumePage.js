@@ -1,13 +1,16 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import dayjs from 'dayjs'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
+import ButtonGroup from '@mui/material/ButtonGroup'
+import Button from '@mui/material/Button'
 import { SMA } from 'technicalindicators'
 import numeral from 'numeral'
 
 import { useAppState } from 'lib/appState'
+import { useLocalStorage } from 'lib/storageHooks'
 
 import Loading from 'components/Loading'
 import LineChart from 'components/LineChart'
@@ -45,11 +48,11 @@ export default function VolumePage() {
 
   const charts = [
     { title: 'Daily WOO Network volume', data: wooVolumeSeries },
-    { title: 'Daily WOO volume 50 day MA', data: wooVolumeSeries },
+    { title: 'Daily WOO volume [day] day MA', data: wooVolumeSeries },
     { title: 'WOO Network % of total market volume', data: percentSeries },
-    { title: 'WOO Network % of total 50 day MA', data: percentSeries },
+    { title: 'WOO Network % of total [day] day MA', data: percentSeries },
     { title: 'Total crypto market volume', data: aggregateVolumeSeries },
-    { title: 'Total market volume 50 day MA', data: aggregateVolumeSeries },
+    { title: 'Total market volume [day] day MA', data: aggregateVolumeSeries },
   ].map(({ title, data },) => {
     const props = {
       title,
@@ -71,11 +74,7 @@ export default function VolumePage() {
       sx: { mb: 6 },
     }
     if (title.includes('%')) props.denominator = '%'
-    if (title.includes('MA')) {
-      props.datasets[0].data =  SMA.calculate({ period: 50, values: data })
-      props.labels =  wooVolumeLabels.slice(49)
-
-    }
+    if (title.includes('MA')) return <MAChart {...props} />
     return <VolumeChart {...props} />
   })
 
@@ -94,15 +93,18 @@ export default function VolumePage() {
   </Box>
 }
 
-function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$' }) {
+function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$', subtitle }) {
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
   return <Card sx={{ p:2, ...sx }} ref={containerRef}>
-    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, height: '50px'}}>
-      <Typography variant="h6" sx={{ textAlign: 'right' }}>
-        {title}
-      </Typography>
+    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3}}>
+      <Stack>
+        <Typography variant="h6" sx={{ textAlign: 'right' }}>
+          {title}
+        </Typography>
+        {subtitle}
+      </Stack>
       {tooltip && <Tooltip {...{tooltip, denominator}} />}
     </Stack>
     <LineChart {...{
@@ -117,16 +119,65 @@ function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$' }) {
   </Card>
 }
 
+function MAChart({ ...props }) {
+  const [maLength, setMaLength] = useLocalStorage('maLength', 50)
+
+  props.datasets[0].data = SMA.calculate({ period: maLength, values: props.datasets[0].data })
+  props.labels = props.labels.slice(maLength - 1)
+  props.title = props.title.replace('[day]', maLength)
+
+  const buttons = [25, 50, 100].map(num => {
+    const onClick = useCallback(() => {
+      setMaLength(num)
+    }, [setMaLength])
+
+    const styles = useCallback(theme => {
+      const _styles = {}
+      if (maLength === num) _styles.color = `${theme.palette.secondary.main}`
+      return _styles
+    }, [maLength, num])
+
+    const props = {
+      onClick,
+      key: num,
+      sx: styles,
+    }
+    if (maLength === num) props.sx.border = '1px solid secondary.main'
+
+
+
+    return <Button {...props}>{num}</Button>
+  })
+
+  props.subtitle = <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
+    {buttons}
+  </ButtonGroup>
+
+
+  return <VolumeChart {...props} />
+}
+
 function Tooltip({ tooltip, denominator = '$' }) {
   if (!tooltip.title) return null
   const text = denominator === '%'
     ? `${tooltip.body}${denominator}`
     : `${denominator}${tooltip.body}`
+
+  const styles = theme => ({
+    mr: 'auto',
+    [theme.breakpoints.down('sm')]: {
+      mr: '0',
+      textAlign: 'right',
+      width: '100%',
+      pt: 2,
+    }
+  })
+
   return <TextWithCaption
     {...{
       caption: dayjs(tooltip.title).format('MMM D, YYYY'),
       text,
-      sx: { mr: 'auto' },
+      sx: styles,
     }}
   />
 }
