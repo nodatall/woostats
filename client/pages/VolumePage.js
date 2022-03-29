@@ -98,7 +98,7 @@ function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$', subt
   const [tooltip, setTooltip] = useState({})
 
   return <Card sx={{ p:2, ...sx }} ref={containerRef}>
-    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3}}>
+    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, minHeight: '50px'}}>
       <Stack>
         <Typography variant="h6" sx={{ textAlign: 'right' }}>
           {title}
