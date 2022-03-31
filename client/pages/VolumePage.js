@@ -21,30 +21,36 @@ export default function VolumePage() {
 
   if (!wooVolume) return <Loading />
 
-  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume.slice(0, -1).reduce(
-    (acc, { date, volume }) => {
-      acc.labels.push(date)
-      acc.series.push(+volume)
-      return acc
-    },
-    {
-      labels: [],
-      series: [],
-    }
-  )
-  const { percentSeries, aggregateVolumeSeries } = aggregateVolume.slice(0, -1).reduce(
-    (acc, { volume }, index) => {
-      const wooVolume = wooVolumeSeries[index]
-      const aggregatePlusWoo = +volume + wooVolume
-      acc.aggregateVolumeSeries.push(aggregatePlusWoo)
-      acc.percentSeries.push((wooVolumeSeries[index] / aggregatePlusWoo) * 100)
-      return acc
-    },
-    {
-      aggregateVolumeSeries: [],
-      percentSeries: [],
-    }
-  )
+  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume
+    .filter(({ date }) => dayjs(date).isBefore('2022-03-27'))
+    .reduce(
+      (acc, { date, volume }) => {
+        acc.labels.push(date)
+        acc.series.push(+volume)
+        return acc
+      },
+      {
+        labels: [],
+        series: [],
+      }
+    )
+
+
+  const { percentSeries, aggregateVolumeSeries } = aggregateVolume
+    .filter(({ date }) => dayjs(date).isBefore('2022-03-27'))
+    .reduce(
+      (acc, { volume }, index) => {
+        const wooVolume = wooVolumeSeries[index]
+        const aggregatePlusWoo = +volume + wooVolume
+        acc.aggregateVolumeSeries.push(aggregatePlusWoo)
+        acc.percentSeries.push((wooVolumeSeries[index] / aggregatePlusWoo) * 100)
+        return acc
+      },
+      {
+        aggregateVolumeSeries: [],
+        percentSeries: [],
+      }
+    )
 
   const charts = [
     { title: 'Daily WOO Network volume', data: wooVolumeSeries },
