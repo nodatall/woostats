@@ -22,7 +22,7 @@ export default function VolumePage() {
   if (!wooVolume) return <Loading />
 
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume
-    .filter(({ date }) => dayjs(date).isBefore('2022-03-27'))
+    .slice(0, -1)
     .reduce(
       (acc, { date, volume }) => {
         acc.labels.push(date)
@@ -37,7 +37,7 @@ export default function VolumePage() {
 
 
   const { percentSeries, aggregateVolumeSeries } = aggregateVolume
-    .filter(({ date }) => dayjs(date).isBefore('2022-03-27'))
+    .slice(0, -1)
     .reduce(
       (acc, { volume }, index) => {
         const wooVolume = wooVolumeSeries[index]

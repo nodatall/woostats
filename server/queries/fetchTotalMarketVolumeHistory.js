@@ -8,7 +8,7 @@ module.exports = async function fetchTotalMarketVolumeHistory() {
 
   const start = volumeRecords.length === 0
     ? dayjs.tz('2021-06-25').format('YYYY-MM-DD')
-    : dayjs.tz().subtract(3, 'days').format('YYYY-MM-DD')
+    : dayjs.tz().subtract(5, 'days').format('YYYY-MM-DD')
 
   const volumeHistory = await nomicsRequest(
     '/volume/history',
