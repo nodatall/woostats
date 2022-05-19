@@ -10,19 +10,26 @@ import Typography from '@mui/material/Typography'
 import TopNav from "./TopNav"
 
 export default function Layout({ children }) {
+  const containerStyles = theme => ({
+    p: 2,
+    pt: 14,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    minHeight: '100vh',
+    [theme.breakpoints.down('sm')]: {
+      pr: 0,
+      pl: 0,
+      pt: 8,
+    }
+  })
+
   return (
     <Box sx={{ backgroundColor: 'background.default' }}>
       <TopNav />
       <Container {...{
         maxWidth: 'lg',
-        sx: {
-          p: 2,
-          pt: 16,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          minHeight: '100vh',
-        },
+        sx: containerStyles,
       }}
       >
         <Box>{children}</Box>

@@ -8,10 +8,10 @@ module.exports = async function updateDailyExchangeVolume({ exchangeId }) {
   const exchangeStatsToday = await fetchDailyExchangeStats({ exchangeId })
   if (!exchangeStatsToday) return
 
-  const { tokenPrices = {} } = await statsCache.get()
-  if (!tokenPrices.btc) return
+  const { tokenTickers = {} } = await statsCache.get()
+  if (!tokenTickers.btc) return
 
-  const volume = Math.round(exchangeStatsToday.trade_volume_24h_btc * tokenPrices.btc)
+  const volume = Math.round(exchangeStatsToday.trade_volume_24h_btc * tokenTickers.btc.price)
   const update = [{
     date: dayjs.tz().format('YYYY-MM-DD'),
     volume,

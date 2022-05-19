@@ -1,20 +1,22 @@
 const cron = require('./lib/cron')
 const statsCache = require('./lib/statsCache')
-const updateTokenPrices = require('./commands/updateTokenPrices')
+const updateTokenTickers = require('./commands/updateTokenTickers')
 const updateTotalMarketVolumeHistory = require('./commands/updateTotalMarketVolumeHistory')
 const updateDailyExchangeVolume = require('./commands/updateDailyExchangeVolume')
 const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHistory')
 const updateWooTokenBurns = require('./commands/updateWooTokenBurns')
+const updateWooDaoTreasuryBalance = require('./commands/updateWooDaoTreasuryBalance')
 const getExchangeVolume = require('./queries/getExchangeVolume')
 const getWooTokenBurns = require('./queries/getWooTokenBurns')
+const getWooDaoTreasuryBalance = require('./queries/getWooDaoTreasuryBalance')
 const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHistory')
 
 function start(socket){
-  if (process.env.initializeAllData) intializeAllData(socket)
+  if (process.env.INITIALIZE_ALL) intializeAllData(socket)
 
   cron.schedule('* * * * *', async () => { // once a minute
-    const tokenPrices = await updateTokenPrices({ tokens: ['bitcoin', 'woo-network'] })
-    statsCache.update({ tokenPrices })
+    const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'WOO'] })
+    statsCache.update({ tokenTickers })
 
     await updateDailyExchangeVolume({ exchangeId: 'wootrade' })
     await updateTotalMarketVolumeHistory()
@@ -23,7 +25,7 @@ function start(socket){
     const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
 
     statsCache.update({ aggregateVolume, wooVolume })
-    socket.emit('send', { tokenPrices, aggregateVolume, wooVolume })
+    socket.emit('send', { tokenTickers, aggregateVolume, wooVolume })
   })
 
   cron.schedule('0 * * * *', async () => { // once an hour
@@ -32,6 +34,14 @@ function start(socket){
     statsCache.update({ wooTokenBurns })
     socket.emit('send', { wooTokenBurns })
   })
+
+  cron.schedule('*/5 * * * *', async () => { // every 5 minutes
+    await updateWooDaoTreasuryBalance()
+    const wooDaoTreasuryBalance = await getWooDaoTreasuryBalance()
+    statsCache.update({ wooDaoTreasuryBalance })
+    socket.emit('send', { wooDaoTreasuryBalance })
+  })
+
 
   cron.schedule('0 0 * * *', async () => { // once a day
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
@@ -42,8 +52,8 @@ function start(socket){
 }
 
 async function intializeAllData(socket) {
-  const tokenPrices = await updateTokenPrices({ tokens: ['bitcoin', 'woo-network'] })
-  statsCache.update({ tokenPrices })
+  const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'WOO'] })
+  statsCache.update({ tokenTickers })
 
   await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
   await updateDailyExchangeVolume({ exchangeId: 'wootrade' })
@@ -55,7 +65,7 @@ async function intializeAllData(socket) {
   const wooTokenBurns = await getWooTokenBurns()
 
   statsCache.update({ aggregateVolume, wooVolume })
-  socket.emit('send', { tokenPrices, aggregateVolume, wooVolume, wooTokenBurns })
+  socket.emit('send', { tokenTickers, aggregateVolume, wooVolume, wooTokenBurns })
 
 }
 

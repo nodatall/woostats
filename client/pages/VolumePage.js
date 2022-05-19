@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react'
 import dayjs from 'dayjs'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import ButtonGroup from '@mui/material/ButtonGroup'
@@ -15,11 +14,12 @@ import { useLocalStorage } from 'lib/storageHooks'
 import Loading from 'components/Loading'
 import LineChart from 'components/LineChart'
 import TextWithCaption from 'components/TextWithCaption'
+import ContentCard from 'components/ContentCard'
 
 export default function VolumePage() {
   const { wooVolume, aggregateVolume } = useAppState(['wooVolume', 'aggregateVolume'])
 
-  if (!wooVolume) return <Loading />
+  if (!wooVolume || wooVolume.length === 0) return <Loading />
 
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume
     .slice(0, -1)
@@ -34,7 +34,6 @@ export default function VolumePage() {
         series: [],
       }
     )
-
 
   const { percentSeries, aggregateVolumeSeries } = aggregateVolume
     .slice(0, -1)
@@ -77,7 +76,6 @@ export default function VolumePage() {
           backgroundColor: 'rgb(25, 29, 35)',
         },
       ],
-      sx: { mb: 6 },
     }
     if (title.includes('%')) props.denominator = '%'
     if (title.includes('MA')) return <MAChart {...props} />
@@ -85,25 +83,29 @@ export default function VolumePage() {
   })
 
   return <Box>
-    <Card sx={{ p: 4, mb: 6 }}>
-      <Stack sx={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ color: 'secondary.main', mr: 2 }}>
-          ${numeral(wooVolume[wooVolume.length - 1].volume).format('0,0')}
-        </Typography>
-        <Typography variant="h5" sx={{ textAlign: 'right' }}>
-          24hr Network Volume
-        </Typography>
-      </Stack>
-    </Card>
+    <AggregateNetworkVolumeBox {...{ wooVolume }} />
     {charts}
   </Box>
+}
+
+function AggregateNetworkVolumeBox({ wooVolume }) {
+  return <ContentCard>
+    <Stack sx={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+      <Typography variant="h4" sx={{ color: 'secondary.main', mr: 2 }}>
+        ${numeral(wooVolume[wooVolume.length - 1].volume).format('0,0')}
+      </Typography>
+      <Typography variant="h5" sx={{ textAlign: 'right' }}>
+        24hr Network Volume
+      </Typography>
+    </Stack>
+  </ContentCard>
 }
 
 function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$', subtitle }) {
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
-  return <Card sx={{ p:2, ...sx }} ref={containerRef}>
+  return <ContentCard sx={{ p: 2 }} ref={containerRef}>
     <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, minHeight: '50px'}}>
       <Stack>
         <Typography variant="h6" sx={{ textAlign: 'right' }}>
@@ -122,7 +124,7 @@ function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$', subt
       denominator,
     }}
     />
-  </Card>
+  </ContentCard>
 }
 
 function MAChart({ ...props }) {
@@ -149,8 +151,6 @@ function MAChart({ ...props }) {
       sx: styles,
     }
     if (maLength === num) props.sx.border = '1px solid secondary.main'
-
-
 
     return <Button {...props}>{num}</Button>
   })

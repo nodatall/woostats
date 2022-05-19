@@ -14,8 +14,8 @@ import EqualizerIcon from '@mui/icons-material/Equalizer'
 import Typography from '@mui/material/Typography'
 
 export default function TopNav() {
-  const { tokenPrices = {} } = useAppState(['tokenPrices'])
-  const wooPrice = tokenPrices.woo && +tokenPrices.woo
+  const { tokenTickers = {} } = useAppState(['tokenTickers'])
+  const wooPrice = tokenTickers.WOO && +tokenTickers.WOO.price
 
   const appBarStyles = theme => ({
     p: 1,
