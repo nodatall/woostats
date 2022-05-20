@@ -14,7 +14,7 @@ import ContentCard from 'components/ContentCard'
 export default function DaoPage(){
   const { wooDaoTreasuryBalance } = useAppState(['wooDaoTreasuryBalance'])
 
-  if (!wooDaoTreasuryBalance) return <Loading />
+  if (!wooDaoTreasuryBalance || wooDaoTreasuryBalance.length === 0) return <Loading />
 
   const latestTreasuryBalance = wooDaoTreasuryBalance[wooDaoTreasuryBalance.length - 1]
   return <Box>
@@ -165,12 +165,20 @@ function TokenRow({ token }) {
       display: 'none',
     }
   })
-
+  console.log(`token ==>`, token)
   return <Stack {...{
     sx: { ...ROW_CONTAINER_STYLES, p: 1, pb: 2, '&:last-child': { pb: 1 }},
   }}>
     <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
-      <img src={token.logoUrl} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
+      <Stack>
+        <img src={token.logoUrl} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
+        {token.chainLogoUrl &&
+          <img
+            src={token.chainLogoUrl}
+            style={{ width: '12px', height: '12px', borderRadius: '50%', marginTop: '-25px', marginLeft: '10px' }}
+          />
+        }
+      </Stack>
       <Typography variant="body1" sx={{ ml: 1 }}>{token.symbol}</Typography>
     </Stack>
     <Typography variant="body2" sx={priceStyles}>${numeral(token.price.toFixed(2)).format('0,0.00')}</Typography>

@@ -9,6 +9,9 @@ const dayjs = require('../lib/dayjs')
 module.exports = async function updateWooDaoTreasuryBalance() {
   const wooEthAddress = '0xfA2d1f15557170F6c4A4C5249e77f534184cdb79'
   const ethTokenBalances = await fetchEVMChainTokenBalancesForAddress({ address: wooEthAddress, chainId: 'eth' })
+  const avalancheTokenBalances = await fetchEVMChainTokenBalancesForAddress({
+    address: '0xB54382c680B0AD037C9F441A8727CA6006fe2dD0', chainId: 'avax',
+  })
   const uniswapBalance = await fetchEVMChainProtocolBalanceForAddress({
     address: wooEthAddress, chainId: 'eth', protocol: 'uniswap3',
   })
@@ -17,9 +20,9 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   })
   const nearBalances = await fetchWooDaoNearBalances()
 
-  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR'] })
+  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX'] })
 
-  const tokenBalances = getTokenBalances({ ethTokenBalances, nearBalances, tokenTickers })
+  const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, tokenTickers })
   const protocolBalances = await getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers, nearBalances })
   const totalValue = [...tokenBalances, ...protocolBalances].reduce((sum, item) => item.value + sum, 0)
 
@@ -45,7 +48,7 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   await client.query(`${query}`)
 }
 
-function getTokenBalances({ ethTokenBalances, nearBalances, tokenTickers }) {
+function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, tokenTickers }) {
   const tokenBalances = [
     {
       chain: 'near',
@@ -57,17 +60,18 @@ function getTokenBalances({ ethTokenBalances, nearBalances, tokenTickers }) {
     }
   ]
 
-  ethTokenBalances.forEach(balance => {
-    tokenBalances.push(
-      {
-        chain: balance.chain,
-        symbol: balance.symbol,
-        logoUrl: balance.logo_url,
-        amount: balance.amount,
-        price: balance.price,
-        value: Number(balance.amount) * Number(balance.price),
-      }
-    )
+  ;[...avalancheTokenBalances, ...ethTokenBalances].forEach(balance => {
+    const tokenDetails = {
+      chain: balance.chain,
+      symbol: balance.symbol,
+      logoUrl: balance.logo_url,
+      amount: balance.amount,
+      price: balance.price,
+      value: Number(balance.amount) * Number(balance.price),
+    }
+    if (balance.chain !== 'eth') tokenDetails.chainLogoUrl = tokenTickers[balance.chain.toUpperCase()].logoUrl
+
+    tokenBalances.push(tokenDetails)
   })
 
   return tokenBalances.sort((a, b) => b.value - a.value)
