@@ -34,7 +34,7 @@ module.exports = async function updateExchangeVolumeHistory({ exchangeId }) {
 
   const query = knex.raw(
     `? ON CONFLICT (date, exchange) DO UPDATE SET volume = EXCLUDED.volume;`,
-    [knex('volume_by_exchange').insert(volumeHistoryUpdate.slice(1))],
+    [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
   )
   await client.query(`${query}`)
 }
