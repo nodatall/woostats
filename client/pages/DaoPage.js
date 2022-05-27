@@ -110,19 +110,21 @@ function ProtocolBalances({ inProtocols }) {
 }
 
 function ProtocolRewards({ rewards }) {
-  const rewardElements = rewards.map(reward => (
-    <Stack {...{
-      sx: { ...ROW_CONTAINER_STYLES, p: 1, pb: 2, '&:last-child': { pb: 1 }},
-      key: reward.amount,
-    }}>
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
-        <img src={reward.logoUrl} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
-        <Typography variant="body1" sx={{ ml: 1 }}>{reward.symbol}</Typography>
+  const rewardElements = rewards
+    .filter(reward => reward.amount > 0)
+    .map(reward => (
+      <Stack {...{
+        sx: { ...ROW_CONTAINER_STYLES, p: 1, pb: 2, '&:last-child': { pb: 1 }},
+        key: reward.amount,
+      }}>
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
+          <img src={reward.logoUrl} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
+          <Typography variant="body1" sx={{ ml: 1 }}>{reward.symbol}</Typography>
+        </Stack>
+        <Typography variant="body2">{numeral(reward.amount).format('0,0.00')}</Typography>
+        <Typography variant="body2" sx={{ textAlign: 'right' }}>${numeral(reward.value).format('0,0')}</Typography>
       </Stack>
-      <Typography variant="body2">{numeral(reward.amount).format('0,0.00')}</Typography>
-      <Typography variant="body2" sx={{ textAlign: 'right' }}>${numeral(reward.value).format('0,0')}</Typography>
-    </Stack>
-  ))
+    ))
 
   return <Stack>
     <Divider textAlign="left">
@@ -165,7 +167,6 @@ function TokenRow({ token }) {
       display: 'none',
     }
   })
-  console.log(`token ==>`, token)
   return <Stack {...{
     sx: { ...ROW_CONTAINER_STYLES, p: 1, pb: 2, '&:last-child': { pb: 1 }},
   }}>
