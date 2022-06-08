@@ -5,6 +5,7 @@ const fetchTokenTickers = require('../queries/fetchTokenTickers')
 const knex = require('../database/knex')
 const client = require('../database')
 const dayjs = require('../lib/dayjs')
+const { addRewardsToProtocolBalance } = require('../lib/treasury')
 
 module.exports = async function updateWooDaoTreasuryBalance() {
   const wooEthAddress = '0xfA2d1f15557170F6c4A4C5249e77f534184cdb79'
@@ -18,10 +19,10 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   const bancorBalance = await fetchEVMChainProtocolBalanceForAddress({
     address: wooEthAddress, chainId: 'eth', protocol: 'bancor',
   })
-  const nearBalances = await fetchWooDaoNearBalances()
 
-  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX'] })
+  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO'] })
 
+  const nearBalances = await fetchWooDaoNearBalances({ tokenTickers })
   const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, tokenTickers })
   const protocolBalances = await getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers, nearBalances })
   const totalValue = [...tokenBalances, ...protocolBalances].reduce((sum, item) => item.value + sum, 0)
@@ -67,7 +68,7 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
       logoUrl: balance.logo_url,
       amount: balance.amount,
       price: balance.price,
-      value: Number(balance.amount) * Number(balance.price),
+      value: +balance.amount * +balance.price,
     }
     if (balance.chain !== 'eth') tokenDetails.chainLogoUrl = tokenTickers[balance.chain.toUpperCase()].logoUrl
 
@@ -84,9 +85,10 @@ async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers
       name: 'Staked NEAR',
       logoUrl: tokenTickers.NEAR.logoUrl,
       amount: nearBalances.stakedNear,
-      value: Number(tokenTickers.NEAR.price) * nearBalances.stakedNear,
-      price: Number(tokenTickers.NEAR.price),
-    }
+      value: +tokenTickers.NEAR.price * nearBalances.stakedNear,
+      price: +tokenTickers.NEAR.price,
+    },
+    nearBalances.refFinanceBalances,
   ]
 
   ;[uniswapBalance, bancorBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
@@ -97,6 +99,7 @@ async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers
       logoUrl: logo_url,
       value: 0,
       details: [],
+      rewards: [],
     }
 
     portfolio_item_list.forEach(item => {
@@ -111,25 +114,18 @@ async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers
         const supplied = []
         item.detail.supply_token_list.forEach(token => {
           supplied.push({
-            value: Number(token.amount) * Number(token.price),
+            value: +token.amount * +token.price,
             logoUrl: token.logo_url,
             symbol: token.optimized_symbol,
             amount: token.amount,
           })
         })
-        const rewards = []
         ;(item.detail.reward_token_list || []).forEach(token => {
-          const value = Number(token.amount) * Number(token.price)
+          const value = +token.amount * +token.price
           protocolBalance.value += value
-          rewards.push({
-            value,
-            symbol: token.symbol,
-            logoUrl: token.logo_url,
-            amount: token.amount,
-          })
+          addRewardsToProtocolBalance({ protocolBalance, token, value })
         })
         protocolDetail.supplied = supplied
-        protocolDetail.rewards = rewards
       }
 
       protocolBalance.details.push(protocolDetail)

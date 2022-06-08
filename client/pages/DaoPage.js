@@ -54,11 +54,8 @@ function ProtocolBalances({ inProtocols }) {
         </Stack>
       </ContentCard>
     } else {
-      const rewards = []
+
       const detailRows = protocolDetails.details.map(detail => {
-        detail.rewards.forEach(reward => {
-          rewards.push(reward)
-        })
         const { logoUrls, symbols, amounts } = detail.supplied.reduce((acc, supply) => {
           const amount = supply.amount < .00001 ? 0 : numeral(supply.amount).format('0,0.00')
           acc.logoUrls.push(supply.logoUrl)
@@ -101,6 +98,7 @@ function ProtocolBalances({ inProtocols }) {
         </Stack>
       })
 
+      const rewards = protocolDetails.rewards
       return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
         <TopRow {...{ title: protocolDetails.name, value: protocolDetails.value, logoUrl: protocolDetails.logoUrl }} />
         {detailRows}
