@@ -20,7 +20,7 @@ export default function Layout({ children }) {
     [theme.breakpoints.down('sm')]: {
       pr: 0,
       pl: 0,
-      pt: 8,
+      pt: 12,
     }
   })
 
