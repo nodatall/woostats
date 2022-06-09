@@ -13,12 +13,13 @@ async function get() {
 }
 
 async function initialize() {
-  const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+  const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+  const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
   const aggregateVolume = await getTotalMarketVolumeHistory()
   const wooTokenBurns = await getWooTokenBurns()
   const tokenTickers = await getTokenTickers()
   const wooDaoTreasuryBalance = await getWooDaoTreasuryBalance()
-  update({ wooVolume, aggregateVolume, wooTokenBurns, tokenTickers, wooDaoTreasuryBalance })
+  update({ wooSpotVolume, wooFuturesVolume, aggregateVolume, wooTokenBurns, tokenTickers, wooDaoTreasuryBalance })
 }
 
 function update(changes) {

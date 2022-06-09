@@ -19,13 +19,15 @@ function start(socket){
     statsCache.update({ tokenTickers })
 
     await updateDailyExchangeVolume({ exchangeId: 'wootrade' })
+    await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures' })
     await updateTotalMarketVolumeHistory()
 
     const aggregateVolume = await getTotalMarketVolumeHistory()
-    const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+    const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+    const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
 
-    statsCache.update({ aggregateVolume, wooVolume })
-    socket.emit('send', { tokenTickers, aggregateVolume, wooVolume })
+    statsCache.update({ aggregateVolume, wooSpotVolume, wooFuturesVolume })
+    socket.emit('send', { tokenTickers, aggregateVolume, wooSpotVolume, wooFuturesVolume })
   })
 
   cron.schedule('0 * * * *', async () => { // once an hour
@@ -45,9 +47,11 @@ function start(socket){
 
   cron.schedule('0 0 * * *', async () => { // once a day
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
-    const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
-    statsCache.update({ wooVolume })
-    socket.emit('send', { wooVolume })
+    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
+    const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+    const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
+    statsCache.update({ wooSpotVolume, wooFuturesVolume })
+    socket.emit('send', { wooSpotVolume, wooFuturesVolume })
   })
 }
 
@@ -57,15 +61,18 @@ async function intializeAllData(socket) {
 
   await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
   await updateDailyExchangeVolume({ exchangeId: 'wootrade' })
+  await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
+  await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures' })
   await updateTotalMarketVolumeHistory()
   await updateWooTokenBurns()
 
   const aggregateVolume = await getTotalMarketVolumeHistory()
-  const wooVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+  const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+  const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
   const wooTokenBurns = await getWooTokenBurns()
 
-  statsCache.update({ aggregateVolume, wooVolume })
-  socket.emit('send', { tokenTickers, aggregateVolume, wooVolume, wooTokenBurns })
+  statsCache.update({ aggregateVolume, wooSpotVolume, wooFuturesVolume })
+  socket.emit('send', { tokenTickers, aggregateVolume, wooSpotVolume, wooTokenBurns, wooFuturesVolume })
 
 }
 

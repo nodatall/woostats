@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
 import { SMA } from 'technicalindicators'
 import numeral from 'numeral'
 
@@ -17,16 +18,22 @@ import TextWithCaption from 'components/TextWithCaption'
 import ContentCard from 'components/ContentCard'
 
 export default function VolumePage() {
-  const { wooVolume, aggregateVolume } = useAppState(['wooVolume', 'aggregateVolume'])
+  const {
+    wooSpotVolume,
+    aggregateVolume,
+    wooFuturesVolume,
+  } = useAppState(['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume'])
+  if (
+    (!wooSpotVolume || wooSpotVolume.length === 0) || (!wooFuturesVolume || wooFuturesVolume.length === 0)
+  ) return <Loading />
 
-  if (!wooVolume || wooVolume.length === 0) return <Loading />
-
-  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooVolume
+  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooSpotVolume
     .slice(0, -1)
     .reduce(
       (acc, { date, volume }) => {
+        const { volume: futuresVolume } = wooFuturesVolume.find(futuresVol => futuresVol.date === date) || { volume: 0 }
         acc.labels.push(date)
-        acc.series.push(+volume)
+        acc.series.push(+volume + +futuresVolume)
         return acc
       },
       {
@@ -39,8 +46,8 @@ export default function VolumePage() {
     .slice(0, -1)
     .reduce(
       (acc, { volume }, index) => {
-        const wooVolume = wooVolumeSeries[index]
-        const aggregatePlusWoo = +volume + wooVolume
+        const wooSpotVolume = wooVolumeSeries[index]
+        const aggregatePlusWoo = +volume + wooSpotVolume
         acc.aggregateVolumeSeries.push(aggregatePlusWoo)
         acc.percentSeries.push((wooVolumeSeries[index] / aggregatePlusWoo) * 100)
         return acc
@@ -83,25 +90,74 @@ export default function VolumePage() {
   })
 
   return <Box>
-    <AggregateNetworkVolumeBox {...{ wooVolume }} />
+    <AggregateNetworkVolumeBox {...{ wooSpotVolume, wooFuturesVolume }} />
     {charts}
   </Box>
 }
 
-function AggregateNetworkVolumeBox({ wooVolume }) {
+function AggregateNetworkVolumeBox({ wooSpotVolume, wooFuturesVolume }) {
+  const spotToday = wooSpotVolume[wooSpotVolume.length - 1].volume
+  const futuresToday = wooFuturesVolume[wooFuturesVolume.length - 1].volume
+  const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
+  const spotAndFuturesElements = ['Spot', 'Futures'].map(category => {
+    const topStackStyle = theme => ({
+      ...stackBaseStyle,
+      mr: category === 'Spot' ? 2 : 0,
+      [theme.breakpoints.down('xs')]: {
+        mr: 0,
+      }
+    })
+    return <Stack sx={topStackStyle} key={category}>
+      <Typography variant="h6" sx={{ textAlign: 'right' }}>
+        {category}
+      </Typography>
+      <Typography variant="h6" sx={{ color: 'primary.main', ml: 2 }}>
+        ${numeral(category === 'Spot' ? spotToday : futuresToday).format('0,0')}
+      </Typography>
+    </Stack>
+  })
+
+  const spotAndFuturesStackStyle = theme => ({
+    ...stackBaseStyle,
+    flexWrap: 'wrap',
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column',
+    }
+  })
+  const aggregateVolumeStyle = theme => ({
+    color: 'secondary.main',
+    mr: 2,
+    [theme.breakpoints.down('xs')]: {
+      mr: 0,
+      mt: 1,
+    }
+  })
+  const aggregateVolumeStackStyle = theme => ({
+    ...stackBaseStyle,
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column-reverse',
+    }
+  })
+
   return <ContentCard>
-    <Stack sx={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-      <Typography variant="h4" sx={{ color: 'secondary.main', mr: 2 }}>
-        ${numeral(wooVolume[wooVolume.length - 1].volume).format('0,0')}
-      </Typography>
-      <Typography variant="h5" sx={{ textAlign: 'right' }}>
-        24hr Network Volume
-      </Typography>
+    <Stack sx={{ alignItems: 'center' }}>
+      <Stack sx={aggregateVolumeStackStyle}>
+        <Typography variant="h4" sx={aggregateVolumeStyle}>
+          ${numeral(+spotToday + +futuresToday).format('0,0')}
+        </Typography>
+        <Typography variant="h5" sx={{ textAlign: 'right' }}>
+          24hr Network Volume
+        </Typography>
+      </Stack>
+      <Divider textAlign="center" sx={{ width: '260px', my: 3 }} />
+      <Stack sx={spotAndFuturesStackStyle}>
+        {spotAndFuturesElements}
+      </Stack>
     </Stack>
   </ContentCard>
 }
 
-function VolumeChart({ title, labels, datasets, sx = {}, denominator = '$', subtitle }) {
+function VolumeChart({ title, labels, datasets, denominator = '$', subtitle }) {
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 

@@ -3,18 +3,25 @@ const client = require('../database')
 const dayjs = require('../lib/dayjs')
 const statsCache = require('../lib/statsCache')
 const fetchDailyExchangeStats = require('../queries/fetchDailyExchangeStats')
+const fetch24hrWooFuturesVolume = require('../queries/fetch24hrWooFuturesVolume')
 
 module.exports = async function updateDailyExchangeVolume({ exchangeId }) {
-  const exchangeStatsToday = await fetchDailyExchangeStats({ exchangeId })
-  if (!exchangeStatsToday) return
+  let volume
+  if (exchangeId === 'woo_network_futures') {
+    volume = await fetch24hrWooFuturesVolume()
+  } else {
+    const exchangeStatsToday = await fetchDailyExchangeStats({ exchangeId })
+    if (!exchangeStatsToday) return
 
-  const { tokenTickers = {} } = await statsCache.get()
-  if (!tokenTickers.BTC) return
+    const { tokenTickers = {} } = await statsCache.get()
+    if (!tokenTickers.BTC) return
 
-  const volume = Math.round(exchangeStatsToday.trade_volume_24h_btc * tokenTickers.BTC.price)
+    volume = exchangeStatsToday.trade_volume_24h_btc * tokenTickers.BTC.price
+  }
+
   const update = [{
     date: dayjs.tz().format('YYYY-MM-DD'),
-    volume,
+    volume: Math.round(volume),
     exchange: exchangeId,
   }]
 

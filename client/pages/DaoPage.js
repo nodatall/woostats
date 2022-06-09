@@ -175,7 +175,14 @@ function TokenRow({ token }) {
         {token.chainLogoUrl &&
           <img
             src={token.chainLogoUrl}
-            style={{ width: '12px', height: '12px', borderRadius: '50%', marginTop: '-25px', marginLeft: '10px' }}
+            style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              marginTop: '-5px',
+              marginLeft: '10px',
+              position: 'absolute',
+            }}
           />
         }
       </Stack>
