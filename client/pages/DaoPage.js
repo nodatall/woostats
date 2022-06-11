@@ -53,8 +53,28 @@ function ProtocolBalances({ inProtocols }) {
           </Typography>
         </Stack>
       </ContentCard>
+    } else if (protocolDetails.type === 'bridge') {
+      const detailRows = protocolDetails.liquidityPositions.map(lp =>
+        <Stack {...{
+          sx: { ...ROW_CONTAINER_STYLES, p: 1, pb: 2, '&:last-child': { pb: 1 }},
+          key: lp.value,
+        }}>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
+            <img src={lp.chainLogoUrl} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
+            <Typography variant="body1" sx={{ ml: 1 }}>{lp.chain}</Typography>
+          </Stack>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ mr: 1 }}>{lp.token}</Typography>
+            <Typography variant="body2">{numeral(lp.liquidity).format('0,0.00')}</Typography>
+          </Stack>
+          <Typography variant="body2" sx={{ textAlign: 'right' }}>${numeral(lp.value).format('0,0')}</Typography>
+        </Stack>
+      )
+      return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
+        <TopRow {...{ title: protocolDetails.name, value: protocolDetails.value, logoUrl: protocolDetails.logoUrl }} />
+        {detailRows}
+      </ContentCard>
     } else {
-
       const detailRows = protocolDetails.details.map(detail => {
         const { logoUrls, symbols, amounts } = detail.supplied.reduce((acc, supply) => {
           const amount = supply.amount < .00001 ? 0 : numeral(supply.amount).format('0,0.00')

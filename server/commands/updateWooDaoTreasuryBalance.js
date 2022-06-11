@@ -2,6 +2,7 @@ const fetchEVMChainTokenBalancesForAddress = require('../queries/fetchEVMChainTo
 const fetchEVMChainProtocolBalanceForAddress = require('../queries/fetchEVMChainProtocolBalanceForAddress')
 const fetchWooDaoNearBalances = require('../queries/fetchWooDaoNearBalances')
 const fetchTokenTickers = require('../queries/fetchTokenTickers')
+const fetchWooDaoCBridgeBalances = require('../queries/fetchWooDaoCBridgeBalances')
 const knex = require('../database/knex')
 const client = require('../database')
 const dayjs = require('../lib/dayjs')
@@ -23,8 +24,11 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO'] })
 
   const nearBalances = await fetchWooDaoNearBalances({ tokenTickers })
+  const cBridgeBalances = await fetchWooDaoCBridgeBalances({ tokenTickers })
   const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, tokenTickers })
-  const protocolBalances = await getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers, nearBalances })
+  const protocolBalances = await getProtocolBalances({
+    uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances,
+  })
   const totalValue = [...tokenBalances, ...protocolBalances].reduce((sum, item) => item.value + sum, 0)
 
   const update = [{
@@ -78,7 +82,7 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
   return tokenBalances.sort((a, b) => b.value - a.value)
 }
 
-async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers, nearBalances }) {
+async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances }) {
   const protocolBalances = [
     {
       type: 'staking',
@@ -89,6 +93,7 @@ async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers
       price: +tokenTickers.NEAR.price,
     },
     nearBalances.refFinanceBalances,
+    cBridgeBalances,
   ]
 
   ;[uniswapBalance, bancorBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
