@@ -64,8 +64,8 @@ function ProtocolBalances({ inProtocols }) {
             <Typography variant="body1" sx={{ ml: 1 }}>{lp.chain}</Typography>
           </Stack>
           <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ mr: 1 }}>{lp.token}</Typography>
             <Typography variant="body2">{numeral(lp.liquidity).format('0,0.00')}</Typography>
+            <Typography variant="body2" sx={{ ml: 1 }}>{lp.token}</Typography>
           </Stack>
           <Typography variant="body2" sx={{ textAlign: 'right' }}>${numeral(lp.value).format('0,0')}</Typography>
         </Stack>
