@@ -4,7 +4,6 @@ const dayjs = require('../lib/dayjs')
 
 module.exports = async function fetchTotalMarketVolumeHistory() {
   const volumeRecords = await client.query('SELECT * FROM total_market_volume ORDER BY date DESC LIMIT 1')
-  if (volumeRecords.length > 0 && volumeRecords[0].date === dayjs.tz().format('YYYY-MM-DD')) return
 
   const start = volumeRecords.length === 0
     ? dayjs.tz('2021-06-25').format('YYYY-MM-DD')
