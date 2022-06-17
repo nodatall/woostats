@@ -3,6 +3,7 @@ const fetchEVMChainProtocolBalanceForAddress = require('../queries/fetchEVMChain
 const fetchWooDaoNearBalances = require('../queries/fetchWooDaoNearBalances')
 const fetchTokenTickers = require('../queries/fetchTokenTickers')
 const fetchWooDaoCBridgeBalances = require('../queries/fetchWooDaoCBridgeBalances')
+const fetchWooDaoBancorV3Balance = require('../queries/fetchWooDaoBancorV3Balance')
 const knex = require('../database/knex')
 const client = require('../database')
 const dayjs = require('../lib/dayjs')
@@ -17,11 +18,8 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   const uniswapBalance = await fetchEVMChainProtocolBalanceForAddress({
     address: wooEthAddress, chainId: 'eth', protocol: 'uniswap3',
   })
-  const bancorBalance = await fetchEVMChainProtocolBalanceForAddress({
-    address: wooEthAddress, chainId: 'eth', protocol: 'bancor',
-  })
-
   const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO'] })
+  const bancorBalance = await fetchWooDaoBancorV3Balance({ tokenTickers })
 
   const nearBalances = await fetchWooDaoNearBalances({ tokenTickers })
   const cBridgeBalances = await fetchWooDaoCBridgeBalances({ tokenTickers })
@@ -94,9 +92,10 @@ async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers
     },
     nearBalances.refFinanceBalances,
     cBridgeBalances,
+    bancorBalance,
   ]
 
-  ;[uniswapBalance, bancorBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
+  ;[uniswapBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
     const protocolBalance = {
       name,
       chain,

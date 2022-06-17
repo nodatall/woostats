@@ -16,7 +16,6 @@ module.exports = async function fetchWooDaoCBridgeBalances() {
   const liquidityPositions = response.lp_info
     .filter(lp => lp['liquidity_amt'] !== '0')
     .map(lp => {
-      console.log(`lp.token ==>`, lp.token)
       const liquidity = toReadableNumber(lp.token.token.decimal, lp.liquidity_amt)
       const value = liquidity * tokenTickers[lp.token.token.symbol.toUpperCase()].price
       totalValue += value
