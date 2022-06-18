@@ -43,7 +43,7 @@ export default function TopNav() {
   const { pathname } = useLocation()
 
   return (
-    <Box sx={{ flexGrow: 1, position: 'fixed', width: '100%' }}>
+    <Box sx={{ flexGrow: 1, position: 'fixed', width: '100%', zIndex: 1 }}>
       <AppBar
         position="static"
         sx={appBarStyles}
