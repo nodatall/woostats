@@ -9,7 +9,7 @@ module.exports = async function getTokenTickers() {
   logger.log('debug', `result ${logger.msg(records)}`)
 
   return records.reduce((acc, {token, price, logo_url}) => {
-    acc[token] = { price, logoUrl: logo_url }
+    acc[token] = { price: +price, logoUrl: logo_url }
     return acc
   }, {})
 }

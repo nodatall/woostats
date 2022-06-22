@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography'
 
 export default function TopNav() {
   const { tokenTickers = {} } = useAppState(['tokenTickers'])
-  const wooPrice = tokenTickers.WOO && +tokenTickers.WOO.price
+  const wooPrice = tokenTickers.WOO && tokenTickers.WOO.price
 
   const appBarStyles = theme => ({
     p: 1,

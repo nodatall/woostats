@@ -1,5 +1,5 @@
 const client = require('../database')
-const web3 = require('../lib/web3')
+const { web3_eth } = require('../lib/web3')
 const dayjs = require('../lib/dayjs')
 const fetchWooTokenBurns = require('../queries/fetchWooTokenBurns')
 const knex = require('../database/knex')
@@ -11,7 +11,7 @@ module.exports = async function updateWooTokenBurns() {
   const wooTokenBurns = []
   response.result.forEach(tx => {
     if (tx.blockNumber === '11585811') return // ignore unofficial burn
-    const burned = Number(web3.utils.fromWei(tx.value)).toFixed()
+    const burned = Number(web3_eth.utils.fromWei(tx.value)).toFixed()
     const month = dayjs.unix(tx.timeStamp).subtract(1, 'month').format('YYYY-MM')
     const tx_hash = tx.hash
     wooTokenBurns.push({ burned, month, tx_hash })

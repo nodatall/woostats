@@ -4,28 +4,40 @@ const fetchWooDaoNearBalances = require('../queries/fetchWooDaoNearBalances')
 const fetchTokenTickers = require('../queries/fetchTokenTickers')
 const fetchWooDaoCBridgeBalances = require('../queries/fetchWooDaoCBridgeBalances')
 const fetchWooDaoBancorV3Balance = require('../queries/fetchWooDaoBancorV3Balance')
+const fetchWooDaoWooFiBalance = require('../queries/fetchWooDaoWooFiBalance')
 const knex = require('../database/knex')
 const client = require('../database')
 const dayjs = require('../lib/dayjs')
 const { addRewardsToProtocolBalance } = require('../lib/treasury')
+const chainLogos = require('../lib/chainLogos')
 
 module.exports = async function updateWooDaoTreasuryBalance() {
+  const wooBNBAddress = '0xfd899C7c5ED84537e2Acfc998ce26C3797654AE8'
   const wooEthAddress = '0xfA2d1f15557170F6c4A4C5249e77f534184cdb79'
+  const wooAvaxDeployer = '0x3aB48821D50137c31Ac1961c5AD496E4977ec4CF'
+  const bnbTokenBalances = await fetchEVMChainTokenBalancesForAddress({ address: wooBNBAddress, chainId: 'bsc' })
   const ethTokenBalances = await fetchEVMChainTokenBalancesForAddress({ address: wooEthAddress, chainId: 'eth' })
-  const avalancheTokenBalances = await fetchEVMChainTokenBalancesForAddress({
-    address: '0xB54382c680B0AD037C9F441A8727CA6006fe2dD0', chainId: 'avax',
-  })
+  const avalancheTokenBalances = [
+    ...await fetchEVMChainTokenBalancesForAddress({
+      address: '0xB54382c680B0AD037C9F441A8727CA6006fe2dD0', chainId: 'avax',
+    }),
+    ...await fetchEVMChainTokenBalancesForAddress({
+      address: wooAvaxDeployer, chainId: 'avax',
+    })
+  ]
+
   const uniswapBalance = await fetchEVMChainProtocolBalanceForAddress({
     address: wooEthAddress, chainId: 'eth', protocol: 'uniswap3',
   })
-  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO'] })
+  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO', 'BNB'] })
   const bancorBalance = await fetchWooDaoBancorV3Balance({ tokenTickers })
+  const avaxWooFiBalance = await fetchWooDaoWooFiBalance({ tokenTickers })
 
   const nearBalances = await fetchWooDaoNearBalances({ tokenTickers })
   const cBridgeBalances = await fetchWooDaoCBridgeBalances({ tokenTickers })
-  const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, tokenTickers })
+  const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, bnbTokenBalances, tokenTickers })
   const protocolBalances = await getProtocolBalances({
-    uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances,
+    uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances, avaxWooFiBalance,
   })
   const totalValue = [...tokenBalances, ...protocolBalances].reduce((sum, item) => item.value + sum, 0)
 
@@ -51,7 +63,7 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   await client.query(`${query}`)
 }
 
-function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, tokenTickers }) {
+function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, bnbTokenBalances, tokenTickers }) {
   const tokenBalances = [
     {
       chain: 'near',
@@ -63,7 +75,7 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
     }
   ]
 
-  ;[...avalancheTokenBalances, ...ethTokenBalances].forEach(balance => {
+  ;[...avalancheTokenBalances, ...ethTokenBalances, ...bnbTokenBalances].forEach(balance => {
     const tokenDetails = {
       chain: balance.chain,
       symbol: balance.symbol,
@@ -72,7 +84,9 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
       price: balance.price,
       value: +balance.amount * +balance.price,
     }
-    if (balance.chain !== 'eth') tokenDetails.chainLogoUrl = tokenTickers[balance.chain.toUpperCase()].logoUrl
+    if (balance.chain !== 'eth') {
+      tokenDetails.chainLogoUrl = chainLogos[balance.chain]
+    }
 
     tokenBalances.push(tokenDetails)
   })
@@ -80,7 +94,9 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
   return tokenBalances.sort((a, b) => b.value - a.value)
 }
 
-async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances }) {
+async function getProtocolBalances({
+  uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances, avaxWooFiBalance
+}) {
   const protocolBalances = [
     {
       type: 'staking',
@@ -93,6 +109,7 @@ async function getProtocolBalances({ uniswapBalance, bancorBalance, tokenTickers
     nearBalances.refFinanceBalances,
     cBridgeBalances,
     bancorBalance,
+    avaxWooFiBalance,
   ]
 
   ;[uniswapBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {

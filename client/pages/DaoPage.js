@@ -71,7 +71,11 @@ function ProtocolBalances({ inProtocols }) {
         </Stack>
       )
       return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
-        <TopRow {...{ title: protocolDetails.name, value: protocolDetails.value, logoUrl: protocolDetails.logoUrl }} />
+        <TopRow {...{
+          title: protocolDetails.name,
+          value: protocolDetails.value,
+          logoUrl: protocolDetails.logoUrl,
+        }} />
         {detailRows}
       </ContentCard>
     } else {
@@ -120,7 +124,12 @@ function ProtocolBalances({ inProtocols }) {
 
       const rewards = protocolDetails.rewards
       return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
-        <TopRow {...{ title: protocolDetails.name, value: protocolDetails.value, logoUrl: protocolDetails.logoUrl }} />
+        <TopRow {...{
+          title: protocolDetails.name,
+          value: protocolDetails.value,
+          logoUrl: protocolDetails.logoUrl,
+          chainLogoUrl: protocolDetails.chainLogoUrl,
+        }} />
         {detailRows}
         {rewards.length > 0 && <ProtocolRewards {...{ rewards }} />}
       </ContentCard>
@@ -214,12 +223,25 @@ function TokenRow({ token }) {
   </Stack>
 }
 
-function TopRow({ title, value, logoUrl, iconElement }) {
+function TopRow({ title, value, logoUrl, iconElement, chainLogoUrl }) {
   const icon = logoUrl
     ? <img src={logoUrl} style={{ width: '20px', height: '20px' }} />
     : iconElement
   return <Stack sx={{ flexDirection: 'row', alignItems: 'center', mb: 2 }}>
     {icon}
+    {chainLogoUrl &&
+      <img
+        src={chainLogoUrl}
+        style={{
+          width: '12px',
+          height: '12px',
+          borderRadius: '50%',
+          marginTop: '-9px',
+          marginLeft: '11px',
+          position: 'absolute',
+        }}
+      />
+    }
     <Typography variant="h6" sx={{ textAlign: 'left', ml: 1 }}>{title}</Typography>
     <Typography variant="h6" sx={{ marginLeft: 'auto', color: 'primary.main' }}>
       ${numeral(value).format('0,0')}
