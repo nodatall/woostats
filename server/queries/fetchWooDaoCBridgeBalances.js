@@ -1,9 +1,9 @@
 const request = require('../lib/request')
 const { toReadableNumber } = require('../lib/utils')
-const fetchTokenTickers = require('../queries/fetchTokenTickers')
+const getTokenTickers = require('../queries/getTokenTickers')
 
 module.exports = async function fetchWooDaoCBridgeBalances() {
-  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO'] })
+  const tokenTickers = await getTokenTickers()
 
   const response = await request({
     name: 'cBridgeRequest',

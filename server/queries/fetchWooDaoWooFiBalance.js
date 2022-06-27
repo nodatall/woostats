@@ -29,10 +29,11 @@ module.exports = async function fetchWooDaoWooFiBalance({ tokenTickers }) {
         netValue: value,
         supplied: [
           {
-            'value': value,
-            'amount': wooBalance,
-            'symbol': 'WOO.e',
-            'logoUrl': tokenTickers.WOO.logoUrl,
+            value: value,
+            amount: wooBalance,
+            symbol: 'WOO.e',
+            name: 'Staking',
+            logoUrl: tokenTickers.WOO.logoUrl,
           }
         ]
       }

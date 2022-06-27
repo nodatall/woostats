@@ -83,7 +83,7 @@ function ProtocolBalances({ inProtocols }) {
         const { logoUrls, symbols, amounts } = detail.supplied.reduce((acc, supply) => {
           const amount = supply.amount < .00001 ? 0 : numeral(supply.amount).format('0,0.00')
           acc.logoUrls.push(supply.logoUrl)
-          acc.symbols.push(supply.symbol)
+          acc.symbols.push(supply.name || supply.symbol)
           acc.amounts.push(`${amount} ${supply.symbol}`)
           return acc
         }, { logoUrls: [], symbols: [], amounts: []})

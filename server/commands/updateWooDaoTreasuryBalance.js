@@ -1,10 +1,11 @@
 const fetchEVMChainTokenBalancesForAddress = require('../queries/fetchEVMChainTokenBalancesForAddress')
 const fetchEVMChainProtocolBalanceForAddress = require('../queries/fetchEVMChainProtocolBalanceForAddress')
 const fetchWooDaoNearBalances = require('../queries/fetchWooDaoNearBalances')
-const fetchTokenTickers = require('../queries/fetchTokenTickers')
+const getTokenTickers = require('../queries/getTokenTickers')
 const fetchWooDaoCBridgeBalances = require('../queries/fetchWooDaoCBridgeBalances')
 const fetchWooDaoBancorV3Balance = require('../queries/fetchWooDaoBancorV3Balance')
 const fetchWooDaoWooFiBalance = require('../queries/fetchWooDaoWooFiBalance')
+const fetchWooDaoThetanutzBalances = require('../queries/fetchWooDaoThetanutzBalances')
 const knex = require('../database/knex')
 const client = require('../database')
 const dayjs = require('../lib/dayjs')
@@ -29,15 +30,16 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   const uniswapBalance = await fetchEVMChainProtocolBalanceForAddress({
     address: wooEthAddress, chainId: 'eth', protocol: 'uniswap3',
   })
-  const tokenTickers = await fetchTokenTickers({ tokens: ['NEAR', 'AVAX', 'REF', 'WOO', 'BNB'] })
+  const tokenTickers = await getTokenTickers()
   const bancorBalance = await fetchWooDaoBancorV3Balance({ tokenTickers })
   const avaxWooFiBalance = await fetchWooDaoWooFiBalance({ tokenTickers })
+  const bscThetanutsBalances = await fetchWooDaoThetanutzBalances({ tokenTickers })
 
   const nearBalances = await fetchWooDaoNearBalances({ tokenTickers })
   const cBridgeBalances = await fetchWooDaoCBridgeBalances({ tokenTickers })
   const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, bnbTokenBalances, tokenTickers })
   const protocolBalances = await getProtocolBalances({
-    uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances, avaxWooFiBalance,
+    uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances, avaxWooFiBalance, bscThetanutsBalances
   })
   const totalValue = [...tokenBalances, ...protocolBalances].reduce((sum, item) => item.value + sum, 0)
 
@@ -95,7 +97,7 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
 }
 
 async function getProtocolBalances({
-  uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances, avaxWooFiBalance
+  uniswapBalance, bancorBalance, tokenTickers, nearBalances, cBridgeBalances, avaxWooFiBalance, bscThetanutsBalances,
 }) {
   const protocolBalances = [
     {
@@ -110,6 +112,7 @@ async function getProtocolBalances({
     cBridgeBalances,
     bancorBalance,
     avaxWooFiBalance,
+    bscThetanutsBalances,
   ]
 
   ;[uniswapBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
