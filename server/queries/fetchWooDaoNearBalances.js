@@ -66,7 +66,7 @@ async function getRefFinanceBalances({ near, tokenTickers }) {
   const account = await near.account('woodao.near')
   const tokenPriceList = await request({
     name: 'get ref finance token price list',
-    serverUrl: 'https://indexer.ref-finance.net',
+    serverUrl: 'https://indexer.ref.finance/',
     path: `/list-token-price`,
   })
   const userSeeds = await account.viewFunction(
@@ -74,7 +74,7 @@ async function getRefFinanceBalances({ near, tokenTickers }) {
   )
   const poolBalances = await request({
     name: 'get woodao ref finance pool balances',
-    serverUrl: 'https://indexer.ref-finance.net',
+    serverUrl: 'https://indexer.ref.finance/',
     path: `/liquidity-pools/woodao.near`,
   })
   const farmRewards = await account.viewFunction(
