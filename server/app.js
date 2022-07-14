@@ -28,6 +28,7 @@ app.use(function (err, req, res) {
 
 require('./socket').initializeSocket(socket)
 require('./worker').start(socket)
+require('./lib/wooWebsocket')(socket)
 
 module.exports = { server }
 

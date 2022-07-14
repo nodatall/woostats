@@ -68,6 +68,7 @@
     "web3": "^1.7.1",
     "webpack": "^4.29.6",
     "winston": "^3.5.0",
+    "ws": "^8.8.0",
     "zustand": "^3.6.9"
   },
   "devDependencies": {
