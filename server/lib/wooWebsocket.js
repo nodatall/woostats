@@ -2,7 +2,6 @@ const WebSocket = require('ws')
 
 const statsCache = require('./statsCache')
 const updateDailyExchangeVolume = require('../commands/updateDailyExchangeVolume')
-const getExchangeVolume = require('../queries/getExchangeVolume')
 
 module.exports = async function openWooWebsocket(socket) {
   const wooSocket = new WebSocket('wss://wss.woo.org/ws/stream/OqdphuyCtYWxwzhxyLLjOWNdFP7sQt8RPWzmb5xY')
@@ -25,28 +24,25 @@ module.exports = async function openWooWebsocket(socket) {
       }))
     } else if (message.topic === 'tickers') {
       const {
-        spotVolume,
-        futuresVolume,
+        wooSpotVolumeToday,
+        wooFuturesVolumeToday,
       } = message.data.reduce((acc, cur) => {
         if (cur.symbol.indexOf('SPOT') !== -1) {
-          acc.spotVolume += cur.amount
+          acc.wooSpotVolumeToday += cur.amount
         } else {
-          acc.futuresVolume += cur.amount
+          acc.wooFuturesVolumeToday += cur.amount
         }
         return acc
       }, {
-        spotVolume: 0,
-        futuresVolume: 0,
+        wooSpotVolumeToday: 0,
+        wooFuturesVolumeToday: 0,
       })
 
-      await updateDailyExchangeVolume({ exchangeId: 'wootrade', volume: spotVolume })
-      await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures', volume: futuresVolume })
+      await updateDailyExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
+      await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
 
-      const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
-      const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
-
-      statsCache.update({ wooSpotVolume, wooFuturesVolume })
-      socket.emit('send', { wooSpotVolume, wooFuturesVolume })
+      statsCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
+      socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
     }
   })
 

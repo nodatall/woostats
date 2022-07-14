@@ -22,11 +22,18 @@ export default function VolumePage() {
     wooSpotVolume,
     aggregateVolume,
     wooFuturesVolume,
-  } = useAppState(['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume'])
+    wooSpotVolumeToday,
+    wooFuturesVolumeToday,
+  } = useAppState(
+    ['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume', 'wooSpotVolumeToday', 'wooFuturesVolumeToday']
+  )
+
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
     (!wooFuturesVolume || wooFuturesVolume.length === 0) ||
-    (!aggregateVolume || aggregateVolume.length == 0)
+    (!aggregateVolume || aggregateVolume.length == 0) ||
+    !wooSpotVolumeToday ||
+    !wooFuturesVolumeToday
   ) return <Loading />
 
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooSpotVolume
@@ -92,14 +99,12 @@ export default function VolumePage() {
   })
 
   return <Box>
-    <AggregateNetworkVolumeBox {...{ wooSpotVolume, wooFuturesVolume }} />
+    <AggregateNetworkVolumeBox {...{ wooSpotVolumeToday, wooFuturesVolumeToday }} />
     {charts}
   </Box>
 }
 
-function AggregateNetworkVolumeBox({ wooSpotVolume, wooFuturesVolume }) {
-  const spotToday = wooSpotVolume[wooSpotVolume.length - 1].volume
-  const futuresToday = wooFuturesVolume[wooFuturesVolume.length - 1].volume
+function AggregateNetworkVolumeBox({ wooSpotVolumeToday, wooFuturesVolumeToday }) {
   const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
   const spotAndFuturesElements = ['Spot', 'Futures'].map(category => {
     const topStackStyle = theme => ({
@@ -114,7 +119,7 @@ function AggregateNetworkVolumeBox({ wooSpotVolume, wooFuturesVolume }) {
         {category}
       </Typography>
       <Typography variant="h6" sx={{ color: 'primary.main', ml: 2 }}>
-        ${numeral(category === 'Spot' ? spotToday : futuresToday).format('0,0')}
+        ${numeral(category === 'Spot' ? wooSpotVolumeToday : wooFuturesVolumeToday).format('0,0')}
       </Typography>
     </Stack>
   })
@@ -145,7 +150,7 @@ function AggregateNetworkVolumeBox({ wooSpotVolume, wooFuturesVolume }) {
     <Stack sx={{ alignItems: 'center' }}>
       <Stack sx={aggregateVolumeStackStyle}>
         <Typography variant="h4" sx={aggregateVolumeStyle}>
-          ${numeral(+spotToday + +futuresToday).format('0,0')}
+          ${numeral(+wooSpotVolumeToday + +wooFuturesVolumeToday).format('0,0')}
         </Typography>
         <Typography variant="h5" sx={{ textAlign: 'right' }}>
           24hr Network Volume

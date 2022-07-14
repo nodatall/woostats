@@ -20,9 +20,11 @@ function start(socket){
     await updateTotalMarketVolumeHistory()
 
     const aggregateVolume = await getTotalMarketVolumeHistory()
+    const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
+    const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
 
     statsCache.update({ aggregateVolume, wooSpotVolume, wooFuturesVolume })
-    socket.emit('send', { tokenTickers, aggregateVolume })
+    socket.emit('send', { tokenTickers, aggregateVolume, wooSpotVolume, wooFuturesVolume })
   })
 
   cron.schedule('0 * * * *', async () => { // once an hour
