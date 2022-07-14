@@ -24,7 +24,9 @@ export default function VolumePage() {
     wooFuturesVolume,
   } = useAppState(['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume'])
   if (
-    (!wooSpotVolume || wooSpotVolume.length === 0) || (!wooFuturesVolume || wooFuturesVolume.length === 0)
+    (!wooSpotVolume || wooSpotVolume.length === 0) ||
+    (!wooFuturesVolume || wooFuturesVolume.length === 0) ||
+    (!aggregateVolume || aggregateVolume.length == 0)
   ) return <Loading />
 
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooSpotVolume
