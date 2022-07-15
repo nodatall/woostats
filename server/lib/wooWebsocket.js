@@ -23,26 +23,33 @@ module.exports = async function openWooWebsocket(socket) {
         event: 'pong',
       }))
     } else if (message.topic === 'tickers') {
-      const {
-        wooSpotVolumeToday,
-        wooFuturesVolumeToday,
-      } = message.data.reduce((acc, cur) => {
-        if (cur.symbol.indexOf('SPOT') !== -1) {
-          acc.wooSpotVolumeToday += cur.amount
-        } else {
-          acc.wooFuturesVolumeToday += cur.amount
-        }
-        return acc
-      }, {
-        wooSpotVolumeToday: 0,
-        wooFuturesVolumeToday: 0,
-      })
+      if (!wooSocket.debounce) {
+        wooSocket.debounce = 1
 
-      await updateDailyExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
-      await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
+        const {
+          wooSpotVolumeToday,
+          wooFuturesVolumeToday,
+        } = message.data.reduce((acc, cur) => {
+          if (cur.symbol.indexOf('SPOT') !== -1) {
+            acc.wooSpotVolumeToday += cur.amount
+          } else {
+            acc.wooFuturesVolumeToday += cur.amount
+          }
+          return acc
+        }, {
+          wooSpotVolumeToday: 0,
+          wooFuturesVolumeToday: 0,
+        })
 
-      statsCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
-      socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
+        await updateDailyExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
+        await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
+
+        statsCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
+        socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
+        setTimeout(() => {
+          wooSocket.debounce = null
+        }, 1000)
+      }
     }
   })
 
