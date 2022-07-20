@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react'
 import dayjs from 'dayjs'
-import isEqual from 'underscore/modules/isEqual.js'
+import isEqual from 'lodash/isEqual'
 import { SMA } from 'technicalindicators'
 import numeral from 'numeral'
 
