@@ -1,16 +1,19 @@
 import React, { useState, useRef, useCallback } from 'react'
 import dayjs from 'dayjs'
+import isEqual from 'underscore/modules/isEqual.js'
+import { SMA } from 'technicalindicators'
+import numeral from 'numeral'
+
+import { useAppState } from 'lib/appState'
+import { useLocalStorage } from 'lib/storageHooks'
+
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import { SMA } from 'technicalindicators'
-import numeral from 'numeral'
-
-import { useAppState } from 'lib/appState'
-import { useLocalStorage } from 'lib/storageHooks'
+import Slider from '@mui/material/Slider'
 
 import Loading from 'components/Loading'
 import LineChart from 'components/LineChart'
@@ -19,21 +22,17 @@ import ContentCard from 'components/ContentCard'
 
 export default function VolumePage() {
   const {
-    wooSpotVolume,
+    wooSpotVolume = [],
     aggregateVolume,
     wooFuturesVolume,
-    wooSpotVolumeToday,
-    wooFuturesVolumeToday,
   } = useAppState(
-    ['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume', 'wooSpotVolumeToday', 'wooFuturesVolumeToday']
+    ['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume']
   )
 
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
     (!wooFuturesVolume || wooFuturesVolume.length === 0) ||
-    (!aggregateVolume || aggregateVolume.length == 0) ||
-    !wooSpotVolumeToday ||
-    !wooFuturesVolumeToday
+    (!aggregateVolume || aggregateVolume.length == 0)
   ) return <Loading />
 
   const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooSpotVolume
@@ -99,12 +98,18 @@ export default function VolumePage() {
   })
 
   return <Box>
-    <AggregateNetworkVolumeBox {...{ wooSpotVolumeToday, wooFuturesVolumeToday }} />
+    <AggregateNetworkVolumeBox />
     {charts}
   </Box>
 }
 
-function AggregateNetworkVolumeBox({ wooSpotVolumeToday, wooFuturesVolumeToday }) {
+function AggregateNetworkVolumeBox() {
+  const {
+    wooSpotVolumeToday,
+    wooFuturesVolumeToday,
+  } = useAppState(
+    ['wooSpotVolumeToday', 'wooFuturesVolumeToday']
+  )
   const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
   const spotAndFuturesElements = ['Spot', 'Futures'].map(category => {
     const topStackStyle = theme => ({
@@ -163,10 +168,23 @@ function AggregateNetworkVolumeBox({ wooSpotVolumeToday, wooFuturesVolumeToday }
     </Stack>
   </ContentCard>
 }
+const reduceArrayToRange = (arr, range) => arr.slice(range[0], range[1])
 
-function VolumeChart({ title, labels, datasets, denominator = '$', subtitle }) {
+const VolumeChart = React.memo(function ({
+  title, labels, datasets, denominator = '$', subtitle,
+}) {
+  const isMA = title.includes('MA')
+  const defaultRange = [labels.length - 91, labels.length - 1]
+  const [range = defaultRange, setRange] = useLocalStorage(`${title.replace(/ /g, '')}RangeSlider`)
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
+
+  datasets = datasets.map(dataset => {
+    return {
+      ...dataset,
+      data: isMA ? dataset.data : reduceArrayToRange(dataset.data, range),
+    }
+  })
 
   return <ContentCard sx={{ p: 2 }} ref={containerRef}>
     <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, minHeight: '50px'}}>
@@ -179,7 +197,7 @@ function VolumeChart({ title, labels, datasets, denominator = '$', subtitle }) {
       {tooltip && <Tooltip {...{tooltip, denominator}} />}
     </Stack>
     <LineChart {...{
-      labels,
+      labels: isMA ? labels : reduceArrayToRange(labels, range),
       datasets,
       tooltip,
       setTooltip,
@@ -187,8 +205,27 @@ function VolumeChart({ title, labels, datasets, denominator = '$', subtitle }) {
       denominator,
     }}
     />
+    {!isMA &&
+      <Slider
+        name="slider"
+        value={range || labels.length}
+        min={0}
+        size="small"
+        max={labels.length}
+        onChange={(_, val) => {
+          setRange(val)
+        }}
+        step={range[1] - range[0] < 50 ? 1 : 5}
+      />
+    }
   </ContentCard>
-}
+}, function(prevProps, nextProps) {
+  for (const prop in prevProps) {
+    if (prop === 'datasets' && isEqual(prevProps[prop].data, nextProps[prop].data)) return true
+    if (!isEqual(prevProps[prop], nextProps[prop])) return false
+  }
+  return true
+})
 
 function MAChart({ ...props }) {
   const [maLength = 50, setMaLength] = useLocalStorage('maLength')

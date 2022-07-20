@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { useAppState } from 'lib/appState'
+import isEqual from 'lodash/isEqual'
 
 function useStorage(storage, key){
   const { [key]: appStateValue, setState } = useAppState([key])
@@ -7,7 +8,7 @@ function useStorage(storage, key){
   const value = key in storage ? safeJSONParse(storage, key) : undefined
 
   useEffect(() => {
-    if (value !== appStateValue) setState({ [key]: value })
+    if (!isEqual(value, appStateValue)) setState({ [key]: value })
   })
 
   const setValue = useCallback(
