@@ -6,6 +6,7 @@ import numeral from 'numeral'
 
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
+import { useTheme } from '@mui/material/styles'
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -205,19 +206,7 @@ const VolumeChart = React.memo(function ({
       denominator,
     }}
     />
-    {!isMA &&
-      <Slider
-        name="slider"
-        value={range || labels.length}
-        min={0}
-        size="small"
-        max={labels.length}
-        onChange={(_, val) => {
-          setRange(val)
-        }}
-        step={range[1] - range[0] < 50 ? 1 : 5}
-      />
-    }
+    {!isMA && <RangeSlider {...{ range, labels, setRange }} />}
   </ContentCard>
 }, function(prevProps, nextProps) {
   for (const prop in prevProps) {
@@ -226,6 +215,42 @@ const VolumeChart = React.memo(function ({
   }
   return true
 })
+
+function RangeSlider({ range, labels, setRange }) {
+  const theme = useTheme()
+  function valueLabelFormat(index) {
+    if (labels[index] === undefined) return labels[labels.length - 1]
+    return labels[index]
+  }
+
+  return <Slider
+    name="slider"
+    value={range || labels.length}
+    min={0}
+    size="small"
+    valueLabelFormat={valueLabelFormat}
+    valueLabelDisplay="auto"
+    max={labels.length}
+    onChange={(_, val) => {
+      setRange(val)
+    }}
+    step={range[1] - range[0] < 50 ? 1 : 5}
+    sx={{
+      maxWidth: 'calc(100% - 45px)',
+      display: 'flex',
+      margin: 'auto',
+      color: '#73bef445',
+      '& .MuiSlider-valueLabel': {
+        borderRadius: '4px',
+        background: theme.palette.primary.main,
+        color: theme.palette.background.default,
+      },
+      '& .MuiSlider-thumb': {
+        background: '#456e8c',
+      },
+    }}
+  />
+}
 
 function MAChart({ ...props }) {
   const [maLength = 50, setMaLength] = useLocalStorage('maLength')
