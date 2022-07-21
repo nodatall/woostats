@@ -150,9 +150,15 @@ async function getProtocolBalances({
             symbol: token.optimized_symbol,
             amount: token.amount,
           })
-          if (value > item.stats.net_usd_value) protocolBalance.value += value
+          if (value > item.stats.net_usd_value) {
+            protocolBalance.value += value
+            protocolDetail.netValue += value
+          }
         })
         ;(item.detail.reward_token_list || []).forEach(token => {
+          if (!token.price && tokenTickers[token.symbol.toUpperCase()]) {
+            token.price = tokenTickers[token.symbol.toUpperCase()].price
+          }
           const value = +token.amount * +token.price
           protocolBalance.value += value
           addRewardsToProtocolBalance({ protocolBalance, token, value })
