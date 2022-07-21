@@ -78,6 +78,9 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalanc
   ]
 
   ;[...avalancheTokenBalances, ...ethTokenBalances, ...bnbTokenBalances].forEach(balance => {
+    if (balance.price === 0 && tokenTickers[balance.symbol.toUpperCase()]) {
+      balance.price = tokenTickers[balance.symbol.toUpperCase()].price
+    }
     const tokenDetails = {
       chain: balance.chain,
       symbol: balance.symbol,
@@ -137,6 +140,9 @@ async function getProtocolBalances({
         protocolDetail.type = 'Liquidity Pool'
         const supplied = []
         item.detail.supply_token_list.forEach(token => {
+          if (!token.price && tokenTickers[token.symbol.toUpperCase()]) {
+            token.price = tokenTickers[token.symbol.toUpperCase()].price
+          }
           supplied.push({
             value: +token.amount * +token.price,
             logoUrl: token.logo_url,
