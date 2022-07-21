@@ -69,7 +69,7 @@ export default function VolumePage() {
 
   const charts = [
     { title: 'Daily WOO Network volume', data: wooVolumeSeries },
-    { title: 'Daily WOO volume [day] day MA', data: wooVolumeSeries },
+    { title: 'Daily Network volume [day] day MA', data: wooVolumeSeries },
     { title: 'WOO Network % of total market volume', data: percentSeries },
     { title: 'WOO Network % of total [day] day MA', data: percentSeries },
     { title: 'Total crypto market volume', data: aggregateVolumeSeries },
@@ -175,7 +175,7 @@ const VolumeChart = React.memo(function ({
   title, labels, datasets, denominator = '$', subtitle,
 }) {
   const isMA = title.includes('MA')
-  const defaultRange = [labels.length - 91, labels.length - 1]
+  const defaultRange = [0, labels.length - 1]
   const [range = defaultRange, setRange] = useLocalStorage(`${title.replace(/ /g, '')}RangeSlider`)
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
@@ -259,33 +259,41 @@ function MAChart({ ...props }) {
   props.labels = props.labels.slice(maLength - 1)
   props.title = props.title.replace('[day]', maLength)
 
-  const buttons = [25, 50, 100].map(num => {
-    const onClick = useCallback(() => {
-      setMaLength(num)
-    }, [setMaLength])
-
-    const styles = useCallback(theme => {
-      const _styles = {}
-      if (maLength === num) _styles.color = `${theme.palette.secondary.main}`
-      return _styles
-    }, [maLength, num])
-
-    const props = {
-      onClick,
-      key: num,
-      sx: styles,
-    }
-    if (maLength === num) props.sx.border = '1px solid secondary.main'
-
-    return <Button {...props}>{num}</Button>
-  })
-
-  props.subtitle = <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
-    {buttons}
-  </ButtonGroup>
+  props.subtitle = <ButtonGroupSubtitle {...{
+    values: [25, 50, 100],
+    current: maLength,
+    setCurrent: setMaLength,
+  }}/>
 
 
   return <VolumeChart {...props} />
+}
+
+function ButtonGroupSubtitle({ values, current, setCurrent }) {
+  const buttons = values.map(val => {
+    const onClick = useCallback(() => {
+      setCurrent(val)
+    }, [setCurrent])
+
+    const styles = useCallback(theme => {
+      const _styles = {}
+      if (current === val) _styles.color = `${theme.palette.secondary.main}`
+      return _styles
+    }, [current, val])
+
+    const props = {
+      onClick,
+      key: val,
+      sx: styles,
+    }
+    if (current === val) props.sx.border = '1px solid secondary.main'
+
+    return <Button {...props}>{val}</Button>
+  })
+
+  return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
+    {buttons}
+  </ButtonGroup>
 }
 
 function Tooltip({ tooltip, denominator = '$' }) {
