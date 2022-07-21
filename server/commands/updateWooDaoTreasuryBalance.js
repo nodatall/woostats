@@ -143,12 +143,14 @@ async function getProtocolBalances({
           if (!token.price && tokenTickers[token.symbol.toUpperCase()]) {
             token.price = tokenTickers[token.symbol.toUpperCase()].price
           }
+          const value = +token.amount * +token.price
           supplied.push({
-            value: +token.amount * +token.price,
+            value,
             logoUrl: token.logo_url,
             symbol: token.optimized_symbol,
             amount: token.amount,
           })
+          if (value > item.stats.net_usd_value) protocolBalance.value += value
         })
         ;(item.detail.reward_token_list || []).forEach(token => {
           const value = +token.amount * +token.price
