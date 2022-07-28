@@ -3,7 +3,7 @@ const WebSocket = require('ws')
 const statsCache = require('./statsCache')
 const updateDailyExchangeVolume = require('../commands/updateDailyExchangeVolume')
 
-module.exports = async function openWooWebsocket(socket) {
+async function openWooWebsocket(socket) {
   const wooSocket = new WebSocket('wss://wss.woo.org/ws/stream/OqdphuyCtYWxwzhxyLLjOWNdFP7sQt8RPWzmb5xY')
 
   wooSocket.on('open', () => {
@@ -14,11 +14,19 @@ module.exports = async function openWooWebsocket(socket) {
     }))
   })
 
+  let lastUpdate = Date.now()
+  let updateTimeout = setInterval(() => {
+    if ((Date.now() - lastUpdate) > 30000) {
+      wooSocket.terminate()
+      clearInterval(updateTimeout)
+      openWooWebsocket(socket)
+    }
+  }, 5000)
+
   wooSocket.on('message', async messageStream => {
     const message = JSON.parse(messageStream.toString())
 
     if (message.event === 'ping') {
-      heartbeat(wooSocket)
       wooSocket.send(JSON.stringify({
         event: 'pong',
       }))
@@ -46,21 +54,13 @@ module.exports = async function openWooWebsocket(socket) {
 
         statsCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
         socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
+        lastUpdate = Date.now()
         setTimeout(() => {
           wooSocket.debounce = null
         }, 1000)
       }
     }
   })
-
-  wooSocket.on('close', function clear() {
-    clearTimeout(this.pingTimeout)
-  })
 }
 
-function heartbeat(wooSocket) {
-  clearTimeout(wooSocket.pingTimeout)
-  wooSocket.pingTimeout = setTimeout(() => {
-    wooSocket.terminate()
-  }, 30000)
-}
+module.exports = openWooWebsocket
