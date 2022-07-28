@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect } from 'react'
 import { Line } from 'react-chartjs-2'
 import numeral from 'numeral'
-import 'lib/chart'
+
+import { lineColors } from 'lib/chart'
 
 export default function LineChart({
   labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef, denominator = '',
@@ -17,12 +18,45 @@ export default function LineChart({
     [parentRef.current]
   )
 
+  const gradients = [
+    ['rgb(147, 91, 211)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'],
+    ['rgb(57, 91, 211)', 'rgb(0, 156, 71)', 'rgb(178, 58, 0)'],
+  ]
+  const backgroundColors = ['rgb(25, 29, 35)', 'rgb(18, 24, 30)']
+  const calculateBorderColor = gradient => {
+    return function(context) {
+      const chart = context.chart
+      const {ctx, chartArea} = chart
+      if (!chartArea) return
+      return getGradient(ctx, chartArea, gradient)
+    }
+  }
+  datasets = datasets.map((dataset, index) => {
+    let borderColor
+    if (datasets.length > 1) {
+      borderColor = lineColors[index]
+    } else {
+      borderColor = calculateBorderColor(gradients[0])
+    }
+    return {
+      ...dataset,
+      borderColor,
+      backgroundColor: backgroundColors[index],
+    }
+  })
+
   const tooltipSetter = useCallback(
     context => {
-      if (context.tooltip.title[0] === tooltip.title) return
+      const { title, dataPoints } = context.tooltip
+      if (title[0] === tooltip.title) return
+      const body = dataPoints.length === 1
+        ? dataPoints[0].formattedValue
+        : dataPoints.map(dataPoint => {
+          return dataPoint.formattedValue
+        })
       setTooltip({
         title: context.tooltip.title[0],
-        body: context.tooltip.dataPoints[0].formattedValue,
+        body,
       })
     },
     [tooltip]
@@ -122,4 +156,20 @@ export default function LineChart({
   ]
 
   return <Line data={data} options={options} plugins={plugins} />
+}
+
+let width, height, gradient
+function getGradient(ctx, chartArea, colors) {
+  const chartWidth = chartArea.right - chartArea.left
+  const chartHeight = chartArea.bottom - chartArea.top
+  if (!gradient || width !== chartWidth || height !== chartHeight) {
+    width = chartWidth
+    height = chartHeight
+    gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
+    gradient.addColorStop(0, colors[0])
+    gradient.addColorStop(0.5, colors[1])
+    gradient.addColorStop(1, colors[2])
+  }
+
+  return gradient
 }

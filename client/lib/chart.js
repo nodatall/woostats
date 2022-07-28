@@ -25,3 +25,5 @@ ChartJS.register(
   Tooltip,
   Legend,
 )
+
+export const lineColors = ['#ae85de', 'rgb(221, 170, 28)']

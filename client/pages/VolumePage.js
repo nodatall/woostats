@@ -7,6 +7,7 @@ import numeral from 'numeral'
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
 import { useTheme } from '@mui/material/styles'
+import { lineColors } from 'lib/chart'
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -36,18 +37,26 @@ export default function VolumePage() {
     (!aggregateVolume || aggregateVolume.length == 0)
   ) return <Loading />
 
-  const { labels: wooVolumeLabels, series: wooVolumeSeries } = wooSpotVolume
+  const {
+    labels: wooVolumeLabels, series: wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries,
+  } = wooSpotVolume
     .slice(0, -1)
     .reduce(
       (acc, { date, volume }) => {
         const { volume: futuresVolume } = wooFuturesVolume.find(futuresVol => futuresVol.date === date) || { volume: 0 }
         acc.labels.push(date)
         acc.series.push(+volume + +futuresVolume)
+        if (futuresVolume > 0) {
+          acc.wooSpotVolumeSeries.push(+volume)
+          acc.wooFuturesVolumeSeries.push(+futuresVolume)
+        }
         return acc
       },
       {
         labels: [],
         series: [],
+        wooSpotVolumeSeries: [],
+        wooFuturesVolumeSeries: [],
       }
     )
 
@@ -68,33 +77,25 @@ export default function VolumePage() {
     )
 
   const charts = [
-    { title: 'Daily WOO Network volume', data: wooVolumeSeries },
-    { title: 'Daily Network volume [day] day MA', data: wooVolumeSeries },
-    { title: 'WOO Network % of total market volume', data: percentSeries },
-    { title: 'WOO Network % of total [day] day MA', data: percentSeries },
-    { title: 'Total crypto market volume', data: aggregateVolumeSeries },
-    { title: 'Total market volume [day] day MA', data: aggregateVolumeSeries },
-  ].map(({ title, data },) => {
+    { title: 'Daily WOO Network volume' },
+    { title: 'Daily Network volume [day] day MA', datasets: [wooVolumeSeries] },
+    { title: 'WOO Network % of total market volume', datasets: [percentSeries] },
+    { title: 'WOO Network % of total [day] day MA', datasets: [percentSeries] },
+    { title: 'Total crypto market volume', datasets: [aggregateVolumeSeries] },
+    { title: 'Total market volume [day] day MA', datasets: [aggregateVolumeSeries] },
+  ].map(({ title, datasets },) => {
+    if (datasets) datasets = datasets.map(dataset => ({ data: dataset }))
     const props = {
       title,
       key: title,
       labels: wooVolumeLabels,
-      datasets: [
-        {
-          label: 'WOO % of total market volume',
-          data,
-          borderColor: function(context) {
-            const chart = context.chart
-            const {ctx, chartArea} = chart
-            if (!chartArea) return
-            return getGradient(ctx, chartArea, ['rgb(147, 91, 211)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'])
-          },
-          backgroundColor: 'rgb(25, 29, 35)',
-        },
-      ],
+      datasets,
     }
+
     if (title.includes('%')) props.denominator = '%'
     if (title.includes('MA')) return <MAChart {...props} />
+    if (title === 'Daily WOO Network volume')
+      return <DailyVolumeChart {...{ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }} />
     return <VolumeChart {...props} />
   })
 
@@ -265,12 +266,44 @@ function MAChart({ ...props }) {
     setCurrent: setMaLength,
   }}/>
 
+  return <VolumeChart {...props} />
+}
+
+function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }) {
+  const [isTotal = 1, setIsTotal] = useLocalStorage('dailyVolumeToggle')
+
+  if (isTotal) {
+    props.datasets = [{ data: wooVolumeSeries }]
+  } else {
+    props.title = `Daily spot vs futures volumes`
+    props.datasets = [
+      { data: wooFuturesVolumeSeries },
+      { data: wooSpotVolumeSeries },
+    ]
+    props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length - 1))
+  }
+  props.subtitle = <ButtonGroupSubtitle {...{
+    values: [
+      1,
+      0,
+    ],
+    valueElements: [
+      <Stack direction="row">
+        <Typography sx={{ color: lineColors[1] }}>Spot</Typography>
+        &nbsp;&nbsp;vs&nbsp;&nbsp;
+        <Typography sx={{ color: lineColors[0] }}>Futures</Typography>
+      </Stack>,
+      'Total',
+    ],
+    current: isTotal,
+    setCurrent: setIsTotal,
+  }}/>
 
   return <VolumeChart {...props} />
 }
 
-function ButtonGroupSubtitle({ values, current, setCurrent }) {
-  const buttons = values.map(val => {
+function ButtonGroupSubtitle({ values, valueElements, current, setCurrent }) {
+  const buttons = values.map((val) => {
     const onClick = useCallback(() => {
       setCurrent(val)
     }, [setCurrent])
@@ -287,8 +320,9 @@ function ButtonGroupSubtitle({ values, current, setCurrent }) {
       sx: styles,
     }
     if (current === val) props.sx.border = '1px solid secondary.main'
+    const valueElement = valueElements ? valueElements[val] : val
 
-    return <Button {...props}>{val}</Button>
+    return <Button {...props}>{valueElement}</Button>
   })
 
   return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
@@ -298,7 +332,24 @@ function ButtonGroupSubtitle({ values, current, setCurrent }) {
 
 function Tooltip({ tooltip, denominator = '$' }) {
   if (!tooltip.title) return null
-  const text = denominator === '%'
+
+  function addDemoninator(value, denominator) {
+    return denominator === '%'
+      ? `${value}${denominator}`
+      : `${denominator}${value}`
+  }
+
+  const body = tooltip.body
+  let text = !Array.isArray(body)
+    ? addDemoninator(body, denominator)
+    : body.map((value, index) =>
+      <Typography variant="h6" key={value} sx={{ color: lineColors[index] }}>
+        {addDemoninator(value, denominator)}
+      </Typography>
+    )
+  if (Array.isArray(text)) text.reverse()
+
+  denominator === '%'
     ? `${tooltip.body}${denominator}`
     : `${denominator}${tooltip.body}`
 
@@ -319,20 +370,4 @@ function Tooltip({ tooltip, denominator = '$' }) {
       sx: styles,
     }}
   />
-}
-
-let width, height, gradient
-function getGradient(ctx, chartArea, colors) {
-  const chartWidth = chartArea.right - chartArea.left
-  const chartHeight = chartArea.bottom - chartArea.top
-  if (!gradient || width !== chartWidth || height !== chartHeight) {
-    width = chartWidth
-    height = chartHeight
-    gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
-    gradient.addColorStop(0, colors[0])
-    gradient.addColorStop(0.5, colors[1])
-    gradient.addColorStop(1, colors[2])
-  }
-
-  return gradient
 }
