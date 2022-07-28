@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
 import Divider from '@mui/material/Divider'
+import '../assets/c-bridge.png'
 
 import { useAppState } from 'lib/appState'
 

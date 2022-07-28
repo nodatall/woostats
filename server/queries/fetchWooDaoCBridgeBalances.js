@@ -32,7 +32,7 @@ module.exports = async function fetchWooDaoCBridgeBalances() {
 
   return {
     name: 'cBridge',
-    logoUrl: 'https://cbridge.celer.network/static/media/favicon.e3350473.png',
+    logoUrl: '/assets/c-bridge.png',
     type: 'bridge',
     value: totalValue,
     liquidityPositions,
