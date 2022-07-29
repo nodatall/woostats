@@ -22,7 +22,6 @@ export default function LineChart({
     ['rgb(147, 91, 211)', 'rgb(0, 156, 181)', 'rgb(178, 118, 0)'],
     ['rgb(57, 91, 211)', 'rgb(0, 156, 71)', 'rgb(178, 58, 0)'],
   ]
-  const backgroundColors = ['rgb(25, 29, 35)', 'rgb(18, 24, 30)']
   const calculateBorderColor = gradient => {
     return function(context) {
       const chart = context.chart
@@ -38,10 +37,13 @@ export default function LineChart({
     } else {
       borderColor = calculateBorderColor(gradients[0])
     }
+    const backgroundColor = datasets.length === 1
+      ? 'rgb(25, 29, 35)'
+      : undefined
     return {
       ...dataset,
       borderColor,
-      backgroundColor: backgroundColors[index],
+      backgroundColor,
     }
   })
 
