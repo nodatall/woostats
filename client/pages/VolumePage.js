@@ -226,12 +226,12 @@ function RangeSlider({ range, labels, setRange }) {
 
   return <Slider
     name="slider"
-    value={range || labels.length - 1}
+    value={range}
     min={0}
     size="small"
     valueLabelFormat={valueLabelFormat}
     valueLabelDisplay="auto"
-    max={labels.length - 1}
+    max={labels.length}
     onChange={(_, val) => {
       setRange(val)
     }}
@@ -278,9 +278,9 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
     props.title = `Daily spot vs futures volumes`
     props.datasets = [
       { data: wooFuturesVolumeSeries },
-      { data: wooSpotVolumeSeries },
+      { data: wooSpotVolumeSeries.slice(-(wooFuturesVolumeSeries.length)) },
     ]
-    props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length - 1))
+    props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length))
   }
   props.subtitle = <ButtonGroupSubtitle {...{
     values: [
