@@ -115,7 +115,7 @@ export default function LineChart({
         type: 'time',
         time: {
           parser: 'YYYY-MM-DD',
-          unit: labels.length > 45 ? 'month' : 'day',
+          unit: labels.length > 60 ? 'month' : 'day',
           displayFormats: {
             day: 'MM/DD'
           }

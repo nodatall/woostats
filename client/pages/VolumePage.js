@@ -220,22 +220,23 @@ const VolumeChart = React.memo(function ({
 function RangeSlider({ range, labels, setRange }) {
   const theme = useTheme()
   function valueLabelFormat(index) {
+    console.log(`labels[index] ==>`, labels[index])
     if (labels[index] === undefined) return labels[labels.length - 1]
     return labels[index]
   }
 
   return <Slider
     name="slider"
-    value={range || labels.length}
+    value={range || labels.length - 1}
     min={0}
     size="small"
     valueLabelFormat={valueLabelFormat}
     valueLabelDisplay="auto"
-    max={labels.length}
+    max={labels.length - 1}
     onChange={(_, val) => {
       setRange(val)
     }}
-    step={range[1] - range[0] < 50 ? 1 : 5}
+    step={range[1] - range[0] < 50 ? 1 : 2}
     sx={{
       maxWidth: 'calc(100% - 45px)',
       display: 'flex',
