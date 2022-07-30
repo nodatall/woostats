@@ -220,7 +220,6 @@ const VolumeChart = React.memo(function ({
 function RangeSlider({ range, labels, setRange }) {
   const theme = useTheme()
   function valueLabelFormat(index) {
-    console.log(`labels[index] ==>`, labels[index])
     if (labels[index] === undefined) return labels[labels.length - 1]
     return labels[index]
   }
