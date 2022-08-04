@@ -69,16 +69,17 @@ async function getRefFinanceBalances({ near, tokenTickers }) {
     serverUrl: 'https://indexer.ref.finance/',
     path: `/list-token-price`,
   })
-  const userSeeds = await account.viewFunction(
-    'v2.ref-farming.near', 'list_user_seeds', { account_id: 'woodao.near' }
-  )
   const poolBalances = await request({
     name: 'get woodao ref finance pool balances',
     serverUrl: 'https://indexer.ref.finance/',
     path: `/liquidity-pools/woodao.near`,
   })
+
   const farmRewards = await account.viewFunction(
-    'v2.ref-farming.near', 'list_rewards', { account_id: 'woodao.near' }
+    'boostfarm.ref-labs.near', 'list_farmer_rewards', { farmer_id: 'woodao.near' }
+  )
+  const farmerSeeds = await account.viewFunction(
+    'boostfarm.ref-labs.near', 'list_farmer_seeds', { farmer_id: 'woodao.near' }
   )
 
   const protocolBalance = {
@@ -113,16 +114,14 @@ async function getRefFinanceBalances({ near, tokenTickers }) {
     })
   }
 
-  for (const seed_id in userSeeds) {
-    const farmsBySeedId = await account.viewFunction(
-      'v2.ref-farming.near', 'list_farms_by_seed', { seed_id }
+  for (const seed_id in farmerSeeds) {
+    const unclaimedTokenAmount = await account.viewFunction(
+      'boostfarm.ref-labs.near', 'get_unclaimed_rewards', { farmer_id: 'woodao.near', seed_id }
     )
-    for (const farm of farmsBySeedId) {
-      const unclaimedTokenAmount = await account.viewFunction(
-        'v2.ref-farming.near', 'get_unclaimed_reward', { account_id: 'woodao.near', farm_id: farm.farm_id }
-      )
-      const tokenFromPriceList = tokenPriceList[farm.reward_token]
-      const amount = toReadableNumber(tokenFromPriceList.decimal, unclaimedTokenAmount)
+    for (rewardToken in unclaimedTokenAmount) {
+      const unclaimedAmount = unclaimedTokenAmount[rewardToken]
+      const tokenFromPriceList = tokenPriceList[rewardToken]
+      const amount = toReadableNumber(tokenFromPriceList.decimal, unclaimedAmount)
       const symbol = tokenFromPriceList.symbol
       const tokenTicker = tokenTickers[symbol]
       if (!tokenTicker) {
@@ -150,7 +149,7 @@ async function getRefFinanceBalances({ near, tokenTickers }) {
       netValue: 0,
       supplied: [],
     }
-    const seedAmount = userSeeds[`v2.ref-finance.near@${poolBalance.id}`]
+    const seedAmount = farmerSeeds[`v2.ref-finance.near@${poolBalance.id}`].free_amount
     const ratio = +seedAmount / +poolBalance.shares_total_supply
     poolBalance.token_account_ids.forEach((tokenId, index) => {
       const tokenFromPriceList = tokenPriceList[tokenId]
