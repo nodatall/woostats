@@ -144,7 +144,7 @@ function ProtocolRewards({ rewards }) {
     .map(reward => (
       <Stack {...{
         sx: { ...ROW_CONTAINER_STYLES, p: 1, pb: 2, '&:last-child': { pb: 1 }},
-        key: reward.amount,
+        key: reward.amount + reward.symbol,
       }}>
         <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
           <img src={reward.logoUrl} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
