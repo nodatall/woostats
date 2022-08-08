@@ -35,7 +35,7 @@ module.exports = async function updateWooDaoTreasuryBalance() {
   const avaxWooFiBalance = await fetchWooDaoWooFiBalance({ tokenTickers })
   const bscThetanutsBalances = await fetchWooDaoThetanutzBalances({ tokenTickers })
 
-  const nearBalances = await fetchWooDaoNearBalances({ tokenTickers })
+  const nearBalances = await fetchWooDaoNearBalances()
   const cBridgeBalances = await fetchWooDaoCBridgeBalances({ tokenTickers })
   const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, bnbTokenBalances, tokenTickers })
   const protocolBalances = await getProtocolBalances({
@@ -67,14 +67,7 @@ module.exports = async function updateWooDaoTreasuryBalance() {
 
 function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, nearBalances, bnbTokenBalances, tokenTickers }) {
   const tokenBalances = [
-    {
-      chain: 'near',
-      symbol: 'NEAR',
-      logoUrl: tokenTickers.NEAR.logoUrl,
-      amount: nearBalances.near,
-      value: nearBalances.near * Number(tokenTickers.NEAR.price),
-      price: Number(tokenTickers.NEAR.price),
-    }
+    ...nearBalances.tokenBalances,
   ]
 
   ;[...avalancheTokenBalances, ...ethTokenBalances, ...bnbTokenBalances].forEach(balance => {

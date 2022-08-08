@@ -10,8 +10,10 @@ module.exports = async function fetchTokenTickers({ tokens }) {
   response.forEach(ticker => {
     const { id, logo_url, price } = ticker
     tokenTickers[id] = { logoUrl: logo_url, price: +price }
-    if (ticker.symbol === 'REF')
-      tokenTickers[id].logoUrl = 'https://assets.coingecko.com/coins/images/18279/small/ref.png?1631238807'
+    if (id === 'REF2') {
+      tokenTickers.REF = tokenTickers[id]
+      delete tokenTickers[id]
+    }
   })
 
   return tokenTickers

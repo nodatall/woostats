@@ -14,7 +14,7 @@ function start(socket){
   if (process.env.INITIALIZE_ALL) intializeAllData(socket)
 
   cron.schedule('* * * * *', async () => { // once a minute
-    const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'NEAR', 'AVAX', 'REF', 'WOO', 'BNB'] })
+    const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB'] })
     statsCache.update({ tokenTickers })
 
     await updateTotalMarketVolumeHistory()
@@ -53,7 +53,7 @@ function start(socket){
 }
 
 async function intializeAllData(socket) {
-  const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'NEAR', 'AVAX', 'REF', 'WOO', 'BNB'] })
+  const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB'] })
   statsCache.update({ tokenTickers })
 
   await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })

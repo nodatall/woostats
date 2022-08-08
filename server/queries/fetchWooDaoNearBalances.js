@@ -1,65 +1,72 @@
-
+const getTokenTickers = require('../queries/getTokenTickers')
 const { nearConnectionPromise, nearAPI } = require('../lib/near')
 const request = require('../lib/request')
 const logger = require('../lib/logger')
 const { addRewardsToProtocolBalance } = require('../lib/treasury')
+const { toReadableNumber } = require('../lib/utils')
 
-module.exports = async function fetchWooDaoNearBalances({ tokenTickers }) {
+module.exports = async function fetchWooDaoNearBalances() {
+  const tokenTickers = await getTokenTickers()
   const near = await nearConnectionPromise
 
   const refFinanceBalances = await getRefFinanceBalances({ near, tokenTickers })
+  const stakedNear = await getStakedNear({ near })
+  const tokenBalances = await getTokenBalances({ near, tokenTickers })
 
+  return {
+    tokenBalances,
+    stakedNear,
+    refFinanceBalances,
+  }
+}
+
+async function getTokenBalances({ near, tokenTickers }) {
   const nearInLockupResponse = await near.connection.provider.query({
     request_type: 'view_account',
     finality: 'final',
     account_id: 'dfe9b1d2bb90b89a47ce77d9703350b30b7fd051.lockup.near',
   })
-  const nearInLockupWallet = nearAPI.utils.format.formatNearAmount(nearInLockupResponse.amount, 2)
+  const nearInLockupWallet = toNumber(nearAPI.utils.format.formatNearAmount(nearInLockupResponse.amount, 2))
   const nearInWalletResponse = await near.connection.provider.query({
     request_type: 'view_account',
     finality: 'final',
     account_id: 'woodao.near',
   })
-  const nearInWallet = nearAPI.utils.format.formatNearAmount(nearInWalletResponse.amount, 2)
+  const nearInWallet = toNumber(nearAPI.utils.format.formatNearAmount(nearInWalletResponse.amount, 2))
+  const refAmount = await getTokenAmount(near, 'token.v2.ref-finance.near')
+  const wooAmount = await getTokenAmount(near, '4691937a7508860f876c9c0a2a617e7d9e945d4b.factory.bridge.near')
+  const wrappedNearAmount = await getTokenAmount(near, 'wrap.near')
+  const nearAmount = nearInWallet + nearInLockupWallet + wrappedNearAmount
 
-  const contractCallResponse = await near.connection.provider.query({
-    request_type: 'call_function',
-    finality: 'final',
-    account_id: 'astro-stakers.poolv1.near',
-    method_name: 'get_accounts',
-    args_base64: Buffer.from(
-      JSON.stringify({
-        from_index: 2500,
-        limit: 100,
-      })
-    ).toString("base64"),
-  })
-
-  const _tokens = decode(contractCallResponse.result)
-  const stakedNearBalance = _tokens
-    .find(({ account_id }) => account_id === 'dfe9b1d2bb90b89a47ce77d9703350b30b7fd051.lockup.near').staked_balance
-  const stakedNear = nearAPI.utils.format.formatNearAmount(stakedNearBalance, 2)
-
-  return {
-    near: toNumber(nearInWallet) + toNumber(nearInLockupWallet),
-    stakedNear: toNumber(stakedNear),
-    refFinanceBalances,
-  }
-}
-
-const toReadableNumber = (
-  decimals,
-  number = '0'
-) => {
-  if (!decimals) return number
-
-  const wholeStr = number.substring(0, number.length - decimals) || '0'
-  const fractionStr = number
-    .substring(number.length - decimals)
-    .padStart(decimals, '0')
-    .substring(0, decimals)
-
-  return +`${wholeStr}.${fractionStr}`.replace(/\.?0+$/, '')
+  return [
+    {
+      chain: 'near',
+      symbol: 'NEAR',
+      logoUrl: tokenTickers.NEAR.logoUrl,
+      amount: nearAmount,
+      value: nearAmount * tokenTickers.NEAR.price,
+      price: tokenTickers.NEAR.price,
+      chainLogoUrl: tokenTickers.NEAR.logoUrl,
+    },
+    {
+      chain: 'near',
+      symbol: 'REF',
+      logoUrl: tokenTickers.REF.logoUrl,
+      amount: refAmount,
+      value: refAmount * tokenTickers.REF.price,
+      price: tokenTickers.REF.price,
+      chainLogoUrl: tokenTickers.NEAR.logoUrl,
+    },
+    {
+      chain: 'near',
+      symbol: 'WOO',
+      logoUrl: tokenTickers.WOO.logoUrl,
+      amount: wooAmount,
+      value: wooAmount * tokenTickers.WOO.price,
+      price: tokenTickers.WOO.price,
+      chainLogoUrl: tokenTickers.NEAR.logoUrl,
+    },
+  ]
 }
 
 async function getRefFinanceBalances({ near, tokenTickers }) {
@@ -171,6 +178,45 @@ async function getRefFinanceBalances({ near, tokenTickers }) {
   }
 
   return protocolBalance
+}
+
+async function getStakedNear({ near }) {
+  const contractCallResponse = await near.connection.provider.query({
+    request_type: 'call_function',
+    finality: 'final',
+    account_id: 'astro-stakers.poolv1.near',
+    method_name: 'get_accounts',
+    args_base64: Buffer.from(
+      JSON.stringify({
+        from_index: 2500,
+        limit: 100,
+      })
+    ).toString("base64"),
+  })
+
+  const _tokens = decode(contractCallResponse.result)
+  const stakedNearBalance = _tokens
+    .find(({ account_id }) => account_id === 'dfe9b1d2bb90b89a47ce77d9703350b30b7fd051.lockup.near').staked_balance
+  return toNumber(nearAPI.utils.format.formatNearAmount(stakedNearBalance, 2))
+}
+
+async function getTokenAmount(near, accountId) {
+  const refTokenMetaData = await near.connection.provider.query({
+    request_type: 'call_function',
+    finality: 'final',
+    account_id: accountId,
+    method_name: 'ft_metadata',
+    args_base64: '',
+  })
+  const decimals = decode(refTokenMetaData.result).decimals
+  const refTokenResponse = await near.connection.provider.query({
+    request_type: 'call_function',
+    finality: 'final',
+    account_id: accountId,
+    method_name: 'ft_balance_of',
+    args_base64: Buffer.from(JSON.stringify({ account_id: 'woodao.near' })).toString('base64'),
+  })
+  return toReadableNumber(decimals, decode(refTokenResponse.result))
 }
 
 function toNumber(numberString) {
