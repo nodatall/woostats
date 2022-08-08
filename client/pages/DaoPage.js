@@ -168,7 +168,7 @@ function WalletBalances({ tokens }) {
 
   const tokenList = tokens.map(token => {
     walletBalance += token.value
-    return <TokenRow {...{ token, key: token.symbol }} />
+    return <TokenRow {...{ token, key: token.symbol + (token.chainLogoUrl || '') }} />
   })
 
   return <ContentCard sx={{ p: 2 }}>
