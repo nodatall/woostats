@@ -2,3 +2,4 @@ node_modules
 client/dist
 error.log
 .env
+scripts/importRemoteDb

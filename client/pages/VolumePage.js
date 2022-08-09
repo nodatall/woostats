@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react'
-import dayjs from 'dayjs'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
+import dayjs from 'lib/dayjs'
 import isEqual from 'lodash/isEqual'
 import { SMA } from 'technicalindicators'
 import numeral from 'numeral'
@@ -170,16 +170,33 @@ function AggregateNetworkVolumeBox() {
     </Stack>
   </ContentCard>
 }
-const reduceArrayToRange = (arr, range) => arr.slice(range[0], range[1])
+const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
 
 const VolumeChart = React.memo(function ({
   title, labels, datasets, denominator = '$', subtitle,
 }) {
   const isMA = title.includes('MA')
-  const defaultRange = [0, labels.length - 1]
-  const [range = defaultRange, setRange] = useLocalStorage(`${title.replace(/ /g, '')}RangeSlider`)
+  const defaultRange = [1, labels.length]
+  const [range = defaultRange, _setRange] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSlider`)
+  const [lastRangeDate = dayjs(), setLastRangeDate] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSliderLastDate`)
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
+  const setRange = val => {
+    _setRange(val)
+    setLastRangeDate(dayjs())
+  }
+
+  useEffect(
+    () => {
+      const today = dayjs()
+      const daysAgo = today.diff(lastRangeDate, 'day')
+      if (daysAgo > 0 && labels.length - range[1] === daysAgo) {
+        setRange([range[0], range[1] + daysAgo])
+        setLastRangeDate(dayjs())
+      }
+    },
+    []
+  )
 
   datasets = datasets.map(dataset => {
     return {
@@ -220,14 +237,13 @@ const VolumeChart = React.memo(function ({
 function RangeSlider({ range, labels, setRange }) {
   const theme = useTheme()
   function valueLabelFormat(index) {
-    if (labels[index] === undefined) return labels[labels.length - 1]
-    return labels[index]
+    return labels[index - 1]
   }
 
   return <Slider
     name="slider"
     value={range}
-    min={0}
+    min={1}
     size="small"
     valueLabelFormat={valueLabelFormat}
     valueLabelDisplay="auto"
