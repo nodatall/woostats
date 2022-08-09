@@ -171,6 +171,7 @@ function AggregateNetworkVolumeBox() {
   </ContentCard>
 }
 const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
+let rangeSetTimeout
 
 const VolumeChart = React.memo(function ({
   title, labels, datasets, denominator = '$', subtitle,
@@ -181,9 +182,13 @@ const VolumeChart = React.memo(function ({
   const [lastRangeDate = dayjs(), setLastRangeDate] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSliderLastDate`)
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
+
   const setRange = val => {
     _setRange(val)
-    setLastRangeDate(dayjs())
+    clearTimeout(rangeSetTimeout)
+    rangeSetTimeout = setTimeout(() => {
+      setLastRangeDate(dayjs())
+    }, 500)
   }
 
   useEffect(
