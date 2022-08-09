@@ -210,7 +210,7 @@ const VolumeChart = React.memo(function ({
     }
   })
 
-  return <ContentCard sx={{ p: 2 }} ref={containerRef}>
+  return <ContentCard sx={{ p: 2 }} >
     <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, minHeight: '50px'}}>
       <Stack>
         <Typography variant="h6" sx={{ textAlign: 'right' }}>
@@ -220,15 +220,17 @@ const VolumeChart = React.memo(function ({
       </Stack>
       {tooltip && <Tooltip {...{tooltip, denominator}} />}
     </Stack>
-    <LineChart {...{
-      labels: isMA ? labels : reduceArrayToRange(labels, range),
-      datasets,
-      tooltip,
-      setTooltip,
-      parentRef: containerRef,
-      denominator,
-    }}
-    />
+    <Box ref={containerRef}>
+      <LineChart {...{
+        labels: isMA ? labels : reduceArrayToRange(labels, range),
+        datasets,
+        tooltip,
+        setTooltip,
+        parentRef: containerRef,
+        denominator,
+      }}
+      />
+    </Box>
     {!isMA && <RangeSlider {...{ range, labels, setRange }} />}
   </ContentCard>
 }, function(prevProps, nextProps) {
