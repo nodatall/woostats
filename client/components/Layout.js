@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 
 import Container from "@mui/material/Container"
 import Box from "@mui/material/Box"
@@ -6,6 +6,8 @@ import Stack from "@mui/material/Stack"
 import GitHubIcon from '@mui/icons-material/GitHub'
 import TwitterIcon from '@mui/icons-material/Twitter'
 import Typography from '@mui/material/Typography'
+import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp'
+import Fade from '@mui/material/Fade'
 
 import TopNav from "./TopNav"
 
@@ -32,13 +34,13 @@ export default function Layout({ children }) {
         sx: containerStyles,
       }}
       >
+        <ScrollUpArrow />
         <Box>{children}</Box>
         <Footer />
       </Container>
     </Box>
   )
 }
-
 
 function Footer() {
   return <Stack>
@@ -70,4 +72,40 @@ function Footer() {
       Unofficial community site for the WOO Network & DAO
     </ Typography>
   </Stack>
+}
+
+function ScrollUpArrow() {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 1500) setVisible(true)
+      else setVisible(false)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  return <Fade in={visible}>
+    <ArrowCircleUpIcon
+      onClick={() => {
+        window.scrollTo({ top: 0 })
+      }}
+      sx={{
+        width: '2.5em',
+        height: '2.5em',
+        position: 'fixed',
+        bottom: '15px',
+        right: '15px',
+        color: 'rgb(255, 255, 255, .1)',
+        transition: 'opacity 350ms',
+        ':hover': {
+          color: 'rgb(255, 255, 255, .5)',
+          cursor: 'pointer',
+        },
+      }}
+    />
+  </Fade>
 }
