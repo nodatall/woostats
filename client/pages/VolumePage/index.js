@@ -1,26 +1,24 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import dayjs from 'lib/dayjs'
 import isEqual from 'lodash/isEqual'
 import { SMA } from 'technicalindicators'
-import numeral from 'numeral'
 
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
-import { useTheme } from '@mui/material/styles'
 import { lineColors } from 'lib/chart'
 
+import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
-import ButtonGroup from '@mui/material/ButtonGroup'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import Slider from '@mui/material/Slider'
 
 import Loading from 'components/Loading'
 import LineChart from 'components/LineChart'
-import TextWithCaption from 'components/TextWithCaption'
 import ContentCard from 'components/ContentCard'
+import RangeSlider from './RangeSlider'
+import ButtonGroupWithSubtitle from './ButtonGroupWithSubtitle'
+import Tooltip from './Tooltip'
+import AggregateNetworkVolumeBox from './AggregateNetworkVolumeBox'
 
 export default function VolumePage() {
   const {
@@ -30,6 +28,7 @@ export default function VolumePage() {
   } = useAppState(
     ['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume']
   )
+  const theme = useTheme()
 
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
@@ -76,14 +75,16 @@ export default function VolumePage() {
       }
     )
 
-  const charts = [
+  let charts = []
+  let tempCharts = []
+  ;[
     { title: 'Daily WOO Network volume' },
     { title: 'Daily Network volume [day] day MA', datasets: [wooVolumeSeries] },
     { title: 'WOO Network % of total market volume', datasets: [percentSeries] },
     { title: 'WOO Network % of total [day] day MA', datasets: [percentSeries] },
     { title: 'Total crypto market volume', datasets: [aggregateVolumeSeries] },
     { title: 'Total market volume [day] day MA', datasets: [aggregateVolumeSeries] },
-  ].map(({ title, datasets },) => {
+  ].forEach(({ title, datasets },) => {
     if (datasets) datasets = datasets.map(dataset => ({ data: dataset }))
     const props = {
       title,
@@ -92,11 +93,41 @@ export default function VolumePage() {
       datasets,
     }
 
+    let chart
     if (title.includes('%')) props.denominator = '%'
-    if (title.includes('MA')) return <MAChart {...props} />
-    if (title === 'Daily WOO Network volume')
-      return <DailyVolumeChart {...{ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }} />
-    return <VolumeChart {...props} />
+    if (title.includes('MA')) chart = <MAChart {...props} />
+    else {
+      chart = title === 'Daily WOO Network volume'
+        ? <DailyVolumeChart {...{ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }} />
+        : <VolumeChart {...props} />
+    }
+    tempCharts.push(chart)
+
+    if (tempCharts.length === 2) {
+      charts.push(
+        <Stack {...{
+          sx: {
+            flexDirection: 'row',
+            [theme.breakpoints.down('lg')]: {
+              flexDirection: 'column',
+            },
+            '> *': {
+              flexBasis: '50%',
+              '&:first-of-type': {
+                mr: 4,
+                [theme.breakpoints.down('lg')]: {
+                  mr: 0
+                },
+              },
+            },
+          },
+          key: title,
+        }}>
+          {tempCharts}
+        </Stack>
+      )
+      tempCharts = []
+    }
   })
 
   return <Box>
@@ -105,71 +136,6 @@ export default function VolumePage() {
   </Box>
 }
 
-function AggregateNetworkVolumeBox() {
-  const {
-    wooSpotVolumeToday,
-    wooFuturesVolumeToday,
-  } = useAppState(
-    ['wooSpotVolumeToday', 'wooFuturesVolumeToday']
-  )
-  const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
-  const spotAndFuturesElements = ['Spot', 'Futures'].map(category => {
-    const topStackStyle = theme => ({
-      ...stackBaseStyle,
-      mr: category === 'Spot' ? 2 : 0,
-      [theme.breakpoints.down('xs')]: {
-        mr: 0,
-      }
-    })
-    return <Stack sx={topStackStyle} key={category}>
-      <Typography variant="h6" sx={{ textAlign: 'right' }}>
-        {category}
-      </Typography>
-      <Typography variant="h6" sx={{ color: 'primary.main', ml: 2 }}>
-        ${numeral(category === 'Spot' ? wooSpotVolumeToday : wooFuturesVolumeToday).format('0,0')}
-      </Typography>
-    </Stack>
-  })
-
-  const spotAndFuturesStackStyle = theme => ({
-    ...stackBaseStyle,
-    flexWrap: 'wrap',
-    [theme.breakpoints.down('xs')]: {
-      flexDirection: 'column',
-    }
-  })
-  const aggregateVolumeStyle = theme => ({
-    color: 'secondary.main',
-    mr: 2,
-    [theme.breakpoints.down('xs')]: {
-      mr: 0,
-      mt: 1,
-    }
-  })
-  const aggregateVolumeStackStyle = theme => ({
-    ...stackBaseStyle,
-    [theme.breakpoints.down('xs')]: {
-      flexDirection: 'column-reverse',
-    }
-  })
-
-  return <ContentCard>
-    <Stack sx={{ alignItems: 'center' }}>
-      <Stack sx={aggregateVolumeStackStyle}>
-        <Typography variant="h4" sx={aggregateVolumeStyle}>
-          ${numeral(+wooSpotVolumeToday + +wooFuturesVolumeToday).format('0,0')}
-        </Typography>
-        <Typography variant="h5" sx={{ textAlign: 'right' }}>
-          24hr Network Volume
-        </Typography>
-      </Stack>
-      <Divider textAlign="center" sx={{ width: '260px', my: 3 }} />
-      <Stack sx={spotAndFuturesStackStyle}>
-        {spotAndFuturesElements}
-      </Stack>
-    </Stack>
-  </ContentCard>
-}
 const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
 let rangeSetTimeout
 
@@ -241,41 +207,6 @@ const VolumeChart = React.memo(function ({
   return true
 })
 
-function RangeSlider({ range, labels, setRange }) {
-  const theme = useTheme()
-  function valueLabelFormat(index) {
-    return labels[index - 1]
-  }
-
-  return <Slider
-    name="slider"
-    value={range}
-    min={1}
-    size="small"
-    valueLabelFormat={valueLabelFormat}
-    valueLabelDisplay="auto"
-    max={labels.length}
-    onChange={(_, val) => {
-      setRange(val)
-    }}
-    step={range[1] - range[0] < 50 ? 1 : 2}
-    sx={{
-      maxWidth: 'calc(100% - 45px)',
-      display: 'flex',
-      margin: 'auto',
-      color: '#73bef445',
-      '& .MuiSlider-valueLabel': {
-        borderRadius: '4px',
-        background: theme.palette.primary.main,
-        color: theme.palette.background.default,
-      },
-      '& .MuiSlider-thumb': {
-        background: '#456e8c',
-      },
-    }}
-  />
-}
-
 function MAChart({ ...props }) {
   const [maLength = 50, setMaLength] = useLocalStorage('maLength')
 
@@ -283,7 +214,7 @@ function MAChart({ ...props }) {
   props.labels = props.labels.slice(maLength - 1)
   props.title = props.title.replace('[day]', maLength)
 
-  props.subtitle = <ButtonGroupSubtitle {...{
+  props.subtitle = <ButtonGroupWithSubtitle {...{
     values: [25, 50, 100],
     current: maLength,
     setCurrent: setMaLength,
@@ -305,7 +236,7 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
     ]
     props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length))
   }
-  props.subtitle = <ButtonGroupSubtitle {...{
+  props.subtitle = <ButtonGroupWithSubtitle {...{
     values: [
       1,
       0,
@@ -323,74 +254,4 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
   }}/>
 
   return <VolumeChart {...props} />
-}
-
-function ButtonGroupSubtitle({ values, valueElements, current, setCurrent }) {
-  const buttons = values.map((val) => {
-    const onClick = useCallback(() => {
-      setCurrent(val)
-    }, [setCurrent])
-
-    const styles = useCallback(theme => {
-      const _styles = {}
-      if (current === val) _styles.color = `${theme.palette.secondary.main}`
-      return _styles
-    }, [current, val])
-
-    const props = {
-      onClick,
-      key: val,
-      sx: styles,
-    }
-    if (current === val) props.sx.border = '1px solid secondary.main'
-    const valueElement = valueElements ? valueElements[val] : val
-
-    return <Button {...props}>{valueElement}</Button>
-  })
-
-  return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
-    {buttons}
-  </ButtonGroup>
-}
-
-function Tooltip({ tooltip, denominator = '$' }) {
-  if (!tooltip.title) return null
-
-  function addDemoninator(value, denominator) {
-    return denominator === '%'
-      ? `${value}${denominator}`
-      : `${denominator}${value}`
-  }
-
-  const body = tooltip.body
-  let text = !Array.isArray(body)
-    ? addDemoninator(body, denominator)
-    : body.map((value, index) =>
-      <Typography variant="h6" key={value} sx={{ color: lineColors[index] }}>
-        {addDemoninator(value, denominator)}
-      </Typography>
-    )
-  if (Array.isArray(text)) text.reverse()
-
-  denominator === '%'
-    ? `${tooltip.body}${denominator}`
-    : `${denominator}${tooltip.body}`
-
-  const styles = theme => ({
-    mr: 'auto',
-    [theme.breakpoints.down('sm')]: {
-      mr: '0',
-      textAlign: 'right',
-      width: '100%',
-      pt: 2,
-    }
-  })
-
-  return <TextWithCaption
-    {...{
-      caption: dayjs(tooltip.title).format('MMM D, YYYY'),
-      text,
-      sx: styles,
-    }}
-  />
 }

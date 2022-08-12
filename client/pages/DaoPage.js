@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
 import Divider from '@mui/material/Divider'
 import '../assets/c-bridge.png'
+import { useTheme } from '@mui/material/styles'
 
 import { useAppState } from 'lib/appState'
 
@@ -14,11 +15,12 @@ import ContentCard from 'components/ContentCard'
 
 export default function DaoPage(){
   const { wooDaoTreasuryBalance } = useAppState(['wooDaoTreasuryBalance'])
+  const theme = useTheme()
 
   if (!wooDaoTreasuryBalance || wooDaoTreasuryBalance.length === 0) return <Loading />
 
   const latestTreasuryBalance = wooDaoTreasuryBalance[wooDaoTreasuryBalance.length - 1]
-  return <Box>
+  return <Box sx={{ maxWidth: theme.breakpoints.values.lg, margin: 'auto' }}>
     <TotalValueBox {...{ totalValue: latestTreasuryBalance.totalValue }} />
     <WalletBalances {...{ tokens: latestTreasuryBalance.tokens }} />
     <ProtocolBalances {...{ inProtocols: latestTreasuryBalance.inProtocols }} />

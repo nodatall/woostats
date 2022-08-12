@@ -30,7 +30,7 @@ export default function Layout({ children }) {
     <Box sx={{ backgroundColor: 'background.default' }}>
       <TopNav />
       <Container {...{
-        maxWidth: 'lg',
+        maxWidth: 'xxl',
         sx: containerStyles,
       }}
       >
