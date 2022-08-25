@@ -17,6 +17,8 @@ COINGECKO_API_KEY=<get from coingecko.com>
 NOMICS_API_KEY=<get from nomics.com>
 ETHERSCAN_API_KEY=<get from etherscan.com>
 DEBANK_API_KEY=<open.debank.com>
+TWILIO_ACCOUNT_SID=<twilio.com>
+TWILIO_AUTH_TOKEN=<twilio.com>
 ```
 
 ### Database

@@ -4,21 +4,24 @@ const updateTokenTickers = require('./commands/updateTokenTickers')
 const updateTotalMarketVolumeHistory = require('./commands/updateTotalMarketVolumeHistory')
 const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHistory')
 const updateWooTokenBurns = require('./commands/updateWooTokenBurns')
-const updateWooDaoTreasuryBalance = require('./commands/updateWooDaoTreasuryBalance')
+const updateWooDaoTreasury = require('./commands/updateWooDaoTreasury')
 const getExchangeVolume = require('./queries/getExchangeVolume')
 const getWooTokenBurns = require('./queries/getWooTokenBurns')
 const getWooDaoTreasuryBalance = require('./queries/getWooDaoTreasuryBalance')
 const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHistory')
 
+const TOKENS = [
+  'BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB', 'ETH',
+]
+
 function start(socket){
   if (process.env.INITIALIZE_ALL) intializeAllData(socket)
 
   cron.schedule('* * * * *', async () => { // once a minute
-    const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB'] })
+    const tokenTickers = await updateTokenTickers({ tokens: TOKENS })
     statsCache.update({ tokenTickers })
 
     await updateTotalMarketVolumeHistory()
-
     const aggregateVolume = await getTotalMarketVolumeHistory()
     const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
@@ -35,7 +38,7 @@ function start(socket){
   })
 
   cron.schedule('*/5 * * * *', async () => { // every 5 minutes
-    await updateWooDaoTreasuryBalance()
+    await updateWooDaoTreasury()
     const wooDaoTreasuryBalance = await getWooDaoTreasuryBalance()
     statsCache.update({ wooDaoTreasuryBalance })
     socket.emit('send', { wooDaoTreasuryBalance })
@@ -53,7 +56,7 @@ function start(socket){
 }
 
 async function intializeAllData(socket) {
-  const tokenTickers = await updateTokenTickers({ tokens: ['BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB'] })
+  const tokenTickers = await updateTokenTickers({ tokens: TOKENS })
   statsCache.update({ tokenTickers })
 
   await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })

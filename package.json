@@ -65,6 +65,7 @@
     "socket.io": "^4.4.0",
     "socket.io-client": "^4.4.0",
     "technicalindicators": "^3.1.0",
+    "twilio": "^3.80.1",
     "web3": "^1.7.1",
     "webpack": "^4.29.6",
     "winston": "^3.5.0",

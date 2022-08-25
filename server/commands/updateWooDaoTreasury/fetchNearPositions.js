@@ -1,23 +1,43 @@
-const getTokenTickers = require('../queries/getTokenTickers')
-const { nearConnectionPromise, nearAPI } = require('../lib/near')
-const request = require('../lib/request')
-const logger = require('../lib/logger')
-const { addRewardsToProtocolBalance } = require('../lib/treasury')
-const { toReadableNumber } = require('../lib/utils')
+const getTokenTickers = require('../../queries/getTokenTickers')
+const { nearConnectionPromise, nearAPI } = require('../../lib/near')
+const request = require('../../lib/request')
+const logger = require('../../lib/logger')
+const { addRewardsToProtocolBalance } = require('../../lib/treasury')
+const { toReadableNumber } = require('../../lib/utils')
+const updatePositions = require('./updatePositions')
 
-module.exports = async function fetchWooDaoNearBalances() {
-  const tokenTickers = await getTokenTickers()
-  const near = await nearConnectionPromise
+module.exports = async function fetchNearPositions() {
+  const fetchUpdate = async () => {
+    const tokenTickers = await getTokenTickers()
+    const near = await nearConnectionPromise
 
-  const refFinanceBalances = await getRefFinanceBalances({ near, tokenTickers })
-  const stakedNear = await getStakedNear({ near })
-  const tokenBalances = await getTokenBalances({ near, tokenTickers })
+    const refFinanceBalances = await getRefFinanceBalances({ near, tokenTickers })
+    const stakedNear = await getStakedNear({ near })
+    const tokenBalances = await getTokenBalances({ near, tokenTickers })
 
-  return {
-    tokenBalances,
-    stakedNear,
-    refFinanceBalances,
+    return {
+      protocolBalances: [
+        {
+          type: 'staking',
+          name: 'Staked NEAR',
+          logoUrl: tokenTickers.NEAR.logoUrl,
+          amount: stakedNear,
+          value: tokenTickers.NEAR.price * stakedNear,
+          price: tokenTickers.NEAR.price,
+          symbol: 'NEAR',
+        },
+        refFinanceBalances,
+      ],
+      tokens: tokenBalances,
+    }
   }
+
+  await updatePositions({
+    callerName: 'fetchNearPositions',
+    protocolNames: ['Staked NEAR', 'Ref Finance'],
+    tokens: [['NEAR', 'near'], ['REF', 'near'], ['WOO', 'near']],
+    fetchUpdate,
+  })
 }
 
 async function getTokenBalances({ near, tokenTickers }) {
@@ -38,6 +58,7 @@ async function getTokenBalances({ near, tokenTickers }) {
   const wrappedNearAmount = await getTokenAmount(near, 'wrap.near')
   const nearAmount = nearInWallet + nearInLockupWallet + wrappedNearAmount
 
+  const chainLogoUrl = tokenTickers.NEAR.logoUrl
   return [
     {
       chain: 'near',
@@ -46,7 +67,7 @@ async function getTokenBalances({ near, tokenTickers }) {
       amount: nearAmount,
       value: nearAmount * tokenTickers.NEAR.price,
       price: tokenTickers.NEAR.price,
-      chainLogoUrl: tokenTickers.NEAR.logoUrl,
+      chainLogoUrl,
     },
     {
       chain: 'near',
@@ -55,7 +76,7 @@ async function getTokenBalances({ near, tokenTickers }) {
       amount: refAmount,
       value: refAmount * tokenTickers.REF.price,
       price: tokenTickers.REF.price,
-      chainLogoUrl: tokenTickers.NEAR.logoUrl,
+      chainLogoUrl,
     },
     {
       chain: 'near',
@@ -64,7 +85,7 @@ async function getTokenBalances({ near, tokenTickers }) {
       amount: wooAmount,
       value: wooAmount * tokenTickers.WOO.price,
       price: tokenTickers.WOO.price,
-      chainLogoUrl: tokenTickers.NEAR.logoUrl,
+      chainLogoUrl,
     },
   ]
 }
