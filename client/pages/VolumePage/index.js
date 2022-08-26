@@ -145,7 +145,9 @@ const VolumeChart = React.memo(function ({
   const isMA = title.includes('MA')
   const defaultRange = [1, labels.length]
   const [range = defaultRange, _setRange] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSlider`)
-  const [lastRangeDate = dayjs(), setLastRangeDate] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSliderLastDate`)
+  const [
+    lastRangeDate = dayjs().format('YYYY-MM-DD'), setLastRangeDate
+  ] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSliderLastDate`)
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
@@ -153,20 +155,20 @@ const VolumeChart = React.memo(function ({
     _setRange(val)
     clearTimeout(rangeSetTimeout)
     rangeSetTimeout = setTimeout(() => {
-      setLastRangeDate(dayjs())
+      setLastRangeDate(dayjs().format('YYYY-MM-DD'))
     }, 500)
   }
 
   useEffect(
     () => {
-      const today = dayjs()
+      const today = dayjs(dayjs().format('YYYY-MM-DD'))
       const daysAgo = today.diff(lastRangeDate, 'day')
       if (daysAgo > 0 && labels.length - range[1] === daysAgo) {
         setRange([range[0], range[1] + daysAgo])
-        setLastRangeDate(dayjs())
+        setLastRangeDate(dayjs().format('YYYY-MM-DD'))
       }
     },
-    []
+    [title]
   )
 
   datasets = datasets.map(dataset => {
