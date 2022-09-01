@@ -8,16 +8,19 @@ const getTokenTickers = require('../../queries/getTokenTickers')
 const client = require('../../database')
 const insertIntoTreasuryTable = require('./insertToTreasuryTable')
 
+const errorCounts = {}
 module.exports = async function updatePositions({ callerName, protocolNames = [], fetchUpdate, tokens = [] }) {
   const tokenTickers = await getTokenTickers()
   try {
     const update = await fetchUpdate()
     await insertIntoTreasuryTable(update)
+    delete errorCounts[callerName]
   } catch(error) {
-    if (process.env.NODE_ENV === 'production') {
+    errorCounts[callerName] = errorCounts[callerName] ? errorCounts[callerName] + 1 : 1
+    if (errorCounts[callerName] % 10 === 0) {
       twillioClient.messages
         .create({
-          body: `${callerName}: ${error.message.slice(0, 130)}`,
+          body: `${callerName} ${errorCounts[callerName] * 5}: ${error.message.slice(0, 130)}`,
           from: process.env.FROM_PHONE,
           to: process.env.TO_PHONE
         })
