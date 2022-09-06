@@ -220,7 +220,7 @@ function TokenRow({ token }) {
       </Stack>
       <Typography variant="body1" sx={{ ml: 1 }}>{token.symbol}</Typography>
     </Stack>
-    <Typography variant="body2" sx={priceStyles}>${numeral(token.price.toFixed(2)).format('0,0.00')}</Typography>
+    <Typography variant="body2" sx={priceStyles}>${numeral(token.price.toFixed(3)).format('0,0.000')}</Typography>
     <Typography variant="body2">{numeral(token.amount).format('0,0.00')}</Typography>
     <Typography variant="body2" sx={{ textAlign: 'right' }}>${numeral(token.value).format('0,0')}</Typography>
   </Stack>

@@ -7,7 +7,7 @@ const chainLogos = require('../../lib/chainLogos')
 const updatePositions = require('./updatePositions')
 
 module.exports = async function fetchTokensAndPositionsFromDebank() {
-  const fetchUpdate = async () => {
+  const fetchTokensUpdate = async () => {
     const wooBNBAddress = '0xfd899C7c5ED84537e2Acfc998ce26C3797654AE8'
     const wooAvaxDeployer = '0x3aB48821D50137c31Ac1961c5AD496E4977ec4CF'
     const bnbTokenBalances = await fetchEVMChainTokenBalancesForAddress({ address: wooBNBAddress, chainId: 'bsc' })
@@ -20,25 +20,33 @@ module.exports = async function fetchTokensAndPositionsFromDebank() {
         address: wooAvaxDeployer, chainId: 'avax',
       })
     ]
+    const tokenTickers = await getTokenTickers()
+    const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, bnbTokenBalances, tokenTickers })
 
+    return { tokens: tokenBalances }
+  }
+
+  await updatePositions({
+    callerName: 'fetchTokenFromDebank',
+    fetchUpdate: fetchTokensUpdate,
+  })
+
+  const fetchPositionsUpdate = async () => {
     const uniswapBalance = await fetchEVMChainProtocolBalanceForAddress({
       address: WOO_DAO_ETH_ADDRESS, chainId: 'eth', protocol: 'uniswap3',
     })
-
     const tokenTickers = await getTokenTickers()
-    const tokenBalances = getTokenBalances({ ethTokenBalances, avalancheTokenBalances, bnbTokenBalances, tokenTickers })
     const protocolBalances = await getProtocolBalances({ uniswapBalance, tokenTickers })
 
     return {
-      tokens: tokenBalances,
       protocolBalances,
     }
   }
 
   await updatePositions({
-    callerName: 'fetchThetanutzPositions',
+    callerName: 'fetchPositionsFromDebank',
     protocolNames: ['Uniswap V3'],
-    fetchUpdate,
+    fetchUpdate: fetchPositionsUpdate,
   })
 }
 
