@@ -48,13 +48,12 @@ module.exports = async function fetchTokensAndPositionsFromDebank() {
     }
   }
 
-  if (dayjs().minute() < 5) {
-    await updatePositions({
-      callerName: 'fetchPositionsFromDebank',
-      protocolNames: ['Uniswap V3', 'Biswap'],
-      fetchUpdate: fetchPositionsUpdate,
-    })
-  }
+  await updatePositions({
+    callerName: 'fetchPositionsFromDebank',
+    protocolNames: ['Uniswap V3', 'Biswap'],
+    fetchUpdate: fetchPositionsUpdate,
+    updateExisting: dayjs().minute() > 4,
+  })
 }
 
 function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, bnbTokenBalances, tokenTickers }) {

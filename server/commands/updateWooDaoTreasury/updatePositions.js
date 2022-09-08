@@ -9,8 +9,15 @@ const client = require('../../database')
 const insertIntoTreasuryTable = require('./insertToTreasuryTable')
 
 const errorCounts = {}
-module.exports = async function updatePositions({ callerName, protocolNames = [], fetchUpdate, tokens = [] }) {
+module.exports = async function updatePositions({
+  callerName, protocolNames = [], fetchUpdate, tokens = [], updateExisting = false
+}) {
   const tokenTickers = await getTokenTickers()
+  if (updateExisting) {
+    await updateFromExistingProtols({ tokenTickers, protocolNames, tokens })
+    return
+  }
+
   try {
     const update = await fetchUpdate()
     await insertIntoTreasuryTable(update)
@@ -26,15 +33,18 @@ module.exports = async function updatePositions({ callerName, protocolNames = []
         })
     }
     logger.log('error', error)
-
-    const treasuryBalances = await client.query(
-      `SELECT date, in_protocols, tokens FROM treasury_balances ORDER BY date DESC;`
-    )
-    const protocolBalances = getUpdatedProtocolBalances({ tokenTickers, protocolNames, treasuryBalances })
-    const updatedTokens = getUpdatedTokenBalances({ tokenTickers, tokens, treasuryBalances })
-
-    await insertIntoTreasuryTable({ protocolBalances, tokens: updatedTokens })
+    await updateFromExistingProtols({ tokenTickers, protocolNames, tokens })
   }
+}
+
+async function updateFromExistingProtols({ tokenTickers, protocolNames, tokens }) {
+  const treasuryBalances = await client.query(
+    `SELECT date, in_protocols, tokens FROM treasury_balances ORDER BY date DESC;`
+  )
+  const protocolBalances = getUpdatedProtocolBalances({ tokenTickers, protocolNames, treasuryBalances })
+  const updatedTokens = getUpdatedTokenBalances({ tokenTickers, tokens, treasuryBalances })
+
+  await insertIntoTreasuryTable({ protocolBalances, tokens: updatedTokens })
 }
 
 function getUpdatedTokenBalances({ tokenTickers, tokens, treasuryBalances }) {
@@ -70,7 +80,7 @@ function getUpdatedProtocolBalances({ tokenTickers, protocolNames, treasuryBalan
     })
     if (
       recentPositions.length > 0 &&
-      protocolNames.every(name => recentPositions.find(position => position.name === name))
+      protocolNames.some(name => recentPositions.find(position => position.name === name))
     ) {
       mostRecentPositions = recentPositions
       return true
