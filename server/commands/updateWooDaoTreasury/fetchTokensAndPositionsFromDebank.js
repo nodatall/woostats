@@ -4,11 +4,13 @@ const getTokenTickers = require('../../queries/getTokenTickers')
 const { WOO_DAO_ETH_ADDRESS } = require('../../lib/treasury')
 const { addRewardsToProtocolBalance } = require('../../lib/treasury')
 const chainLogos = require('../../lib/chainLogos')
+const dayjs = require('../../lib/dayjs')
 const updatePositions = require('./updatePositions')
 
 module.exports = async function fetchTokensAndPositionsFromDebank() {
+  const wooBNBAddress = '0xfd899C7c5ED84537e2Acfc998ce26C3797654AE8'
+
   const fetchTokensUpdate = async () => {
-    const wooBNBAddress = '0xfd899C7c5ED84537e2Acfc998ce26C3797654AE8'
     const wooAvaxDeployer = '0x3aB48821D50137c31Ac1961c5AD496E4977ec4CF'
     const bnbTokenBalances = await fetchEVMChainTokenBalancesForAddress({ address: wooBNBAddress, chainId: 'bsc' })
     const ethTokenBalances = await fetchEVMChainTokenBalancesForAddress({ address: WOO_DAO_ETH_ADDRESS, chainId: 'eth' })
@@ -35,19 +37,24 @@ module.exports = async function fetchTokensAndPositionsFromDebank() {
     const uniswapBalance = await fetchEVMChainProtocolBalanceForAddress({
       address: WOO_DAO_ETH_ADDRESS, chainId: 'eth', protocol: 'uniswap3',
     })
+    const biswapBalance = await fetchEVMChainProtocolBalanceForAddress({
+      address: wooBNBAddress, chainId: 'bsc', protocol: 'bsc_biswap',
+    })
     const tokenTickers = await getTokenTickers()
-    const protocolBalances = await getProtocolBalances({ uniswapBalance, tokenTickers })
+    const protocolBalances = await getProtocolBalances({ uniswapBalance, tokenTickers, biswapBalance })
 
     return {
       protocolBalances,
     }
   }
 
-  await updatePositions({
-    callerName: 'fetchPositionsFromDebank',
-    protocolNames: ['Uniswap V3'],
-    fetchUpdate: fetchPositionsUpdate,
-  })
+  if (dayjs().minute < 5) {
+    await updatePositions({
+      callerName: 'fetchPositionsFromDebank',
+      protocolNames: ['Uniswap V3', 'Biswap'],
+      fetchUpdate: fetchPositionsUpdate,
+    })
+  }
 }
 
 function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, bnbTokenBalances, tokenTickers }) {
@@ -75,10 +82,10 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, bnbTokenBa
   return tokenBalances.sort((a, b) => b.value - a.value)
 }
 
-async function getProtocolBalances({ uniswapBalance, tokenTickers }) {
+async function getProtocolBalances({ uniswapBalance, biswapBalance, tokenTickers }) {
   const protocolBalances = []
 
-  ;[uniswapBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
+  ;[uniswapBalance, biswapBalance].forEach(({ name, chain, site_url, logo_url, portfolio_item_list }) => {
     const protocolBalance = {
       name,
       chain,
