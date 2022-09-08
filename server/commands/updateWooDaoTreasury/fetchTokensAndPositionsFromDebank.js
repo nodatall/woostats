@@ -48,7 +48,7 @@ module.exports = async function fetchTokensAndPositionsFromDebank() {
     }
   }
 
-  if (dayjs().minute < 5) {
+  if (dayjs().minute() < 5) {
     await updatePositions({
       callerName: 'fetchPositionsFromDebank',
       protocolNames: ['Uniswap V3', 'Biswap'],
