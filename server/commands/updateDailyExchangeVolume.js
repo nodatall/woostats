@@ -1,7 +1,7 @@
 const knex = require('../database/knex')
-const client = require('../database')
+const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
-const statsCache = require('../lib/statsCache')
+const memoryCache = require('../lib/memoryCache')
 const fetchDailyExchangeStats = require('../queries/fetchDailyExchangeStats')
 const fetch24hrWooFuturesVolume = require('../queries/fetch24hrWooFuturesVolume')
 
@@ -13,7 +13,7 @@ module.exports = async function updateDailyExchangeVolume({ exchangeId, volume }
       const exchangeStatsToday = await fetchDailyExchangeStats({ exchangeId })
       if (!exchangeStatsToday) return
 
-      const { tokenTickers = {} } = await statsCache.get()
+      const { tokenTickers = {} } = await memoryCache.get()
       if (!tokenTickers.BTC) return
 
       volume = exchangeStatsToday.trade_volume_24h_btc * tokenTickers.BTC.price
@@ -21,7 +21,7 @@ module.exports = async function updateDailyExchangeVolume({ exchangeId, volume }
   }
 
   const update = [{
-    date: dayjs.tz().format('YYYY-MM-DD'),
+    date: dayjs.utc().format('YYYY-MM-DD'),
     volume: Math.round(volume),
     exchange: exchangeId,
   }]

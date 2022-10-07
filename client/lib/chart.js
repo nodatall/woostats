@@ -1,4 +1,4 @@
-import 'chartjs-adapter-moment'
+import 'chartjs-adapter-date-fns'
 import {
   Chart as ChartJS,
   LineElement,

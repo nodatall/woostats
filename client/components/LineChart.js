@@ -3,9 +3,10 @@ import { Line } from 'react-chartjs-2'
 import numeral from 'numeral'
 
 import { lineColors } from 'lib/chart'
+let tooltipDebounce
 
 export default function LineChart({
-  labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef, denominator = '',
+  labels, datasets, options = {}, modifyOptions, setTooltip, tooltip, parentRef, denominator = '', gradientIndex = 0
 }) {
   useEffect(
     () => {
@@ -35,7 +36,7 @@ export default function LineChart({
     if (datasets.length > 1) {
       borderColor = lineColors[index]
     } else {
-      borderColor = calculateBorderColor(gradients[0])
+      borderColor = calculateBorderColor(gradients[gradientIndex])
     }
     const backgroundColor = datasets.length === 1
       ? 'rgb(25, 29, 35)'
@@ -49,17 +50,22 @@ export default function LineChart({
 
   const tooltipSetter = useCallback(
     context => {
-      const { title, dataPoints } = context.tooltip
-      if (title[0] === tooltip.title) return
+      if (tooltipDebounce) return
+      tooltipDebounce = true
+      const { dataPoints } = context.tooltip
+      if (!dataPoints) return
       const body = dataPoints.length === 1
         ? dataPoints[0].formattedValue
         : dataPoints.map(dataPoint => {
           return dataPoint.formattedValue
         })
       setTooltip({
-        title: context.tooltip.title[0],
+        title: context.tooltip.title[0].replace('a.m.', ''),
         body,
       })
+      setTimeout(() => {
+        tooltipDebounce = false
+      }, 10)
     },
     [tooltip]
   )
@@ -114,12 +120,11 @@ export default function LineChart({
         },
         type: 'time',
         time: {
-          parser: 'YYYY-MM-DD',
           unit: labels.length > 60 ? 'month' : 'day',
           displayFormats: {
-            day: 'MM/DD'
+            day: 'mm/dd'
           }
-        }
+        },
       },
     },
     plugins: {

@@ -1,5 +1,5 @@
 const knex = require('../../database/knex')
-const client = require('../../database')
+const { client } = require('../../database')
 const dayjs = require('../../lib/dayjs')
 
 module.exports = async function insertIntoTreasuryTable({ tokens = [], protocolBalances = [] }) {

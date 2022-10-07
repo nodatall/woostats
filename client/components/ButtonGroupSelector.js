@@ -1,8 +1,12 @@
 import React, { useCallback } from 'react'
+
+import Typography from '@mui/material/Typography'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Button from '@mui/material/Button'
 
-export default function ButtonGroupWithSubtitle({ values, valueElements, current, setCurrent }) {
+export default function ButtonGroupSelector({
+  values, valueElements, current, setCurrent, sx = {}, textVariant = 'body1',
+}) {
   const buttons = values.map((val) => {
     const onClick = useCallback(() => {
       setCurrent(val)
@@ -17,15 +21,17 @@ export default function ButtonGroupWithSubtitle({ values, valueElements, current
     const props = {
       onClick,
       key: val,
-      sx: styles,
+      sx: { textTransform: 'none' },
     }
     if (current === val) props.sx.border = '1px solid secondary.main'
     const valueElement = valueElements ? valueElements[val] : val
 
-    return <Button {...props}>{valueElement}</Button>
+    return <Button {...props}>
+      <Typography variant={textVariant} sx={styles} component="span">{valueElement}</Typography>
+    </Button>
   })
 
-  return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
+  return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2, ...sx }}>
     {buttons}
   </ButtonGroup>
 }

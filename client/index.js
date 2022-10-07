@@ -1,13 +1,12 @@
 import React from 'react'
-import ReactDOM from "react-dom"
+import { createRoot } from 'react-dom/client'
 
 import App from './App.js'
 import "@babel/polyfill"
 
 import './index.sass'
 
-ReactDOM.render(
-  <App />,
-  document.querySelector('main')
-)
+const container = document.querySelector('main')
+const root = createRoot(container)
+root.render(<App />)
 

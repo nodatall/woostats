@@ -1,26 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react'
-import dayjs from 'lib/dayjs'
-import isEqual from 'lodash/isEqual'
+import React from 'react'
+
 import { SMA } from 'technicalindicators'
 
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
 import { lineColors } from 'lib/chart'
 
-import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 
 import Loading from 'components/Loading'
-import LineChart from 'components/LineChart'
-import ContentCard from 'components/ContentCard'
-import RangeSlider from './RangeSlider'
-import ButtonGroupWithSubtitle from './ButtonGroupWithSubtitle'
-import Tooltip from './Tooltip'
+import TwoColumns from 'components/TwoColumns'
+import ButtonGroupSelector from 'components/ButtonGroupSelector'
+import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import AggregateNetworkVolumeBox from './AggregateNetworkVolumeBox'
 
-export default function VolumePage() {
+export default function NetworkPage() {
   const {
     wooSpotVolume = [],
     aggregateVolume,
@@ -28,7 +24,6 @@ export default function VolumePage() {
   } = useAppState(
     ['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume']
   )
-  const theme = useTheme()
 
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
@@ -75,8 +70,7 @@ export default function VolumePage() {
       }
     )
 
-  let charts = []
-  let tempCharts = []
+  const charts = []
   ;[
     { title: 'Daily WOO Network volume' },
     { title: 'Daily Network volume [day] day MA', datasets: [wooVolumeSeries] },
@@ -99,115 +93,18 @@ export default function VolumePage() {
     else {
       chart = title === 'Daily WOO Network volume'
         ? <DailyVolumeChart {...{ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }} />
-        : <VolumeChart {...props} />
+        : <RangeSliderLineChart {...props} />
     }
-    tempCharts.push(chart)
-
-    if (tempCharts.length === 2) {
-      charts.push(
-        <Stack {...{
-          sx: {
-            flexDirection: 'row',
-            [theme.breakpoints.down('lg')]: {
-              flexDirection: 'column',
-            },
-            '> *': {
-              flexBasis: '50%',
-              '&:first-of-type': {
-                mr: 4,
-                [theme.breakpoints.down('lg')]: {
-                  mr: 0
-                },
-              },
-            },
-          },
-          key: title,
-        }}>
-          {tempCharts}
-        </Stack>
-      )
-      tempCharts = []
-    }
+    charts.push(chart)
   })
 
   return <Box>
     <AggregateNetworkVolumeBox />
-    {charts}
+    <TwoColumns>
+      {charts}
+    </TwoColumns>
   </Box>
 }
-
-const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
-let rangeSetTimeout
-
-const VolumeChart = React.memo(function ({
-  title, labels, datasets, denominator = '$', subtitle,
-}) {
-  const isMA = title.includes('MA')
-  const defaultRange = [1, labels.length]
-  const [range = defaultRange, _setRange] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSlider`)
-  const [
-    lastRangeDate = dayjs().format('YYYY-MM-DD'), setLastRangeDate
-  ] = useLocalStorage(`${title.replace(/ /g, '')}WooVolumeRangeSliderLastDate`)
-  const containerRef = useRef()
-  const [tooltip, setTooltip] = useState({})
-
-  const setRange = val => {
-    _setRange(val)
-    clearTimeout(rangeSetTimeout)
-    rangeSetTimeout = setTimeout(() => {
-      setLastRangeDate(dayjs().format('YYYY-MM-DD'))
-    }, 500)
-  }
-
-  useEffect(
-    () => {
-      const today = dayjs(dayjs().format('YYYY-MM-DD'))
-      const daysAgo = today.diff(lastRangeDate, 'day')
-      if (daysAgo > 0 && labels.length - range[1] === daysAgo) {
-        setRange([range[0], range[1] + daysAgo])
-        setLastRangeDate(dayjs().format('YYYY-MM-DD'))
-      }
-    },
-    [title]
-  )
-
-  datasets = datasets.map(dataset => {
-    return {
-      ...dataset,
-      data: isMA ? dataset.data : reduceArrayToRange(dataset.data, range),
-    }
-  })
-
-  return <ContentCard sx={{ p: 2 }} >
-    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, minHeight: '50px'}}>
-      <Stack>
-        <Typography variant="h6" sx={{ textAlign: 'right' }}>
-          {title}
-        </Typography>
-        {subtitle}
-      </Stack>
-      {tooltip && <Tooltip {...{tooltip, denominator}} />}
-    </Stack>
-    <Box ref={containerRef}>
-      <LineChart {...{
-        labels: isMA ? labels : reduceArrayToRange(labels, range),
-        datasets,
-        tooltip,
-        setTooltip,
-        parentRef: containerRef,
-        denominator,
-      }}
-      />
-    </Box>
-    {!isMA && <RangeSlider {...{ range, labels, setRange }} />}
-  </ContentCard>
-}, function(prevProps, nextProps) {
-  for (const prop in prevProps) {
-    if (prop === 'datasets' && isEqual(prevProps[prop].data, nextProps[prop].data)) return true
-    if (!isEqual(prevProps[prop], nextProps[prop])) return false
-  }
-  return true
-})
 
 function MAChart({ ...props }) {
   const [maLength = 50, setMaLength] = useLocalStorage('maLength')
@@ -216,13 +113,13 @@ function MAChart({ ...props }) {
   props.labels = props.labels.slice(maLength - 1)
   props.title = props.title.replace('[day]', maLength)
 
-  props.subtitle = <ButtonGroupWithSubtitle {...{
+  props.subtitle = <ButtonGroupSelector {...{
     values: [25, 50, 100],
     current: maLength,
     setCurrent: setMaLength,
   }}/>
 
-  return <VolumeChart {...props} />
+  return <RangeSliderLineChart {...props} />
 }
 
 function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }) {
@@ -238,16 +135,16 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
     ]
     props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length))
   }
-  props.subtitle = <ButtonGroupWithSubtitle {...{
+  props.subtitle = <ButtonGroupSelector {...{
     values: [
       1,
       0,
     ],
     valueElements: [
       <Stack direction="row">
-        <Typography sx={{ color: lineColors[1] }}>Spot</Typography>
+        <Typography sx={{ color: lineColors[1] }} component="span">Spot</Typography>
         &nbsp;&nbsp;vs&nbsp;&nbsp;
-        <Typography sx={{ color: lineColors[0] }}>Futures</Typography>
+        <Typography sx={{ color: lineColors[0] }} component="span">Futures</Typography>
       </Stack>,
       'Total',
     ],
@@ -255,5 +152,5 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
     setCurrent: setIsTotal,
   }}/>
 
-  return <VolumeChart {...props} />
+  return <RangeSliderLineChart {...props} />
 }

@@ -8,6 +8,7 @@ const dayjs = require('../../lib/dayjs')
 const updatePositions = require('./updatePositions')
 
 module.exports = async function fetchTokensAndPositionsFromDebank() {
+  if (process.env.NODE_ENV !== 'production') return
   const wooBNBAddress = '0xfd899C7c5ED84537e2Acfc998ce26C3797654AE8'
 
   const fetchTokensUpdate = async () => {

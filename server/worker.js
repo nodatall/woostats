@@ -1,5 +1,5 @@
 const cron = require('./lib/cron')
-const statsCache = require('./lib/statsCache')
+const memoryCache = require('./lib/memoryCache')
 const updateTokenTickers = require('./commands/updateTokenTickers')
 const updateTotalMarketVolumeHistory = require('./commands/updateTotalMarketVolumeHistory')
 const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHistory')
@@ -9,69 +9,49 @@ const getExchangeVolume = require('./queries/getExchangeVolume')
 const getWooTokenBurns = require('./queries/getWooTokenBurns')
 const getWooDaoTreasuryBalance = require('./queries/getWooDaoTreasuryBalance')
 const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHistory')
+const updateWooFiEventsForLast = require('./commands/updateWooFiEventsForLast')
 
 const TOKENS = [
   'BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB', 'ETH',
 ]
 
 function start(socket){
-  if (process.env.INITIALIZE_ALL) intializeAllData(socket)
-
-  cron.schedule('* * * * *', async () => { // once a minute
+  cron.schedule('* * * * *', async () => { // minute
     const tokenTickers = await updateTokenTickers({ tokens: TOKENS })
-    statsCache.update({ tokenTickers })
+    await memoryCache.update({ tokenTickers })
 
     await updateTotalMarketVolumeHistory()
     const aggregateVolume = await getTotalMarketVolumeHistory()
     const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
 
-    statsCache.update({ aggregateVolume, wooSpotVolume, wooFuturesVolume })
+    await memoryCache.update({ aggregateVolume, wooSpotVolume, wooFuturesVolume })
     socket.emit('send', { tokenTickers, aggregateVolume, wooSpotVolume, wooFuturesVolume })
   })
 
-  cron.schedule('0 * * * *', async () => { // once an hour
-    await updateWooTokenBurns()
-    const wooTokenBurns = await getWooTokenBurns()
-    statsCache.update({ wooTokenBurns })
-    socket.emit('send', { wooTokenBurns })
-  })
-
-  cron.schedule('*/5 * * * *', async () => { // every 5 minutes
+  cron.schedule('*/5 * * * *', async () => { // 5 minutes
     await updateWooDaoTreasury()
     const wooDaoTreasuryBalance = await getWooDaoTreasuryBalance()
-    statsCache.update({ wooDaoTreasuryBalance })
+    await memoryCache.update({ wooDaoTreasuryBalance })
     socket.emit('send', { wooDaoTreasuryBalance })
   })
 
+  cron.schedule('0 * * * *', async () => { // hour
+    await updateWooTokenBurns()
+    await updateWooFiEventsForLast({ hours: 12, socket })
+    const wooTokenBurns = await getWooTokenBurns()
+    await memoryCache.update({ wooTokenBurns })
+    socket.emit('send', { wooTokenBurns })
+  })
 
-  cron.schedule('0 0 * * *', async () => { // once a day
+  cron.schedule('0 0 * * *', async () => { // day
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
     await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
     const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
-    statsCache.update({ wooSpotVolume, wooFuturesVolume })
+    await memoryCache.update({ wooSpotVolume, wooFuturesVolume })
     socket.emit('send', { wooSpotVolume, wooFuturesVolume })
   })
-}
-
-async function intializeAllData(socket) {
-  const tokenTickers = await updateTokenTickers({ tokens: TOKENS })
-  statsCache.update({ tokenTickers })
-
-  await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
-  await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
-  await updateTotalMarketVolumeHistory()
-  await updateWooTokenBurns()
-
-  const aggregateVolume = await getTotalMarketVolumeHistory()
-  const wooSpotVolume = await getExchangeVolume({ exchangeId: 'wootrade' })
-  const wooFuturesVolume = await getExchangeVolume({ exchangeId: 'woo_network_futures' })
-  const wooTokenBurns = await getWooTokenBurns()
-
-  statsCache.update({ aggregateVolume, wooSpotVolume, wooFuturesVolume })
-  socket.emit('send', { tokenTickers, aggregateVolume, wooSpotVolume, wooTokenBurns, wooFuturesVolume })
-
 }
 
 module.exports = { start }

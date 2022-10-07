@@ -3,3 +3,4 @@ client/dist
 error.log
 .env
 scripts/importRemoteDb
+notes.*

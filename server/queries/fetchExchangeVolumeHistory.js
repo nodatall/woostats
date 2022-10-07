@@ -1,4 +1,4 @@
-const client = require('../database')
+const { client } = require('../database')
 const coingeckoRequest = require('../lib/coingecko')
 const dayjs = require('../lib/dayjs')
 

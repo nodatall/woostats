@@ -29,6 +29,8 @@ app.use(function (err, req, res) {
 require('./socket').initializeSocket(socket)
 require('./worker').start(socket)
 require('./lib/wooWebsocket')(socket)
+require('./commands/processWooFiEvents').startProcessor(socket)
+require('./lib/nakji').start(socket)
+require('./commands/updateWooFiEventsForLast')({ hours: 1 })
 
 module.exports = { server }
-

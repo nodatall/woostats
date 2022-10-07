@@ -10,6 +10,7 @@ async function request({
   params,
   headers = {},
 }) {
+  if (!name) throw new Error('name is required')
   let result
 
   try {

@@ -1,4 +1,4 @@
-const client = require('../database')
+const { client } = require('../database')
 const { web3_eth } = require('../lib/web3')
 const dayjs = require('../lib/dayjs')
 const fetchWooTokenBurns = require('../queries/fetchWooTokenBurns')

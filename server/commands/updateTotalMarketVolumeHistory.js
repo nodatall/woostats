@@ -1,6 +1,6 @@
 const fetchTotalMarketVolumeHistory = require('../queries/fetchTotalMarketVolumeHistory')
 const knex = require('../database/knex')
-const client = require('../database')
+const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
 
 module.exports = async function updateTotalMarketVolumeHistory() {

@@ -1,4 +1,4 @@
-const client = require('../database')
+const { client } = require('../database')
 
 module.exports = async function getExchangeVolumes({ exchangeId }) {
   const records = await client.query(

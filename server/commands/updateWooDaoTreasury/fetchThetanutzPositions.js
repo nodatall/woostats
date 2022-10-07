@@ -8,6 +8,7 @@ module.exports = async function fetchThetanutzPositions() {
   const fetchUpdate = async () => {
     const tokenTickers = await getTokenTickers()
     const ABI = await request({
+      name: 'fetchThetanutzPositionsABI',
       serverUrl: 'https://thetanuts.finance/v1/synVault_ABI.json',
     })
     const wooVaultContract = new web3_bsc.eth.Contract(ABI, '0x91FDBdB3E031F0Ac57aCe6F393b247192A7265b4')

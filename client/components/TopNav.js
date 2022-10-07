@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 
 import { useAppState } from 'lib/appState'
 
+import { useTheme } from '@mui/material/styles'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
@@ -14,31 +15,7 @@ import EqualizerIcon from '@mui/icons-material/Equalizer'
 import Typography from '@mui/material/Typography'
 
 export default function TopNav() {
-  const { tokenTickers = {} } = useAppState(['tokenTickers'])
-  const wooPrice = tokenTickers.WOO && tokenTickers.WOO.price
-
-  const appBarStyles = theme => ({
-    p: 1,
-    pr: 4,
-    pl: 4,
-    boxShadow: 'none',
-    backgroundColor: 'background.dark',
-    backgroundImage: 'none',
-    [theme.breakpoints.down('sm')]: {
-      pr: 1,
-      pl: 1,
-    }
-  })
-
-  const wooPriceStyles = theme => ({
-    color: 'primary.main',
-    mr: 1,
-    display: 'flex',
-    alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      display: 'none',
-    }
-  })
+  const theme = useTheme()
 
   const { pathname } = useLocation()
 
@@ -46,42 +23,84 @@ export default function TopNav() {
     <Box sx={{ flexGrow: 1, position: 'fixed', width: '100%', zIndex: 1 }}>
       <AppBar
         position="static"
-        sx={appBarStyles}
+        sx={{
+          p: 1,
+          pr: 4,
+          pl: 4,
+          boxShadow: 'none',
+          backgroundColor: 'background.dark',
+          backgroundImage: 'none',
+          [theme.breakpoints.down('sm')]: {
+            pr: 1,
+            pl: 1,
+          }
+        }}
       >
         <Toolbar
           disableGutters
           sx={{
-            display: "flex",
-            justifyContent: "flex-start",
+            display: 'flex',
+            justifyContent: 'flex-start',
+            [theme.breakpoints.down('sm')]: {
+              justifyContent: 'center',
+            },
           }}
         >
-          <Button {...{
-            sx: { display: "flex", alignItems: "center", ml: -1, pr: 0, mr: 'auto' },
-            to: '/',
-            onClick: () => { if (pathname === '/') window.scrollTo(0, 0) },
-          }}>
-            <img src={wooLogo} style={{ marginRight: "10px" }} />
-            <EqualizerIcon
-              fontSize="large"
-              color="primary"
-            />
-          </Button>
-          {wooPrice &&
-            <Typography
-              variant="h6"
-              sx={wooPriceStyles}
-            >
-              <img src={wooTokenIcon} style={{ marginRight: '10px', width: '36px', height: '36px' }} />
-              {`$${wooPrice.toFixed(3)}`}
-            </Typography>
-          }
-          <TopNavLink {...{ to: '/', pathname, text: 'Volume' }} />
+          <WooStatsLogo {...{ theme }} />
+          <WooPrice {...{ theme }} />
+          <TopNavLink {...{ to: '/', pathname, text: 'Network' }} />
+          {/* <TopNavLink {...{ to: '/woofi', pathname, text: 'WOOFi' }} /> */}
           <TopNavLink {...{ to: '/dao', pathname, text: 'DAO' }} />
           <TopNavLink {...{ to: '/token', pathname, text: 'Token' }} />
         </Toolbar>
       </AppBar>
     </Box>
   )
+}
+
+function WooStatsLogo({ theme }) {
+  return <Button {...{
+    sx: {
+      display: 'flex',
+      alignItems: 'center',
+      ml: -1,
+      pr: 0,
+      mr: 'auto',
+      [theme.breakpoints.down('sm')]: {
+        display: 'none',
+      },
+    },
+    to: '/',
+    onClick: () => { if (pathname === '/') window.scrollTo(0, 0) },
+  }}>
+    <img src={wooLogo} style={{ marginRight: "10px" }} />
+    <EqualizerIcon
+      fontSize="large"
+      color="primary"
+    />
+  </Button>
+}
+
+function WooPrice({ theme }) {
+  const { tokenTickers = {} } = useAppState(['tokenTickers'])
+  const wooPrice = tokenTickers.WOO && tokenTickers.WOO.price
+  if (!wooPrice) return null
+
+  return <Typography
+    variant="h6"
+    sx={{
+      color: 'primary.main',
+      mr: 1,
+      display: 'flex',
+      alignItems: 'center',
+      [theme.breakpoints.down('md')]: {
+        display: 'none',
+      },
+    }}
+  >
+    <img src={wooTokenIcon} style={{ marginRight: '10px', width: '36px', height: '36px' }} />
+    {`$${wooPrice.toFixed(3)}`}
+  </Typography>
 }
 
 function TopNavLink({ text, pathname, sx = {}, to }) {
@@ -96,7 +115,7 @@ function TopNavLink({ text, pathname, sx = {}, to }) {
       },
       ...sx
     }
-    if (pathname === to) {
+    if (to === '/' ? pathname === to : pathname.includes(to)) {
       Object.assign(styles, {
         color: 'secondary.subtle',
         background: '#1c1c1c',

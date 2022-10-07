@@ -1,5 +1,5 @@
 const knex = require('../database/knex')
-const client = require('../database')
+const { client } = require('../database')
 const fetchTokenTickers = require('../queries/fetchTokenTickers')
 
 module.exports = async function updateTokenTickers({ tokens }) {

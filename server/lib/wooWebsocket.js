@@ -1,6 +1,6 @@
 const WebSocket = require('ws')
 
-const statsCache = require('./statsCache')
+const memoryCache = require('./memoryCache')
 const updateDailyExchangeVolume = require('../commands/updateDailyExchangeVolume')
 
 async function openWooWebsocket(socket) {
@@ -16,7 +16,7 @@ async function openWooWebsocket(socket) {
 
   let lastUpdate = Date.now()
   let updateTimeout = setInterval(() => {
-    if ((Date.now() - lastUpdate) > 30000) {
+    if ((Date.now() - lastUpdate) > 20000) {
       wooSocket.terminate()
       clearInterval(updateTimeout)
       openWooWebsocket(socket)
@@ -52,7 +52,7 @@ async function openWooWebsocket(socket) {
         await updateDailyExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
         await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
 
-        statsCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
+        await memoryCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
         socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
         lastUpdate = Date.now()
         setTimeout(() => {

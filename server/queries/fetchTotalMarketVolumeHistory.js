@@ -1,5 +1,5 @@
 const nomicsRequest = require('../lib/nomics')
-const client = require('../database')
+const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
 
 module.exports = async function fetchTotalMarketVolumeHistory() {

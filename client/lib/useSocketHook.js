@@ -9,7 +9,8 @@ const socket = ioClient(process.env.ORIGIN || window.origin)
 export default function useSocket() {
   const { setState } = useAppState()
   useEffect(() => {
-    socket.emit('get', {})
+    const pageName = document.location.href.split('/')[3]
+    socket.emit('get', { pageName })
     socket.on('send', function(incomingState) {
       const newState = { ...incomingState }
       Object.keys(newState).forEach(key => {
@@ -18,7 +19,7 @@ export default function useSocket() {
       setState(newState)
     })
     onReturnToStaleApp(
-      () => { socket.emit('get', {}) },
+      () => { socket.emit('get', { pageName }) },
       10
     )
   }, [])

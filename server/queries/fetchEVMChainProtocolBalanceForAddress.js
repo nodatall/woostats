@@ -4,6 +4,6 @@ module.exports = async function fetchEVMChainProtocolBalanceForAddress({ address
   return await debankRequest(
     `/v1/user/protocol`,
     `id=${address}&chain_id=${chainId}&protocol_id=${protocol}`,
-    true
+    process.env.NODE_ENV === 'production'
   )
 }

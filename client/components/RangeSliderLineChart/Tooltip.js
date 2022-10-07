@@ -41,7 +41,7 @@ export default function Tooltip({ tooltip, denominator = '$' }) {
 
   return <TextWithCaption
     {...{
-      caption: dayjs(tooltip.title).format('MMM D, YYYY'),
+      caption: dayjs.tz(tooltip.title).format('MMM D, YYYY'),
       text,
       sx: styles,
     }}

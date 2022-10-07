@@ -74,6 +74,15 @@ theme = createTheme(theme, {
         },
       },
     },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          '& > th, & > td': {
+            borderBottom: 'thin solid rgba(255, 255, 255, 0.12)',
+          }
+        },
+      },
+    },
   },
 })
 

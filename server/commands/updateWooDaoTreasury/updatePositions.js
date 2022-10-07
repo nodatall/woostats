@@ -5,7 +5,7 @@ const twillioClient = require('twilio')(accountSid, authToken)
 const logger = require('../../lib/logger')
 const calculateTokenPrice = require('../../lib/calculateTokenPrice')
 const getTokenTickers = require('../../queries/getTokenTickers')
-const client = require('../../database')
+const { client } = require('../../database')
 const insertIntoTreasuryTable = require('./insertToTreasuryTable')
 
 const errorCounts = {}
