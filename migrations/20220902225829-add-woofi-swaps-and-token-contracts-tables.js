@@ -11,7 +11,7 @@ exports.up = db => {
       );
 
       CREATE TABLE woofi_swaps (
-        created_at timestamp NOT NULL,
+        date timestamp NOT NULL,
         chain text NOT NULL,
         block_number integer NOT NULL,
         index integer NOT NULL,
