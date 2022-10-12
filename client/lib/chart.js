@@ -11,6 +11,7 @@ import {
   Filler,
   Tooltip,
   Legend,
+  ArcElement,
 } from 'chart.js'
 
 ChartJS.register(
@@ -24,6 +25,7 @@ ChartJS.register(
   Filler,
   Tooltip,
   Legend,
+  ArcElement,
 )
 
 export const lineColors = ['#ae85de', 'rgb(221, 170, 28)']

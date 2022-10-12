@@ -2,6 +2,7 @@ const WebSocket = require('ws')
 
 const memoryCache = require('./memoryCache')
 const updateDailyExchangeVolume = require('../commands/updateDailyExchangeVolume')
+const logger = require('../lib/logger')
 
 async function openWooWebsocket(socket) {
   const wooSocket = new WebSocket('wss://wss.woo.org/ws/stream/OqdphuyCtYWxwzhxyLLjOWNdFP7sQt8RPWzmb5xY')
@@ -60,6 +61,11 @@ async function openWooWebsocket(socket) {
         }, 1000)
       }
     }
+  })
+
+  wooSocket.on('error', error => {
+    console.error(`wooWebsocket error ${error.message}`)
+    logger.log('error', error.message)
   })
 }
 

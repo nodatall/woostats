@@ -1,45 +1,63 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
 
 import { useAppState } from 'lib/appState'
 
 import Typography from '@mui/material/Typography'
 
 import ContentCard from 'components/ContentCard'
+import Loading from 'components/Loading'
 import TwoColumns from 'components/TwoColumns'
 import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import SwapsListTable from './SwapsListTable'
+import VolumeBySourcesChart from './VolumeBySourcesChart'
 
-export default function SwapStats() {
+export default function SwapStats({ timePeriod }) {
+  const statStateKeys = [
+    'recentWooFiSwaps',
+    'topWooFiSwaps',
+    'dailyWooFiVolumeBySources',
+    'dailyWooFiSwapVolume',
+  ]
+  const state = useAppState(statStateKeys)
+  if (statStateKeys.some(key => state[key] === undefined)) return <Loading />
   const {
-    recentWooFiSwaps = [],
-    topWooFiSwaps = [],
-  } = useAppState(
-    [
-      'recentWooFiSwaps',
-      'topWooFiSwaps'
-    ]
-  )
+    recentWooFiSwaps,
+    topWooFiSwaps,
+    dailyWooFiVolumeBySources,
+    dailyWooFiSwapVolume,
+  } = state
 
   return <TwoColumns>
-    <DailyVolumeChart key="DailyVolumeChart" />
-    <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" />
+    <DailyVolumeChart key="DailyVolumeChart" timePeriod={timePeriod} />
+    <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" timePeriod={timePeriod} />
+    <ContentCard key="VolumeBySources">
+      <Typography variant="h6">
+        Volume by sources
+      </Typography>
+      <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
+    </ContentCard>
+    <ContentCard key="VolumeByAssets">
+      <Typography variant="h6">
+        Volume by assets
+      </Typography>
+      WOOOoooooo
+    </ContentCard>
     <ContentCard>
-      <Typography variant="h6" sx={{  }}>
+      <Typography variant="h6">
         Recent Trades
       </Typography>
       <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true }} />
     </ContentCard>
     <ContentCard>
-      <Typography variant="h6" sx={{  }}>
-        Top Trades
+      <Typography variant="h6">
+        Top Trades (All time)
       </Typography>
       <SwapsListTable {...{ swaps: topWooFiSwaps }} />
     </ContentCard>
   </TwoColumns>
 }
 
-function DailyVolumeChart() {
+function DailyVolumeChart({ timePeriod }) {
   const {
     dailyWooFiSwapVolume = [],
   } = useAppState(
@@ -68,12 +86,13 @@ function DailyVolumeChart() {
     labels,
     datasets,
     gradientIndex: 1,
+    timePeriod,
   }
 
   return <RangeSliderLineChart {...props} />
 }
 
-function DailyNumberOfSwapsChart() {
+function DailyNumberOfSwapsChart({ timePeriod }) {
   const {
     dailyNumberOfWooFiSwaps = [],
   } = useAppState(
@@ -104,6 +123,7 @@ function DailyNumberOfSwapsChart() {
     datasets,
     gradientIndex: 1,
     denominator: '',
+    timePeriod,
   }
 
   return <RangeSliderLineChart {...props} />

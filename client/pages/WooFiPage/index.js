@@ -19,16 +19,48 @@ import SwapStats from './SwapStats'
 
 export default function WooFiPage(){
   const [section = 'Swap', setSection] = useLocalStorage('wooFiStatsSection')
+  const [timePeriod = -1, setTimePeriod] = useLocalStorage('timePeriod')
 
   return <Box>
     <ContentCard sx={{ mt: 0, pt: 0, pb: 2 }}>
       <Stack direction="row" justifyContent="center" sx={{ flexWrap: 'wrap' }}>
         <ChainChooser/>
+        <TimePeriodChooser {...{ timePeriod, setTimePeriod }} />
         <SectionChooser {...{ section, setSection }} />
       </Stack>
     </ContentCard>
-    {section === 'Swap' ? <SwapStats /> : <ComingSoon />}
+    {section === 'Swap' ? <SwapStats {...{ timePeriod }} /> : <ComingSoon />}
   </Box>
+}
+
+function TimePeriodChooser({ timePeriod, setTimePeriod }) {
+  const periodToDays = {
+    'All time': -1,
+    '1 week': 7,
+    '1 month': 30,
+    '3 months': 90,
+    '6 months': 180,
+  }
+  const selectMenuItems = Object.keys(periodToDays).map(period =>
+    <MenuItem value={periodToDays[period]} key={period}>{period}</MenuItem>
+  )
+
+  return <FormControl
+    fullWidth
+    sx={{
+      mt: 2,
+      width: 'auto',
+      mx: 1.5,
+    }}
+  >
+    <Select
+      value={timePeriod}
+      onChange={event => setTimePeriod(event.target.value)}
+      sx={{ '.MuiSelect-select': { py: 1.25 } }}
+    >
+      {selectMenuItems}
+    </Select>
+  </ FormControl>
 }
 
 function SectionChooser({ section, setSection }) {
@@ -47,6 +79,7 @@ function SectionChooser({ section, setSection }) {
       justifyContent: 'center',
       mt: 0,
       pt: 2,
+      mx: 1.5,
     },
     textVariant: 'h6',
   }}/>
@@ -111,7 +144,7 @@ function ChainChooser() {
       sx: {
         justifyContent: 'center',
         mt: 0,
-        mx: 3,
+        mx: 1.5,
         pt: 2,
         [theme.breakpoints.down('sm')]: {
           display: 'none'

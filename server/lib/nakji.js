@@ -39,6 +39,11 @@ async function subscribeToStream({ endpoint }) {
     }
     lastUpdate = Date.now()
   })
+
+  socketConnection.on('error', error => {
+    console.error(`nakji.subscribeToStream error ${error.message}`)
+    logger.log('error', error.message)
+  })
 }
 
 function processNakjiMessage(message) {

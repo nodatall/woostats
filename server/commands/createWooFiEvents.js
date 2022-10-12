@@ -1,3 +1,4 @@
+const { WOOFI_SOURCES } = require('../../shared/woofi')
 const { client } = require('../database')
 const knex = require('../database/knex')
 const { snakeCase } = require('change-case')
@@ -29,6 +30,10 @@ module.exports = async function createWooFiEvents({ events }) {
       if (snakeKey === 'ts') snakeKey = 'date'
       formatted[snakeKey] = event.Data[key]
     }
+    formatted.source = WOOFI_SOURCES.WOOFi.includes(formatted.from_address)
+      ? formatted.to_address
+      : formatted.from_address
+
     const eventDb = eventTypeMap[event.Event].db
     if (insertsByTable[eventDb]) {
       insertsByTable[eventDb].push(formatted)

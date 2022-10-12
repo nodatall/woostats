@@ -27,7 +27,7 @@ export default function SwapsListTable({ swaps, minDate }) {
       : dayjs.tz(swap.date).format('DD/MM/YY HH:mm')
     return <TableRow
       hover={true}
-      key={`${swap.txHash}${swap.fromSymbol}${swap.toSymbol}`}
+      key={`${swap.txHash}${swap.fromSymbol}${swap.toSymbol}${swap.usdVolume}`}
       sx={{
         cursor: 'pointer',
         textDecoration: 'none',
@@ -38,7 +38,7 @@ export default function SwapsListTable({ swaps, minDate }) {
     >
       <TableCell component="th" scope="row">{date}</TableCell>
       <TableCell>${numeral(swap.usdVolume).format('0,0.00')}</TableCell>
-      <TableCell className="hideOnMobile">{getAddressLabel(swap.fromAddress)}</TableCell>
+      <TableCell className="hideOnMobile">{getAddressLabel(swap.source)}</TableCell>
       <TableCell className="hideOnMobile">{swap.chain.toUpperCase()}</TableCell>
       <TableCell
         align="right"
