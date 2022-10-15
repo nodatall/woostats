@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import numeral from 'numeral'
 
 import { getAddressLabel } from 'lib/woofi'

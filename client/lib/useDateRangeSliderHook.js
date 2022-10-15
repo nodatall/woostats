@@ -31,7 +31,7 @@ export default function useDateRangeSliderHook({ length, title, defaultPeriod })
     () => {
       const today = dayjs.tz(dayjs.tz().format('YYYY-MM-DD'))
       const daysAgo = today.diff(lastRangeDate, 'day')
-      if (daysAgo > 0 && labels.length - range[1] === daysAgo) {
+      if (daysAgo > 0 && length - range[1] === daysAgo) {
         setRange([range[0], range[1] + daysAgo])
         setLastRangeDate(dayjs.tz().format('YYYY-MM-DD'))
       }
