@@ -10,6 +10,7 @@ import TwoColumns from 'components/TwoColumns'
 import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import SwapsListTable from './SwapsListTable'
 import VolumeBySourcesChart from './VolumeBySourcesChart'
+import VolumeByAssetsTable from './VolumeByAssetsTable'
 
 export default function SwapStats({ timePeriod }) {
   const statStateKeys = [
@@ -17,6 +18,7 @@ export default function SwapStats({ timePeriod }) {
     'topWooFiSwaps',
     'dailyWooFiVolumeBySources',
     'dailyWooFiSwapVolume',
+    'dailyWooFiVolumeByAssets',
   ]
   const state = useAppState(statStateKeys)
   if (statStateKeys.some(key => state[key] === undefined)) return <Loading />
@@ -25,6 +27,7 @@ export default function SwapStats({ timePeriod }) {
     topWooFiSwaps,
     dailyWooFiVolumeBySources,
     dailyWooFiSwapVolume,
+    dailyWooFiVolumeByAssets,
   } = state
 
   return <TwoColumns>
@@ -40,7 +43,7 @@ export default function SwapStats({ timePeriod }) {
       <Typography variant="h6">
         Volume by assets
       </Typography>
-      WOOOoooooo
+      <VolumeByAssetsTable {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
     </ContentCard>
     <ContentCard>
       <Typography variant="h6">

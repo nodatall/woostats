@@ -3,6 +3,7 @@ import { Doughnut } from 'react-chartjs-2'
 import isEqual from 'lodash/isEqual'
 import numeral from 'numeral'
 
+import dayjs from 'lib/dayjs'
 import { getAddressLabel } from 'lib/woofi'
 import useDateRangeSlider from 'lib/useDateRangeSliderHook'
 
@@ -170,7 +171,9 @@ const VolumeBySourcesChart = React.memo(function ({ dailyWooFiVolumeBySources, t
       </Stack>
     </Stack>
     <Stack direction="row" justifyContent="center">
-      <Typography variant="body1">{dateLabels[range[0]]} - {dateLabels[range[1] - 1]}</Typography>
+      <Typography variant="body1">
+        {dayjs(dateLabels[range[0] - 1]).format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).format('MM/DD/YYYY')}
+      </Typography>
     </Stack>
     <RangeSlider {...{ range, labels: dateLabels, setRange }} />
   </Box>

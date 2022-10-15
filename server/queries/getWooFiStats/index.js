@@ -5,6 +5,7 @@ const getTopWooFiSwaps = require('./getTopWooFiSwaps')
 const getDailySwapVolume = require('./getDailySwapVolume')
 const getDailyNumberOfWooFiSwaps = require('./getDailyNumberOfWooFiSwaps')
 const getDailyVolumeBySources = require('./getDailyVolumeBySources')
+const getDailyVolumeByAssets = require('./getDailyVolumeByAssets')
 
 const getFunctionIndexMap = {
   1: getRecentWooFiSwaps,
@@ -12,9 +13,10 @@ const getFunctionIndexMap = {
   3: getDailySwapVolume,
   4: getDailyNumberOfWooFiSwaps,
   5: getDailyVolumeBySources,
+  6: getDailyVolumeByAssets,
 }
 const eventGetFunctionMap = {
-  'nakji.woofi.0_0_0.WOOPP_WooSwap': [1, 2, 3, 4, 5],
+  'nakji.woofi.0_0_0.WOOPP_WooSwap': [1, 2, 3, 4, 5, 6],
 }
 
 const eventsByChain = {

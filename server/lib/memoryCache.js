@@ -13,6 +13,7 @@ const cacheKeysByCacheName = {
     'dailyWooFiSwapVolume',
     'dailyNumberOfWooFiSwaps',
     'dailyWooFiVolumeBySources',
+    'dailyWooFiVolumeByAssets',
   ],
   token: ['wooTokenBurns'],
 }

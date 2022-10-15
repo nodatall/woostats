@@ -33,7 +33,7 @@ const selectWooFiSwapsQuery = function(chain = 'all') {
         .on('woofi_swaps.chain', 'b.chain')
         .on('woofi_swaps.to_token', 'b.address')
     })
-    .limit(10)
+    .limit(50)
 
   if (chain !== 'all') {
     query.where('woofi_swaps.chain', chain)

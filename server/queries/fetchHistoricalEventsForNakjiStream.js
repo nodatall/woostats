@@ -4,10 +4,13 @@ module.exports = async function fetchHistoricalEventsForNakjiStream({ stream, fr
   let params = ''
   if (from) params += `&from=${from}`
   if (to) params += `&to=${to}`
+
   const result = await nakjiRequest({
     path: `/data/${stream}`,
     params,
   })
+
+  if (!result) return []
 
   const events = []
   result.split('\n').forEach(event => {
