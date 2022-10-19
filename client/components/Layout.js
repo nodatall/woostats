@@ -46,7 +46,6 @@ export default function Layout({ children }) {
 
 function Footer() {
   const { pathname } = useLocation()
-  const theme = useTheme()
 
   return <Stack>
     <Stack sx={{ pb: 1, flexDirection: 'row', justifyContent: 'center'}}>

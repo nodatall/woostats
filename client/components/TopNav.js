@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { useAppState } from 'lib/appState'
+import { useLocalStorage } from 'lib/storageHooks'
 
+import WooFiTimePeriodSelect from 'components/WooFiTimePeriodSelect'
 import { useTheme } from '@mui/material/styles'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
@@ -16,8 +18,22 @@ import Typography from '@mui/material/Typography'
 
 export default function TopNav() {
   const theme = useTheme()
+  const [timePeriod = -1, setTimePeriod] = useLocalStorage('wooFiTimePeriod')
 
   const { pathname } = useLocation()
+  const [showWooFiMonthSelector, setShowWooFiMonthSelector] = useState(false)
+
+  useEffect(() => {
+    if (!pathname.includes('woofi')) setShowWooFiMonthSelector(false)
+    const onScroll = () => {
+      const shouldShowWooFiMonth = pathname.includes('woofi') && window.scrollY > 109
+      if (shouldShowWooFiMonth && !showWooFiMonthSelector) setShowWooFiMonthSelector(true)
+      else if (!shouldShowWooFiMonth && showWooFiMonthSelector) setShowWooFiMonthSelector(false)
+    }
+    window.addEventListener('scroll', onScroll)
+
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [showWooFiMonthSelector, pathname])
 
   return (
     <Box sx={{ flexGrow: 1, position: 'fixed', width: '100%', zIndex: 1 }}>
@@ -47,6 +63,9 @@ export default function TopNav() {
           }}
         >
           <WooStatsLogo {...{ theme }} />
+          {showWooFiMonthSelector &&
+            <WooFiTimePeriodSelect {...{ timePeriod, setTimePeriod }} />
+          }
           <WooPrice {...{ theme }} />
           <TopNavLink {...{ to: '/', pathname, text: 'Network' }} />
           {/* <TopNavLink {...{ to: '/woofi', pathname, text: 'WOOFi' }} /> */}
