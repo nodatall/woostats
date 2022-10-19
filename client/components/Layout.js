@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react"
+import { useLocation } from 'react-router-dom'
 
+import { useTheme } from '@mui/material/styles'
 import Container from "@mui/material/Container"
 import Box from "@mui/material/Box"
 import Stack from "@mui/material/Stack"
@@ -12,26 +14,26 @@ import Fade from '@mui/material/Fade'
 import TopNav from "./TopNav"
 
 export default function Layout({ children }) {
-  const containerStyles = theme => ({
-    p: 2,
-    pt: 14,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    minHeight: '100vh',
-    [theme.breakpoints.down('sm')]: {
-      pr: 0,
-      pl: 0,
-      pt: 12,
-    }
-  })
+  const theme = useTheme()
 
   return (
     <Box sx={{ backgroundColor: 'background.default' }}>
       <TopNav />
       <Container {...{
         maxWidth: 'xxl',
-        sx: containerStyles,
+        sx: {
+          p: 2,
+          pt: 14,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '100vh',
+          [theme.breakpoints.down('sm')]: {
+            pr: 0,
+            pl: 0,
+            pt: 12,
+          }
+        },
       }}
       >
         <ScrollUpArrow />
@@ -43,6 +45,9 @@ export default function Layout({ children }) {
 }
 
 function Footer() {
+  const { pathname } = useLocation()
+  const theme = useTheme()
+
   return <Stack>
     <Stack sx={{ pb: 1, flexDirection: 'row', justifyContent: 'center'}}>
       <a {...{
@@ -65,6 +70,19 @@ function Footer() {
         />
       </a>
     </Stack>
+    {pathname.includes('woofi') &&
+      <Typography
+        variant="body1"
+        sx={{
+          textAlign: 'center', color: 'rgba(255, 255, 255, 0.3)', pb: 0, cursor: 'pointer',
+        }}
+        onClick={() => {
+          window.open('https://nakji.network/')
+        }}
+      >
+        Powered by nakji.network
+      </ Typography>
+    }
     <Typography
       variant="body1"
       sx={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.3)', pb: 2 }}
