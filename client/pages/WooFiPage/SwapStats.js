@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useCallback } from 'react'
+import { SMA } from 'technicalindicators'
 
 import { useAppState } from 'lib/appState'
+import { useLocalStorage } from 'lib/storageHooks'
 
 import Typography from '@mui/material/Typography'
-
+import Button from '@mui/material/Button'
 import ContentCard from 'components/ContentCard'
 import Loading from 'components/Loading'
 import TwoColumns from 'components/TwoColumns'
@@ -61,6 +63,9 @@ export default function SwapStats({ timePeriod }) {
 }
 
 function DailyVolumeChart({ timePeriod }) {
+  const coreTitle = 'Swap volume'
+  const [title = coreTitle, setTitle] = useLocalStorage('WooFiSwapVolumeTitle')
+
   const {
     dailyWooFiSwapVolume = [],
   } = useAppState(
@@ -73,7 +78,7 @@ function DailyVolumeChart({ timePeriod }) {
     .reduce(
       (acc, { date, volume }) => {
         acc.labels.push(date)
-        acc.series.push(volume)
+        acc.series.push(+volume)
         return acc
       },
       {
@@ -82,7 +87,17 @@ function DailyVolumeChart({ timePeriod }) {
       }
     )
   const datasets = [{ data: series }]
-  const title = 'Swap volume'
+  const onSubtitleClick = useCallback(() => {
+    if (title.includes('MA')) setTitle(coreTitle)
+    else setTitle(`${coreTitle} 50 day MA`)
+  }, [title])
+  const subtitle = <Button
+    size="small"
+    sx={{ textAlign: 'right', textTransform: 'none', width: 'fit-content', marginLeft: 'auto', py: 0 }}
+    onClick={onSubtitleClick}
+  >
+    {title === coreTitle ? 'Show MA' : 'Show all'}
+  </Button>
   const props = {
     title,
     key: title,
@@ -90,6 +105,12 @@ function DailyVolumeChart({ timePeriod }) {
     datasets,
     gradientIndex: 1,
     timePeriod,
+    subtitle,
+  }
+
+  if (title.includes('MA')) {
+    props.datasets[0].data = SMA.calculate({ period: 50, values: props.datasets[0].data })
+    props.labels = props.labels.slice(49)
   }
 
   return <RangeSliderLineChart {...props} />
