@@ -6,7 +6,7 @@ const { WOO_DAO_ETH_ADDRESS } = require('../../lib/treasury')
 const getTokenTickers = require('../../queries/getTokenTickers')
 const updatePositions = require('./updatePositions')
 
-async function fetchDammPositions() {
+module.exports = async function fetchDammPositions() {
   const fetchUpdate = async () => {
     const wooDammContractAddress = '0x33E67BB96d51d0B6cF759f4cF0c75916B04a0229'
 
@@ -55,5 +55,3 @@ async function fetchDammPositions() {
     fetchUpdate,
   })
 }
-
-fetchDammPositions()
