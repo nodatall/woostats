@@ -8,12 +8,12 @@ const fetchDammPositions = require('./fetchDammPositions')
 
 module.exports = async function updateWooDaoTreasury() {
   await Promise.all([
-    await fetchTokensAndPositionsFromDebank(),
-    await fetchBancorPositions(),
-    await fetchNearPositions(),
-    await fetchCBridgePositions(),
-    await fetchWooFiPositions(),
-    await fetchThetanutzPositions(),
-    await fetchDammPositions(),
+    fetchTokensAndPositionsFromDebank(),
+    fetchBancorPositions(),
+    fetchNearPositions(),
+    fetchCBridgePositions(),
+    fetchWooFiPositions(),
+    fetchThetanutzPositions(),
+    fetchDammPositions(),
   ])
 }
