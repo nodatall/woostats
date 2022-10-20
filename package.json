@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --colors --progress",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider; webpack --colors --progress",
     "build:dev": "webpack --colors --progress -w",
     "start:dev": "npm run build:dev & nodemon ./scripts/start",
     "start": "./scripts/start",
