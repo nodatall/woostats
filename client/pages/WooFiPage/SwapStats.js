@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { SMA } from 'technicalindicators'
 
 import { useAppState } from 'lib/appState'
@@ -62,10 +62,31 @@ export default function SwapStats({ timePeriod }) {
   </TwoColumns>
 }
 
-function DailyVolumeChart({ timePeriod }) {
-  const coreTitle = 'Swap volume'
-  const [title = coreTitle, setTitle] = useLocalStorage('WooFiSwapVolumeTitle')
+function LineOrMAChart({ coreTitle, ...props }) {
+  const [isMA = false, setIsMA] = useLocalStorage('isLineOrMAChartMA')
 
+  const onSubtitleClick = useCallback(() => {
+    setIsMA(!isMA)
+  }, [isMA])
+
+  props.subtitle = <Button
+    size="small"
+    sx={{ textAlign: 'right', textTransform: 'none', width: 'fit-content', marginLeft: 'auto', py: 0 }}
+    onClick={onSubtitleClick}
+  >
+    {isMA ? 'Show daily' : 'Show MA'}
+  </Button>
+
+  if (isMA) {
+    props.datasets[0].data = SMA.calculate({ period: 50, values: props.datasets[0].data })
+    props.labels = props.labels.slice(49)
+  }
+  props.title = isMA ? `${coreTitle} 50 day MA` : coreTitle
+
+  return <RangeSliderLineChart {...props} />
+}
+
+function DailyVolumeChart({ timePeriod }) {
   const {
     dailyWooFiSwapVolume = [],
   } = useAppState(
@@ -87,33 +108,18 @@ function DailyVolumeChart({ timePeriod }) {
       }
     )
   const datasets = [{ data: series }]
-  const onSubtitleClick = useCallback(() => {
-    if (title.includes('MA')) setTitle(coreTitle)
-    else setTitle(`${coreTitle} 50 day MA`)
-  }, [title])
-  const subtitle = <Button
-    size="small"
-    sx={{ textAlign: 'right', textTransform: 'none', width: 'fit-content', marginLeft: 'auto', py: 0 }}
-    onClick={onSubtitleClick}
-  >
-    {title === coreTitle ? 'Show MA' : 'Show all'}
-  </Button>
+  const coreTitle = 'Swap volume'
+
   const props = {
-    title,
-    key: title,
+    key: coreTitle,
     labels,
     datasets,
     gradientIndex: 1,
     timePeriod,
-    subtitle,
+    coreTitle,
   }
 
-  if (title.includes('MA')) {
-    props.datasets[0].data = SMA.calculate({ period: 50, values: props.datasets[0].data })
-    props.labels = props.labels.slice(49)
-  }
-
-  return <RangeSliderLineChart {...props} />
+  return <LineOrMAChart {...props} />
 }
 
 function DailyNumberOfSwapsChart({ timePeriod }) {
@@ -129,7 +135,7 @@ function DailyNumberOfSwapsChart({ timePeriod }) {
     .reduce(
       (acc, { date, number }) => {
         acc.labels.push(date)
-        acc.series.push(number)
+        acc.series.push(+number)
         return acc
       },
       {
@@ -138,11 +144,10 @@ function DailyNumberOfSwapsChart({ timePeriod }) {
       }
     )
   const datasets = [{ data: series }]
-  const title = 'Number of trades'
-
+  const coreTitle = 'Number of trades'
   const props = {
-    title,
-    key: title,
+    coreTitle,
+    key: coreTitle,
     labels,
     datasets,
     gradientIndex: 1,
@@ -150,5 +155,5 @@ function DailyNumberOfSwapsChart({ timePeriod }) {
     timePeriod,
   }
 
-  return <RangeSliderLineChart {...props} />
+  return <LineOrMAChart {...props} />
 }
