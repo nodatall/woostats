@@ -1,15 +1,16 @@
-import  { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import dayjs from 'lib/dayjs'
 import { useLocalStorage } from 'lib/storageHooks'
-import useDidMountEffect from 'lib/useDidMountEffectHook'
 
 let rangeSetTimeout
 let rangeSliderDebounce = null
 
 export default function useDateRangeSliderHook({ length, title, defaultPeriod }) {
   const defaultRange = [1, length]
-  const [range = defaultRange, _setRange] = useLocalStorage(`${title}RangeSlider`)
+  const [range = defaultRange, _setRange] = (
+    defaultPeriod ? useState(defaultRange) : useLocalStorage(`${title}RangeSlider`)
+  )
   const [
     lastRangeDate = dayjs.tz().format('YYYY-MM-DD'), setLastRangeDate
   ] = useLocalStorage(`${title}RangeSliderLastDate`)
@@ -39,8 +40,9 @@ export default function useDateRangeSliderHook({ length, title, defaultPeriod })
     []
   )
 
-  useDidMountEffect(
+  useEffect(
     () => {
+      if (!defaultPeriod) return
       const start = defaultPeriod === -1 ? 1 : length - defaultPeriod
       setRange([start, length], true)
     },
