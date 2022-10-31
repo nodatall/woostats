@@ -7,10 +7,8 @@ let rangeSetTimeout
 let rangeSliderDebounce = null
 
 export default function useDateRangeSliderHook({ length, title, defaultPeriod }) {
-  const defaultRange = [1, length]
-  const [range = defaultRange, _setRange] = (
-    defaultPeriod ? useState(defaultRange) : useLocalStorage(`${title}RangeSlider`)
-  )
+  const defaultRange = [defaultPeriod === -1 ? 1 : length - defaultPeriod, length]
+  const [range = defaultRange, _setRange] = useState(defaultRange)
   const [
     lastRangeDate = dayjs.tz().format('YYYY-MM-DD'), setLastRangeDate
   ] = useLocalStorage(`${title}RangeSliderLastDate`)
@@ -43,10 +41,11 @@ export default function useDateRangeSliderHook({ length, title, defaultPeriod })
   useEffect(
     () => {
       if (!defaultPeriod) return
-      const start = defaultPeriod === -1 ? 1 : length - defaultPeriod
+      let start = defaultPeriod === -1 ? 1 : length - defaultPeriod
+      if (start < 0) start = 1
       setRange([start, length], true)
     },
-    [defaultPeriod]
+    [defaultPeriod, title]
   )
 
   return { range, setRange }

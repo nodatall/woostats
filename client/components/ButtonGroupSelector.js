@@ -31,7 +31,7 @@ export default function ButtonGroupSelector({
     </Button>
   })
 
-  return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', mt: 2, ...sx }}>
+  return <ButtonGroup sx={{ display: 'flex', justifyContent: 'right', ...sx }}>
     {buttons}
   </ButtonGroup>
 }

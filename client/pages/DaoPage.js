@@ -43,7 +43,7 @@ function ProtocolBalances({ inProtocols }) {
 
   return inProtocols.map(protocolDetails => {
     if (protocolDetails.type === 'staking') {
-      return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
+      return <ContentCard key={protocolDetails.name}>
         <Stack {...{ sx: ROW_CONTAINER_STYLES }}>
           <Stack sx={{ flexDirection: 'row', alignItems: 'center' }}>
             <img src={protocolDetails.logoUrl} style={{ width: '20px', height: '20px' }} />
@@ -73,7 +73,7 @@ function ProtocolBalances({ inProtocols }) {
           <Typography variant="body2" sx={{ textAlign: 'right' }}>${numeral(lp.value).format('0,0')}</Typography>
         </Stack>
       )
-      return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
+      return <ContentCard key={protocolDetails.name}>
         <TopRow {...{
           title: protocolDetails.name,
           value: protocolDetails.value,
@@ -126,7 +126,7 @@ function ProtocolBalances({ inProtocols }) {
       })
 
       const rewards = protocolDetails.rewards
-      return <ContentCard sx={{ p: 2 }} key={protocolDetails.name}>
+      return <ContentCard key={protocolDetails.name}>
         <TopRow {...{
           title: protocolDetails.name,
           value: protocolDetails.value,
@@ -173,7 +173,7 @@ function WalletBalances({ tokens }) {
     return <TokenRow {...{ token, key: token.symbol + (token.chainLogoUrl || '') }} />
   })
 
-  return <ContentCard sx={{ p: 2 }}>
+  return <ContentCard>
     <TopRow {...{ title: 'Wallet', value: walletBalance, iconElement: <AccountBalanceWalletIcon /> }} />
     {tokenList}
   </ContentCard>

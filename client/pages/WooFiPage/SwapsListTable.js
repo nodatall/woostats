@@ -7,18 +7,20 @@ import dayjs from 'lib/dayjs'
 import { useTheme } from '@mui/material/styles'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import Table from '@mui/material/Table'
-import Box from '@mui/material/Box'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TablePagination from '@mui/material/TablePagination'
 
+import ChartTopBar from 'components/ChartTopBar'
+import ContentCard from 'components/ContentCard'
+
 const chainToExplorerMap = {
   'bsc': 'https://bscscan.com/',
 }
 
-export default function SwapsListTable({ swaps, minDate }) {
+export default function SwapsListTable({ swaps, minDate, title }) {
   const theme = useTheme()
   const headers = ['Time', 'Volume', 'Source', 'Chain', 'Pair' ]
   const hiddenOnMobile = ['Source', 'Chain']
@@ -75,7 +77,8 @@ export default function SwapsListTable({ swaps, minDate }) {
     return <TableCell {...props}>{header}</TableCell>
   })
 
-  return <Box>
+  return <ContentCard>
+    <ChartTopBar {...{ title }} />
     <Table
       sx={{
         minWidth: 325,
@@ -102,5 +105,5 @@ export default function SwapsListTable({ swaps, minDate }) {
       page={page}
       onPageChange={handleChangePage}
     />
-  </Box>
+  </ContentCard>
 }

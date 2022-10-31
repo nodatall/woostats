@@ -13,6 +13,8 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import CircleIcon from '@mui/icons-material/Circle'
 
+import ContentCard from 'components/ContentCard'
+import ChartTopBar from 'components/ChartTopBar'
 import RangeSlider from 'components/RangeSlider'
 
 const VolumeBySourcesChart = React.memo(function ({ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }) {
@@ -155,28 +157,31 @@ const VolumeBySourcesChart = React.memo(function ({ dailyWooFiVolumeBySources, t
     </Stack>
   )
 
-  return <Box>
-    <Stack direction="row" justifyContent="center">
-      <Box sx={{ maxWidth: '700px', position: 'relative', minWidth: '50px', minHeight: '50px', flexGrow: 1 }}>
-        <Stack alignItems="center" sx={{ position: 'absolute', top: 'calc(50% - 25px)', right: 'calc(50% - 25px)'}}>
-          <Typography variant="h6">${numeral(total.toFixed(2)).format('0a')}</Typography>
-          <Typography variant="caption">Total</Typography>
-        </Stack>
-        <Box sx={{ py: 2 }}>
-          <Doughnut {...config} />
+  return <ContentCard key="VolumeBySources">
+    <ChartTopBar {...{ title: 'Volume by sources', sx: { minHeight: '0px' } }} />
+    <Box>
+      <Stack direction="row" justifyContent="center">
+        <Box sx={{ maxWidth: '500px', position: 'relative', minWidth: '50px', minHeight: '50px', flexGrow: 1 }}>
+          <Stack alignItems="center" sx={{ position: 'absolute', top: 'calc(50% - 25px)', right: 'calc(50% - 25px)'}}>
+            <Typography variant="h6">${numeral(total.toFixed(2)).format('0a')}</Typography>
+            <Typography variant="caption">Total</Typography>
+          </Stack>
+          <Box sx={{ py: 2 }}>
+            <Doughnut {...config} />
+          </Box>
         </Box>
-      </Box>
-      <Stack sx={{ ml: 2, justifyContent: 'center' }}>
-        {labelElements}
+        <Stack sx={{ ml: 2, justifyContent: 'center' }}>
+          {labelElements}
+        </Stack>
       </Stack>
-    </Stack>
-    <Stack direction="row" justifyContent="center">
-      <Typography variant="body1">
-        {dayjs(dateLabels[range[0] - 1]).format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).format('MM/DD/YYYY')}
-      </Typography>
-    </Stack>
-    <RangeSlider {...{ range, labels: dateLabels, setRange }} />
-  </Box>
+      <Stack direction="row" justifyContent="center" sx={{ mt: 1 }}>
+        <Typography variant="body1">
+          {dayjs(dateLabels[range[0] - 1]).format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).format('MM/DD/YYYY')}
+        </Typography>
+      </Stack>
+      <RangeSlider {...{ range, labels: dateLabels, setRange }} />
+    </Box>
+  </ContentCard>
 }, function(prevProps, nextProps) {
   if (prevProps.timePeriod !== nextProps.timePeriod) return false
   for (const prop in prevProps) {

@@ -3,7 +3,7 @@ import Card from '@mui/material/Card'
 
 const ContentCard = ({ sx = {}, children }, ref) => {
   const styles = theme => ({
-    p: 4,
+    p: 2,
     mb: 4,
     ...sx,
     [theme.breakpoints.down('sm')]: {

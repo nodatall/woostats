@@ -3,6 +3,7 @@ const WebSocket = require('ws')
 const { web3_eth } = require('./web3')
 const request = require('./request')
 const dayjs = require('./dayjs')
+const logger = require('./logger')
 const createWooFiEvents = require('../commands/createWooFiEvents')
 const { queueWooFiEventType } = require('../commands/processWooFiEvents')
 

@@ -122,7 +122,7 @@ export default function LineChart({
         time: {
           unit: labels.length > 60 ? 'month' : 'day',
           displayFormats: {
-            day: 'mm/dd'
+            day: 'MM/dd'
           }
         },
       },

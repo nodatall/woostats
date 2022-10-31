@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { useAppState } from 'lib/appState'
-import { useLocalStorage } from 'lib/storageHooks'
 
-import WooFiTimePeriodSelect from 'components/WooFiTimePeriodSelect'
+import TimePeriodSelect from 'components/TimePeriodSelect'
 import { useTheme } from '@mui/material/styles'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
@@ -18,22 +17,14 @@ import Typography from '@mui/material/Typography'
 
 export default function TopNav() {
   const theme = useTheme()
-  const [timePeriod = -1, setTimePeriod] = useLocalStorage('wooFiTimePeriod')
 
   const { pathname } = useLocation()
-  const [showWooFiMonthSelector, setShowWooFiMonthSelector] = useState(false)
+  const [showTimePeriodSelect, setShowWooFiMonthSelector] = useState(true)
 
   useEffect(() => {
-    if (!pathname.includes('woofi')) setShowWooFiMonthSelector(false)
-    const onScroll = () => {
-      const shouldShowWooFiMonth = pathname.includes('woofi') && window.scrollY > 109
-      if (shouldShowWooFiMonth && !showWooFiMonthSelector) setShowWooFiMonthSelector(true)
-      else if (!shouldShowWooFiMonth && showWooFiMonthSelector) setShowWooFiMonthSelector(false)
-    }
-    window.addEventListener('scroll', onScroll)
-
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [showWooFiMonthSelector, pathname])
+    if (!pathname.includes('woofi') || pathname !== '/') setShowWooFiMonthSelector(true)
+    else setShowWooFiMonthSelector(false)
+  }, [pathname])
 
   return (
     <Box sx={{ flexGrow: 1, position: 'fixed', width: '100%', zIndex: 1 }}>
@@ -63,8 +54,8 @@ export default function TopNav() {
           }}
         >
           <WooStatsLogo {...{ theme }} />
-          {showWooFiMonthSelector &&
-            <WooFiTimePeriodSelect {...{ timePeriod, setTimePeriod }} />
+          {showTimePeriodSelect &&
+            <TimePeriodSelect />
           }
           <WooPrice {...{ theme }} />
           <TopNavLink {...{ to: '/', pathname, text: 'Network' }} />
@@ -109,7 +100,7 @@ function WooPrice({ theme }) {
     variant="h6"
     sx={{
       color: 'primary.main',
-      mr: 1,
+      mr: 2,
       display: 'flex',
       alignItems: 'center',
       [theme.breakpoints.down('md')]: {
@@ -127,7 +118,6 @@ function TopNavLink({ text, pathname, sx = {}, to }) {
     const styles = {
       py: 1,
       px: 2,
-      ml: 2,
       [theme.breakpoints.down('sm')]: {
         py: .5,
         px: 1,

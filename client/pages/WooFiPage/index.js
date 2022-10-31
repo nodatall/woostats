@@ -14,19 +14,17 @@ import InputLabel from '@mui/material/InputLabel'
 
 import ComingSoon from 'components/ComingSoon'
 import ContentCard from 'components/ContentCard'
-import WooFiTimePeriodSelect from 'components/WooFiTimePeriodSelect'
 import ButtonGroupSelector from 'components/ButtonGroupSelector'
 import SwapStats from './SwapStats'
 
 export default function WooFiPage(){
   const [section = 'Swap', setSection] = useLocalStorage('wooFiStatsSection')
-  const [timePeriod = -1, setTimePeriod] = useLocalStorage('wooFiTimePeriod')
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
 
   return <Box>
     <ContentCard sx={{ mt: 0, pt: 0, pb: 2 }}>
       <Stack direction="row" justifyContent="center" sx={{ flexWrap: 'wrap' }}>
         <ChainChooser/>
-        <WooFiTimePeriodSelect {...{ timePeriod, setTimePeriod, sx: { mt: 2 } }} />
         <SectionChooser {...{ section, setSection }} />
       </Stack>
     </ContentCard>

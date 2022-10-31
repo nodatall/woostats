@@ -17,6 +17,8 @@ import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import AggregateNetworkVolumeBox from './AggregateNetworkVolumeBox'
 
 export default function NetworkPage() {
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
+
   const {
     wooSpotVolume = [],
     aggregateVolume,
@@ -85,6 +87,7 @@ export default function NetworkPage() {
       key: title,
       labels: wooVolumeLabels,
       datasets,
+      timePeriod,
     }
 
     let chart
@@ -114,6 +117,7 @@ function MAChart({ ...props }) {
   props.title = props.title.replace('[day]', maLength)
 
   props.subtitle = <ButtonGroupSelector {...{
+    sx: { mt: 1 },
     values: [25, 50, 100],
     current: maLength,
     setCurrent: setMaLength,
@@ -136,6 +140,7 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
     props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length))
   }
   props.subtitle = <ButtonGroupSelector {...{
+    sx: { mt: 1 },
     values: [
       1,
       0,

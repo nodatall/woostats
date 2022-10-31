@@ -4,13 +4,11 @@ import isEqual from 'lodash/isEqual'
 import useDateRangeSlider from 'lib/useDateRangeSliderHook'
 
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
 
 import LineChart from 'components/LineChart'
 import ContentCard from 'components/ContentCard'
 import RangeSlider from 'components/RangeSlider'
-import Tooltip from './Tooltip'
+import ChartTopBar from 'components/ChartTopBar'
 
 const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
 
@@ -24,7 +22,6 @@ const RangeSliderLineChart = React.memo(function ({
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
 
-
   datasets = datasets.map(dataset => {
     return {
       ...dataset,
@@ -32,16 +29,8 @@ const RangeSliderLineChart = React.memo(function ({
     }
   })
 
-  return <ContentCard sx={{ p: 2, key: title }} >
-    <Stack sx={{flexDirection: 'row-reverse', flexWrap: 'wrap', mb: 3, minHeight: '50px'}}>
-      <Stack>
-        <Typography variant="h6" sx={{ textAlign: 'right' }}>
-          {title}
-        </Typography>
-        {subtitle}
-      </Stack>
-      {tooltip && <Tooltip {...{tooltip, denominator}} />}
-    </Stack>
+  return <ContentCard sx={{ key: title }} >
+    <ChartTopBar {...{ title, subtitle, tooltip, denominator }} />
     <Box ref={containerRef}>
       <LineChart {...{
         labels: isMA ? labels : reduceArrayToRange(labels, range),

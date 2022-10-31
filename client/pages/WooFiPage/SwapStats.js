@@ -1,18 +1,16 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { SMA } from 'technicalindicators'
 
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
 
-import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
-import ContentCard from 'components/ContentCard'
 import Loading from 'components/Loading'
 import TwoColumns from 'components/TwoColumns'
 import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import SwapsListTable from './SwapsListTable'
 import VolumeBySourcesChart from './VolumeBySourcesChart'
-import VolumeByAssetsTable from './VolumeByAssetsTable'
+import VolumeByAssets from './VolumeByAssets'
 
 export default function SwapStats({ timePeriod }) {
   const statStateKeys = [
@@ -35,30 +33,10 @@ export default function SwapStats({ timePeriod }) {
   return <TwoColumns>
     <DailyVolumeChart key="DailyVolumeChart" timePeriod={timePeriod} />
     <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" timePeriod={timePeriod} />
-    <ContentCard key="VolumeBySources">
-      <Typography variant="h6">
-        Volume by sources
-      </Typography>
-      <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
-    </ContentCard>
-    <ContentCard key="VolumeByAssets">
-      <Typography variant="h6">
-        Volume by assets
-      </Typography>
-      <VolumeByAssetsTable {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
-    </ContentCard>
-    <ContentCard>
-      <Typography variant="h6">
-        Recent Trades
-      </Typography>
-      <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true }} />
-    </ContentCard>
-    <ContentCard>
-      <Typography variant="h6">
-        Top Trades (All time)
-      </Typography>
-      <SwapsListTable {...{ swaps: topWooFiSwaps }} />
-    </ContentCard>
+    <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
+    <VolumeByAssets {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
+    <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
+    <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} />
   </TwoColumns>
 }
 

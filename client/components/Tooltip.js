@@ -19,7 +19,7 @@ export default function Tooltip({ tooltip, denominator = '$' }) {
   let text = !Array.isArray(body)
     ? addDemoninator(body, denominator)
     : body.map((value, index) =>
-      <Typography variant="h6" key={value} sx={{ color: lineColors[index] }}>
+      <Typography variant="h6" key={value} sx={{ color: lineColors[index], marginBottom: -.5 }}>
         {addDemoninator(value, denominator)}
       </Typography>
     )
