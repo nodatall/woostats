@@ -13,10 +13,10 @@ function recordToWooFiSwap(record) {
   return formattedRecord
 }
 
-const selectWooFiSwapsQuery = function(chain = 'all') {
+const selectWooFiSwapsQuery = function(chain) {
   const query = knex
     .select(
-      'woofi_swaps.*',
+      `woofi_swaps_${chain}.*`,
       'a.logo_url AS from_logo_url',
       'a.symbol AS from_symbol',
       'b.logo_url AS to_logo_url',
@@ -33,11 +33,8 @@ const selectWooFiSwapsQuery = function(chain = 'all') {
         .on('woofi_swaps.chain', 'b.chain')
         .on('woofi_swaps.to_token', 'b.address')
     })
+    .where('woofi_swaps.chain', chain)
     .limit(50)
-
-  if (chain !== 'all') {
-    query.where('woofi_swaps.chain', chain)
-  }
 
   return query
 }

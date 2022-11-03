@@ -14,7 +14,7 @@ import VolumeByAssets from './VolumeByAssets'
 
 export default function SwapStats({ timePeriod }) {
   const statStateKeys = [
-    'recentWooFiSwaps',
+    'recentWooFiSwapsbsc',
     'topWooFiSwaps',
     'dailyWooFiVolumeBySources',
     'dailyWooFiSwapVolume',

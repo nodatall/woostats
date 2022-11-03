@@ -7,6 +7,7 @@ const getDailyNumberOfWooFiSwaps = require('./getDailyNumberOfWooFiSwaps')
 const getDailyVolumeBySources = require('./getDailyVolumeBySources')
 const getDailyVolumeByAssets = require('./getDailyVolumeByAssets')
 const getTokensFromContracts = require('./getTokensFromContracts')
+const CHAINS = Object.keys(require('../../lib/chainLogos'))
 
 const getFunctionIndexMap = {
   1: getRecentWooFiSwaps,
@@ -18,7 +19,7 @@ const getFunctionIndexMap = {
   7: getTokensFromContracts,
 }
 const eventGetFunctionMap = {
-  'nakji.woofi.0_0_0.WOOPP_WooSwap': [1, 2, 3, 4, 5, 6, 7],
+  'swap': [1, 2, 3, 4, 5, 6, 7],
 }
 
 const eventsByChain = {
@@ -35,7 +36,7 @@ for (const chain in eventsByChain) {
 module.exports = async function getWooFiStats({ eventTypes, getAll = false }) {
   const stats = {}
   if (getAll) {
-    for (const chain of Object.keys(eventsByChain)) {
+    for (const chain of CHAINS) {
       const getFunctions = Object.values(getFunctionIndexMap)
       await callGetFunctionsForChain({ chain, getFunctions, stats })
     }
@@ -65,6 +66,6 @@ async function callGetFunctionsForChain({ chain, getFunctions, stats }) {
   const sql = db.helpers.concat(queries)
   const records = await client.multi(sql)
   records.forEach((record, index) => {
-    Object.assign(stats, getFunctions[index].formatRecords(record))
+    Object.assign(stats, getFunctions[index].formatRecords({ record, chain }))
   })
 }

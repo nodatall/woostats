@@ -11,8 +11,8 @@ function buildQuery({ chain, fromHours }) {
   return query.toString()
 }
 
-function formatRecords(records) {
-  return { topWooFiSwaps: records.map(recordToWooFiSwap) }
+function formatRecords({ records, chain }) {
+  return { [`topWooFiSwaps:${chain}`]: records.map(recordToWooFiSwap) }
 }
 
 module.exports = { buildQuery, formatRecords }
