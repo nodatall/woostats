@@ -22,7 +22,7 @@ export default function TopNav() {
   const [showTimePeriodSelect, setShowWooFiMonthSelector] = useState(true)
 
   useEffect(() => {
-    if (!pathname.includes('woofi') || pathname !== '/') setShowWooFiMonthSelector(true)
+    if (pathname.includes('woofi') || pathname === '/') setShowWooFiMonthSelector(true)
     else setShowWooFiMonthSelector(false)
   }, [pathname])
 

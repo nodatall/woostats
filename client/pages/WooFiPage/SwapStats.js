@@ -66,12 +66,14 @@ function LineOrMAChart({ coreTitle, ...props }) {
 
 function DailyVolumeChart({ timePeriod }) {
   const {
-    dailyWooFiSwapVolume = [],
+    dailyWooFiSwapVolumex = [],
   } = useAppState(
     [
       'dailyWooFiSwapVolume',
     ]
   )
+
+  if (!dailyWooFiSwapVolumex) return <Loading />
 
   const { labels, series } = dailyWooFiSwapVolume
     .reduce(

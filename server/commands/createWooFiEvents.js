@@ -8,7 +8,7 @@ const createTokenContracts = require('../commands/createTokenContracts')
 const eventTypeMap = {
   'nakji.woofi.0_0_0.WOOPP_WooSwap': {
     chain: 'bsc',
-    db: 'woofi_swaps',
+    db: 'woofi_swaps_bsc',
   },
 }
 

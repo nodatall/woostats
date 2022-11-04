@@ -42,8 +42,9 @@ module.exports = async function getWooFiStats({ eventTypes, getAll = false }) {
     }
   } else {
     const getFunctionIndexesByChain = {}
-    for (const eventType of eventTypes) {
+    for (const eventType of eventTypes) { // modify to loop per chain instead of event type
       const chain = eventTypesToChainMap[eventType]
+      console.log(`chain ==>`, chain)
       const getFunctionIndexes = eventGetFunctionMap[eventType]
       getFunctionIndexesByChain[chain] = getFunctionIndexesByChain[chain]
         ? getFunctionIndexesByChain[chain].add([...getFunctionIndexes])

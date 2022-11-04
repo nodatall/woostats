@@ -1,7 +1,7 @@
 function buildQuery({ chain }) {
   const query = `
     SELECT "date"::date::text, sum(usd_volume) as volume, source
-    FROM woofi_swaps
+    FROM woofi_swaps_${chain}
     WHERE chain = $1
     GROUP BY source, date::date ORDER BY date::date ASC;
   `
