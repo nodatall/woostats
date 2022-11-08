@@ -1,5 +1,5 @@
 const fetchHistoricalEventsForNakjiStream = require('../queries/fetchHistoricalEventsForNakjiStream')
-const createWooFiEvents = require('./createWooFiEvents')
+const { createWooFiEvents } = require('./createWooFiEvents')
 const dayjs = require('../lib/dayjs')
 
 module.exports = async function updateHistoricalWooFiEvents({ stream, from = 0 }) {

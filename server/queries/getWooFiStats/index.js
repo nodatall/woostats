@@ -1,5 +1,6 @@
 const { client, db } = require('../../database')
 
+const { eventTypeMap } = require('../../commands/createWooFiEvents')
 const getRecentWooFiSwaps = require('./getRecentWooFiSwaps')
 const getTopWooFiSwaps = require('./getTopWooFiSwaps')
 const getDailySwapVolume = require('./getDailySwapVolume')
@@ -22,17 +23,6 @@ const eventGetFunctionMap = {
   'swap': [1, 2, 3, 4, 5, 6, 7],
 }
 
-const eventsByChain = {
-  bsc: ['nakji.woofi.0_0_0.WOOPP_WooSwap']
-}
-
-const eventTypesToChainMap = {}
-for (const chain in eventsByChain) {
-  for (const event of eventsByChain[chain]) {
-    eventTypesToChainMap[event] = chain
-  }
-}
-
 module.exports = async function getWooFiStats({ eventTypes, getAll = false }) {
   const stats = {}
   if (getAll) {
@@ -43,9 +33,8 @@ module.exports = async function getWooFiStats({ eventTypes, getAll = false }) {
   } else {
     const getFunctionIndexesByChain = {}
     for (const eventType of eventTypes) { // modify to loop per chain instead of event type
-      const chain = eventTypesToChainMap[eventType]
-      console.log(`chain ==>`, chain)
-      const getFunctionIndexes = eventGetFunctionMap[eventType]
+      const { chain, type } = eventTypeMap[eventType]
+      const getFunctionIndexes = eventGetFunctionMap[type]
       getFunctionIndexesByChain[chain] = getFunctionIndexesByChain[chain]
         ? getFunctionIndexesByChain[chain].add([...getFunctionIndexes])
         : new Set([...getFunctionIndexes])

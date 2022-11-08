@@ -30,7 +30,7 @@ const selectWooFiSwapsQuery = function(chain) {
     .join({ b: 'token_contracts' }, function() {
       this.on(`${swapsDb}.to_token`, 'b.address')
     })
-    .where('token_contracts.chain', chain)
+    .where('a.chain', chain)
     .limit(50)
 
   return query

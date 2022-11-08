@@ -1,7 +1,7 @@
 function buildQuery({ chain }) {
   const query = `
     SELECT "date"::date::text, count(*) as number
-    FROM woofi_swaps
+    FROM woofi_swaps_${chain}
     WHERE chain = $1
     GROUP BY "date"::date ORDER BY date ASC;
   `
