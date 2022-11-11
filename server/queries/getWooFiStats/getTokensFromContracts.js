@@ -4,7 +4,7 @@ function buildQuery() {
   return { query: query.toString() }
 }
 
-function formatRecords(records) {
+function formatRecords({ records }) {
   return { wooFiAssetTokens: records }
 }
 

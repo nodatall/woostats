@@ -55,7 +55,7 @@ async function callGetFunctionsForChain({ chain, getFunctions, stats }) {
   const queries = getFunctions.map(({ buildQuery }) => buildQuery({ chain }))
   const sql = db.helpers.concat(queries)
   const records = await client.multi(sql)
-  records.forEach((record, index) => {
-    Object.assign(stats, getFunctions[index].formatRecords({ record, chain }))
+  records.forEach((records, index) => {
+    Object.assign(stats, getFunctions[index].formatRecords({ records, chain }))
   })
 }
