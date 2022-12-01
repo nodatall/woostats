@@ -18,7 +18,6 @@ async function startProcessor(socket) {
       const startTime = performance.now()
 
       const eventTypes = [...recentWooFiEventTypes]
-      console.log(`Processing WooFi eventTypes ==>`, eventTypes)
       recentWooFiEventTypes.clear()
 
       const wooFiStats = await getWooFiStats({ eventTypes })

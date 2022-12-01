@@ -41,7 +41,10 @@ async function update(changes) {
     for (const _cacheName in cacheKeysByCacheName) {
       if (cacheKeysByCacheName[_cacheName].includes(key)) cacheName = _cacheName
     }
-    if (!cacheName) throw new Error(`no cache name in cacheKeysByCacheName matching "${key}"`)
+    if (!cacheName) {
+      console.error(`no cache name in cacheKeysByCacheName matching "${key}"`)
+      continue
+    }
 
     if (!memoryCache[cacheName]) {
       const existingCache = await getCache(cacheName)

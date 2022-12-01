@@ -6,37 +6,39 @@ import { useLocalStorage } from 'lib/storageHooks'
 
 import Button from '@mui/material/Button'
 import Loading from 'components/Loading'
+import ContentCardLoading from 'components/ContentCardLoading'
 import TwoColumns from 'components/TwoColumns'
 import RangeSliderLineChart from 'components/RangeSliderLineChart'
+import ContentCard from 'components/ContentCard'
 import SwapsListTable from './SwapsListTable'
 import VolumeBySourcesChart from './VolumeBySourcesChart'
 import VolumeByAssets from './VolumeByAssets'
 
 export default function SwapStats({ timePeriod }) {
-  const statStateKeys = [
-    'recentWooFiSwapsbsc',
-    'topWooFiSwaps',
-    'dailyWooFiVolumeBySources',
-    'dailyWooFiSwapVolume',
-    'dailyWooFiVolumeByAssets',
-  ]
-  const state = useAppState(statStateKeys)
-  if (statStateKeys.some(key => state[key] === undefined)) return <Loading />
-  const {
-    recentWooFiSwaps,
-    topWooFiSwaps,
-    dailyWooFiVolumeBySources,
-    dailyWooFiSwapVolume,
-    dailyWooFiVolumeByAssets,
-  } = state
+  // const statStateKeys = [
+  //   'recentWooFiSwapsbsc',
+  //   'topWooFiSwaps',
+  //   'dailyWooFiVolumeBySources',
+  //   'dailyWooFiSwapVolume',
+  //   'dailyWooFiVolumeByAssets',
+  // ]
+  // const state = useAppState(statStateKeys)
+  // if (statStateKeys.some(key => state[key] === undefined)) return <Loading />
+  // const {
+  //   recentWooFiSwaps,
+  //   topWooFiSwaps,
+  //   dailyWooFiVolumeBySources,
+  //   dailyWooFiSwapVolume,
+  //   dailyWooFiVolumeByAssets,
+  // } = state
 
   return <TwoColumns>
     <DailyVolumeChart key="DailyVolumeChart" timePeriod={timePeriod} />
     <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" timePeriod={timePeriod} />
-    <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
+    {/* <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
     <VolumeByAssets {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
     <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
-    <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} />
+    <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} /> */}
   </TwoColumns>
 }
 
@@ -66,14 +68,15 @@ function LineOrMAChart({ coreTitle, ...props }) {
 
 function DailyVolumeChart({ timePeriod }) {
   const {
-    dailyWooFiSwapVolumex = [],
+    ['dailyWooFiSwapVolume:bsc']: dailyWooFiSwapVolume = [],
   } = useAppState(
     [
-      'dailyWooFiSwapVolume',
+      'dailyWooFiSwapVolume:bsc',
     ]
   )
 
-  if (!dailyWooFiSwapVolumex) return <Loading />
+  if (!dailyWooFiSwapVolume || dailyWooFiSwapVolume.length === 0) return <ContentCardLoading />
+  console.log(`dailyWooFiSwapVolume ==>`, dailyWooFiSwapVolume)
 
   const { labels, series } = dailyWooFiSwapVolume
     .reduce(
@@ -104,12 +107,14 @@ function DailyVolumeChart({ timePeriod }) {
 
 function DailyNumberOfSwapsChart({ timePeriod }) {
   const {
-    dailyNumberOfWooFiSwaps = [],
+    ['dailyNumberOfWooFiSwaps:bsc']: dailyNumberOfWooFiSwaps = [],
   } = useAppState(
     [
       'dailyNumberOfWooFiSwaps',
     ]
   )
+
+  if (!dailyNumberOfWooFiSwaps || dailyNumberOfWooFiSwaps.length === 0) return <ContentCardLoading />
 
   const { labels, series } = dailyNumberOfWooFiSwaps
     .reduce(
