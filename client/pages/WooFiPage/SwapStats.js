@@ -3,6 +3,7 @@ import { SMA } from 'technicalindicators'
 
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
+import useWooFiState from 'lib/useWooFiStateHook'
 
 import Button from '@mui/material/Button'
 import Loading from 'components/Loading'
@@ -35,8 +36,9 @@ export default function SwapStats({ timePeriod }) {
   return <TwoColumns>
     <DailyVolumeChart key="DailyVolumeChart" timePeriod={timePeriod} />
     <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" timePeriod={timePeriod} />
-    {/* <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
-    <VolumeByAssets {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
+    {/* <VolumeBySourcesChart {...{ timePeriod }} />
+    <div>hello</div> */}
+    {/* <VolumeByAssets {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
     <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
     <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} /> */}
   </TwoColumns>
@@ -67,16 +69,8 @@ function LineOrMAChart({ coreTitle, ...props }) {
 }
 
 function DailyVolumeChart({ timePeriod }) {
-  const {
-    ['dailyWooFiSwapVolume:bsc']: dailyWooFiSwapVolume = [],
-  } = useAppState(
-    [
-      'dailyWooFiSwapVolume:bsc',
-    ]
-  )
-
-  if (!dailyWooFiSwapVolume || dailyWooFiSwapVolume.length === 0) return <ContentCardLoading />
-  console.log(`dailyWooFiSwapVolume ==>`, dailyWooFiSwapVolume)
+  const { dailyWooFiSwapVolume, loading } = useWooFiState(['dailyWooFiSwapVolume'])
+  if (loading) return <ContentCardLoading />
 
   const { labels, series } = dailyWooFiSwapVolume
     .reduce(
@@ -106,15 +100,8 @@ function DailyVolumeChart({ timePeriod }) {
 }
 
 function DailyNumberOfSwapsChart({ timePeriod }) {
-  const {
-    ['dailyNumberOfWooFiSwaps:bsc']: dailyNumberOfWooFiSwaps = [],
-  } = useAppState(
-    [
-      'dailyNumberOfWooFiSwaps',
-    ]
-  )
-
-  if (!dailyNumberOfWooFiSwaps || dailyNumberOfWooFiSwaps.length === 0) return <ContentCardLoading />
+  const { dailyNumberOfWooFiSwaps, loading } = useWooFiState(['dailyNumberOfWooFiSwaps'])
+  if (loading) return <ContentCardLoading />
 
   const { labels, series } = dailyNumberOfWooFiSwaps
     .reduce(
