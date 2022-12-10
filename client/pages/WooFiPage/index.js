@@ -19,7 +19,6 @@ import SwapStats from './SwapStats'
 
 export default function WooFiPage(){
   const [section = 'Swap', setSection] = useLocalStorage('wooFiStatsSection')
-  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
 
   return <Box>
     <ContentCard sx={{ mt: 0, pt: 0, pb: 2 }}>
@@ -28,7 +27,7 @@ export default function WooFiPage(){
         <SectionChooser {...{ section, setSection }} />
       </Stack>
     </ContentCard>
-    {section === 'Swap' ? <SwapStats {...{ timePeriod }} /> : <ComingSoon />}
+    {section === 'Swap' ? <SwapStats /> : <ComingSoon />}
   </Box>
 }
 

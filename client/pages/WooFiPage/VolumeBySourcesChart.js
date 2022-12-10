@@ -6,6 +6,8 @@ import numeral from 'numeral'
 import dayjs from 'lib/dayjs'
 import { getAddressLabel } from 'lib/woofi'
 import useDateRangeSlider from 'lib/useDateRangeSliderHook'
+import useWooFiState from 'lib/useWooFiStateHook'
+import { useLocalStorage } from 'lib/storageHooks'
 
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
@@ -16,15 +18,24 @@ import CircleIcon from '@mui/icons-material/Circle'
 import ContentCard from 'components/ContentCard'
 import ChartTopBar from 'components/ChartTopBar'
 import RangeSlider from 'components/RangeSlider'
+import ContentCardLoading from 'components/ContentCardLoading'
 
-const VolumeBySourcesChart = React.memo(function ({ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }) {
+const VolumeBySourcesChart = React.memo(function () {
+  const {
+    dailyWooFiVolumeBySources,
+    dailyWooFiSwapVolume,
+    loading,
+  } = useWooFiState(['dailyWooFiVolumeBySources', 'dailyWooFiSwapVolume'])
   const theme = useTheme()
 
-  const dateLabels = dailyWooFiSwapVolume.map(({ date }) => date)
+  const dateLabels = (dailyWooFiSwapVolume || []).map(({ date }) => date)
 
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
   const { range, setRange } = useDateRangeSlider({
     length: dateLabels.length, title: 'VolumeBySources', defaultPeriod: timePeriod,
   })
+
+  if (loading) return <ContentCardLoading />
 
   const volumeBySources = {}
 

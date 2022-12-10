@@ -15,36 +15,19 @@ import SwapsListTable from './SwapsListTable'
 import VolumeBySourcesChart from './VolumeBySourcesChart'
 import VolumeByAssets from './VolumeByAssets'
 
-export default function SwapStats({ timePeriod }) {
-  // const statStateKeys = [
-  //   'recentWooFiSwapsbsc',
-  //   'topWooFiSwaps',
-  //   'dailyWooFiVolumeBySources',
-  //   'dailyWooFiSwapVolume',
-  //   'dailyWooFiVolumeByAssets',
-  // ]
-  // const state = useAppState(statStateKeys)
-  // if (statStateKeys.some(key => state[key] === undefined)) return <Loading />
-  // const {
-  //   recentWooFiSwaps,
-  //   topWooFiSwaps,
-  //   dailyWooFiVolumeBySources,
-  //   dailyWooFiSwapVolume,
-  //   dailyWooFiVolumeByAssets,
-  // } = state
-
+export default function SwapStats() {
   return <TwoColumns>
-    <DailyVolumeChart key="DailyVolumeChart" timePeriod={timePeriod} />
-    <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" timePeriod={timePeriod} />
-    {/* <VolumeBySourcesChart {...{ timePeriod }} />
-    <div>hello</div> */}
-    {/* <VolumeByAssets {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
-    <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
+    <DailyVolumeChart key="DailyVolumeChart" />
+    <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" />
+    <VolumeBySourcesChart />
+    <VolumeByAssets />
+    {/* <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
     <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} /> */}
   </TwoColumns>
 }
 
 function LineOrMAChart({ coreTitle, ...props }) {
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
   const [isMA = false, setIsMA] = useLocalStorage('isLineOrMAChartMA')
 
   const onSubtitleClick = useCallback(() => {
@@ -65,10 +48,10 @@ function LineOrMAChart({ coreTitle, ...props }) {
   }
   props.title = isMA ? `${coreTitle} 50 day MA` : coreTitle
 
-  return <RangeSliderLineChart {...props} />
+  return <RangeSliderLineChart {...{ ...props, timePeriod }} />
 }
 
-function DailyVolumeChart({ timePeriod }) {
+function DailyVolumeChart() {
   const { dailyWooFiSwapVolume, loading } = useWooFiState(['dailyWooFiSwapVolume'])
   if (loading) return <ContentCardLoading />
 
@@ -92,14 +75,13 @@ function DailyVolumeChart({ timePeriod }) {
     labels,
     datasets,
     gradientIndex: 1,
-    timePeriod,
     coreTitle,
   }
 
   return <LineOrMAChart {...props} />
 }
 
-function DailyNumberOfSwapsChart({ timePeriod }) {
+function DailyNumberOfSwapsChart() {
   const { dailyNumberOfWooFiSwaps, loading } = useWooFiState(['dailyNumberOfWooFiSwaps'])
   if (loading) return <ContentCardLoading />
 
@@ -124,7 +106,6 @@ function DailyNumberOfSwapsChart({ timePeriod }) {
     datasets,
     gradientIndex: 1,
     denominator: '',
-    timePeriod,
   }
 
   return <LineOrMAChart {...props} />
