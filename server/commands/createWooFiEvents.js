@@ -8,7 +8,8 @@ const createTokenContracts = require('../commands/createTokenContracts')
 const eventTypeMap = {
   'nakji.woofi.0_0_0.WOOPP_WooSwap': {
     chain: 'bsc',
-    db: 'woofi_swaps',
+    db: 'woofi_swaps_bsc',
+    type: 'swap',
   },
 }
 
@@ -16,7 +17,7 @@ const chainToMoralisChainMap = {
   'bsc': 'BSC',
 }
 
-module.exports = async function createWooFiEvents({ events }) {
+async function createWooFiEvents({ events }) {
   const insertsByTable = {}
 
   const allEvents = []
@@ -93,4 +94,9 @@ async function fetchAndSaveTokenContractsFromEvents({ events }) {
     }))
     await createTokenContracts({ contracts })
   }
+}
+
+module.exports = {
+  createWooFiEvents,
+  eventTypeMap,
 }

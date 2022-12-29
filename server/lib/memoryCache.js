@@ -8,12 +8,12 @@ const cacheKeysByCacheName = {
   network: ['aggregateVolume', 'wooSpotVolume', 'wooFuturesVolume', 'wooSpotVolumeToday', 'wooFuturesVolumeToday'],
   dao: ['wooDaoTreasuryBalance'],
   woofi: [
-    'recentWooFiSwaps',
-    'topWooFiSwaps',
-    'dailyWooFiSwapVolume',
-    'dailyNumberOfWooFiSwaps',
-    'dailyWooFiVolumeBySources',
-    'dailyWooFiVolumeByAssets',
+    'recentWooFiSwaps:bsc',
+    'topWooFiSwaps:bsc',
+    'dailyWooFiSwapVolume:bsc',
+    'dailyNumberOfWooFiSwaps:bsc',
+    'dailyWooFiVolumeBySources:bsc',
+    'dailyWooFiVolumeByAssets:bsc',
     'wooFiAssetTokens',
   ],
   token: ['wooTokenBurns'],
@@ -41,7 +41,10 @@ async function update(changes) {
     for (const _cacheName in cacheKeysByCacheName) {
       if (cacheKeysByCacheName[_cacheName].includes(key)) cacheName = _cacheName
     }
-    if (!cacheName) throw new Error(`no cache name in cacheKeysByCacheName matching "${key}"`)
+    if (!cacheName) {
+      console.error(`no cache name in cacheKeysByCacheName matching "${key}"`)
+      continue
+    }
 
     if (!memoryCache[cacheName]) {
       const existingCache = await getCache(cacheName)

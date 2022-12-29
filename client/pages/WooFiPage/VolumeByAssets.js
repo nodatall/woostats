@@ -6,6 +6,7 @@ import { useAppState } from 'lib/appState'
 import dayjs from 'lib/dayjs'
 import useDateRangeSlider from 'lib/useDateRangeSliderHook'
 import { useLocalStorage } from 'lib/storageHooks'
+import useWooFiState from 'lib/useWooFiStateHook'
 
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
@@ -21,12 +22,21 @@ import RangeSlider from 'components/RangeSlider'
 import ContentCard from 'components/ContentCard'
 import ChartTopBar from 'components/ChartTopBar'
 import BarChart from 'components/BarChart'
+import ContentCardLoading from 'components/ContentCardLoading'
 
 const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
 
-const VolumeBySourcesChart = React.memo(function ({ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }) {
+const VolumeBySourcesChart = React.memo(function () {
+  const {
+    dailyWooFiVolumeByAssets,
+    dailyWooFiSwapVolume,
+    loading,
+  } = useWooFiState(['dailyWooFiVolumeByAssets', 'dailyWooFiSwapVolume'])
+
   const [showingChart = true, setShowingChart] = useLocalStorage('showVolumeByAssetsChart')
-  const dateLabels = dailyWooFiSwapVolume.map(({ date }) => date)
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
+
+  const dateLabels = (dailyWooFiSwapVolume || []).map(({ date }) => date)
 
   const { range, setRange } = useDateRangeSlider({
     length: dateLabels.length, title: 'VolumeByAssets', defaultPeriod: timePeriod,
@@ -35,6 +45,8 @@ const VolumeBySourcesChart = React.memo(function ({ dailyWooFiVolumeByAssets, ti
   const onSubtitleClick = useCallback(() => {
     setShowingChart(!showingChart)
   }, [showingChart])
+
+  if (loading) return <ContentCardLoading />
 
   const subtitle = <Button
     size="small"

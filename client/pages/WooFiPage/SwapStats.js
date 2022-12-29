@@ -1,46 +1,30 @@
 import React, { useCallback } from 'react'
 import { SMA } from 'technicalindicators'
 
-import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
+import useWooFiState from 'lib/useWooFiStateHook'
 
 import Button from '@mui/material/Button'
-import Loading from 'components/Loading'
+import ContentCardLoading from 'components/ContentCardLoading'
 import TwoColumns from 'components/TwoColumns'
 import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import SwapsListTable from './SwapsListTable'
 import VolumeBySourcesChart from './VolumeBySourcesChart'
 import VolumeByAssets from './VolumeByAssets'
 
-export default function SwapStats({ timePeriod }) {
-  const statStateKeys = [
-    'recentWooFiSwaps',
-    'topWooFiSwaps',
-    'dailyWooFiVolumeBySources',
-    'dailyWooFiSwapVolume',
-    'dailyWooFiVolumeByAssets',
-  ]
-  const state = useAppState(statStateKeys)
-  if (statStateKeys.some(key => state[key] === undefined)) return <Loading />
-  const {
-    recentWooFiSwaps,
-    topWooFiSwaps,
-    dailyWooFiVolumeBySources,
-    dailyWooFiSwapVolume,
-    dailyWooFiVolumeByAssets,
-  } = state
-
+export default function SwapStats() {
   return <TwoColumns>
-    <DailyVolumeChart key="DailyVolumeChart" timePeriod={timePeriod} />
-    <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" timePeriod={timePeriod} />
-    <VolumeBySourcesChart {...{ dailyWooFiVolumeBySources, timePeriod, dailyWooFiSwapVolume }} />
-    <VolumeByAssets {...{ dailyWooFiVolumeByAssets, timePeriod, dailyWooFiSwapVolume }} />
-    <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
-    <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} />
+    <DailyVolumeChart key="DailyVolumeChart" />
+    <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" />
+    <VolumeBySourcesChart />
+    <VolumeByAssets />
+    <RecentTradesTable />
+    <TopTradesTable />
   </TwoColumns>
 }
 
 function LineOrMAChart({ coreTitle, ...props }) {
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
   const [isMA = false, setIsMA] = useLocalStorage('isLineOrMAChartMA')
 
   const onSubtitleClick = useCallback(() => {
@@ -61,17 +45,12 @@ function LineOrMAChart({ coreTitle, ...props }) {
   }
   props.title = isMA ? `${coreTitle} 50 day MA` : coreTitle
 
-  return <RangeSliderLineChart {...props} />
+  return <RangeSliderLineChart {...{ ...props, timePeriod }} />
 }
 
-function DailyVolumeChart({ timePeriod }) {
-  const {
-    dailyWooFiSwapVolume = [],
-  } = useAppState(
-    [
-      'dailyWooFiSwapVolume',
-    ]
-  )
+function DailyVolumeChart() {
+  const { dailyWooFiSwapVolume, loading } = useWooFiState(['dailyWooFiSwapVolume'])
+  if (loading) return <ContentCardLoading />
 
   const { labels, series } = dailyWooFiSwapVolume
     .reduce(
@@ -93,21 +72,15 @@ function DailyVolumeChart({ timePeriod }) {
     labels,
     datasets,
     gradientIndex: 1,
-    timePeriod,
     coreTitle,
   }
 
   return <LineOrMAChart {...props} />
 }
 
-function DailyNumberOfSwapsChart({ timePeriod }) {
-  const {
-    dailyNumberOfWooFiSwaps = [],
-  } = useAppState(
-    [
-      'dailyNumberOfWooFiSwaps',
-    ]
-  )
+function DailyNumberOfSwapsChart() {
+  const { dailyNumberOfWooFiSwaps, loading } = useWooFiState(['dailyNumberOfWooFiSwaps'])
+  if (loading) return <ContentCardLoading />
 
   const { labels, series } = dailyNumberOfWooFiSwaps
     .reduce(
@@ -130,8 +103,21 @@ function DailyNumberOfSwapsChart({ timePeriod }) {
     datasets,
     gradientIndex: 1,
     denominator: '',
-    timePeriod,
   }
 
   return <LineOrMAChart {...props} />
+}
+
+function RecentTradesTable() {
+  const { recentWooFiSwaps, loading } = useWooFiState(['recentWooFiSwaps'])
+  if (loading) return <ContentCardLoading />
+
+  return <SwapsListTable {...{ swaps: recentWooFiSwaps, minDate: true, title: 'Recent Trades', key: 'Recent Trades' }} />
+}
+
+function TopTradesTable() {
+  const { topWooFiSwaps, loading } = useWooFiState(['topWooFiSwaps'])
+  if (loading) return <ContentCardLoading />
+
+  return <SwapsListTable {...{ swaps: topWooFiSwaps, title: 'Top Trades (All time)', key: 'Top Trades' }} />
 }

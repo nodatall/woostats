@@ -1,5 +1,6 @@
 const { client, db } = require('../../database')
 
+const { eventTypeMap } = require('../../commands/createWooFiEvents')
 const getRecentWooFiSwaps = require('./getRecentWooFiSwaps')
 const getTopWooFiSwaps = require('./getTopWooFiSwaps')
 const getDailySwapVolume = require('./getDailySwapVolume')
@@ -7,6 +8,7 @@ const getDailyNumberOfWooFiSwaps = require('./getDailyNumberOfWooFiSwaps')
 const getDailyVolumeBySources = require('./getDailyVolumeBySources')
 const getDailyVolumeByAssets = require('./getDailyVolumeByAssets')
 const getTokensFromContracts = require('./getTokensFromContracts')
+const CHAINS = Object.keys(require('../../lib/chainLogos'))
 
 const getFunctionIndexMap = {
   1: getRecentWooFiSwaps,
@@ -18,32 +20,21 @@ const getFunctionIndexMap = {
   7: getTokensFromContracts,
 }
 const eventGetFunctionMap = {
-  'nakji.woofi.0_0_0.WOOPP_WooSwap': [1, 2, 3, 4, 5, 6, 7],
-}
-
-const eventsByChain = {
-  bsc: ['nakji.woofi.0_0_0.WOOPP_WooSwap']
-}
-
-const eventTypesToChainMap = {}
-for (const chain in eventsByChain) {
-  for (const event of eventsByChain[chain]) {
-    eventTypesToChainMap[event] = chain
-  }
+  'swap': [1, 2, 3, 4, 5, 6, 7],
 }
 
 module.exports = async function getWooFiStats({ eventTypes, getAll = false }) {
   const stats = {}
   if (getAll) {
-    for (const chain of Object.keys(eventsByChain)) {
+    for (const chain of CHAINS) {
       const getFunctions = Object.values(getFunctionIndexMap)
       await callGetFunctionsForChain({ chain, getFunctions, stats })
     }
   } else {
     const getFunctionIndexesByChain = {}
-    for (const eventType of eventTypes) {
-      const chain = eventTypesToChainMap[eventType]
-      const getFunctionIndexes = eventGetFunctionMap[eventType]
+    for (const eventType of eventTypes) { // modify to loop per chain instead of event type
+      const { chain, type } = eventTypeMap[eventType]
+      const getFunctionIndexes = eventGetFunctionMap[type]
       getFunctionIndexesByChain[chain] = getFunctionIndexesByChain[chain]
         ? getFunctionIndexesByChain[chain].add([...getFunctionIndexes])
         : new Set([...getFunctionIndexes])
@@ -64,7 +55,7 @@ async function callGetFunctionsForChain({ chain, getFunctions, stats }) {
   const queries = getFunctions.map(({ buildQuery }) => buildQuery({ chain }))
   const sql = db.helpers.concat(queries)
   const records = await client.multi(sql)
-  records.forEach((record, index) => {
-    Object.assign(stats, getFunctions[index].formatRecords(record))
+  records.forEach((records, index) => {
+    Object.assign(stats, getFunctions[index].formatRecords({ records, chain }))
   })
 }

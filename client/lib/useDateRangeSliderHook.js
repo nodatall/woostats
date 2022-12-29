@@ -35,7 +35,7 @@ export default function useDateRangeSliderHook({ length, title, defaultPeriod })
         setLastRangeDate(dayjs.tz().format('YYYY-MM-DD'))
       }
     },
-    []
+    [length]
   )
 
   useEffect(
@@ -45,7 +45,7 @@ export default function useDateRangeSliderHook({ length, title, defaultPeriod })
       if (start < 0) start = 1
       setRange([start, length], true)
     },
-    [defaultPeriod, title]
+    [length, defaultPeriod, title]
   )
 
   return { range, setRange }

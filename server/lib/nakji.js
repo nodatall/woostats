@@ -4,7 +4,7 @@ const { web3_eth } = require('./web3')
 const request = require('./request')
 const dayjs = require('./dayjs')
 const logger = require('./logger')
-const createWooFiEvents = require('../commands/createWooFiEvents')
+const { createWooFiEvents } = require('../commands/createWooFiEvents')
 const { queueWooFiEventType } = require('../commands/processWooFiEvents')
 
 const STABLE_ADDRESSES = [
@@ -63,7 +63,7 @@ function processNakjiMessage(message) {
     }
   }
 
-  if (processed.Event === 'nakji.woofi.0_0_0.WOOPP_WooSwap') {
+  if (processed.Event === 'nakji.woofi.0_0_0.WOOPP_WooSwap') { // any swap
     processed.Data.usdVolume = STABLE_ADDRESSES.includes(processed.Data.fromToken)
       ? processed.Data.fromAmount.toFixed(8)
       : processed.Data.toAmount.toFixed(8)
