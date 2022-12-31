@@ -18,8 +18,8 @@ export default function SwapStats() {
     <DailyNumberOfSwapsChart key="DailyNumberOfSwapsChart" />
     <VolumeBySourcesChart />
     <VolumeByAssets />
-    <RecentTradesTable />
-    <TopTradesTable />
+    <RecentTradesTable key="RecentTradesTable"/>
+    <TopTradesTable key="TopTradesTable" />
   </TwoColumns>
 }
 
