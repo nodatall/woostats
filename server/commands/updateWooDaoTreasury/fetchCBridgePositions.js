@@ -10,7 +10,7 @@ module.exports = async function fetchCBridgePositions() {
       name: 'cBridgeRequest',
       serverUrl: 'https://cbridge-prod2.celer.network',
       path: '/v1/getLPInfoList',
-      params: 'addr=0x891c61289ccE86a8f8d62BD51a070857E0Db7abe'
+      params: 'addr=0x0a9eEddaa65546Ad35D3F0Ac9E6F09575E4C9297'
     })
     if (!response) return
     let totalValue = 0
