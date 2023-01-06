@@ -16,7 +16,7 @@ const STABLE_ADDRESSES = [
 
 async function start() {
   subscribeToStream({
-    endpoint: 'wss://stream.nakji.network/ws?streams=nakji.woofi.0_0_0.WOOPP_WooSwap',
+    endpoint: 'wss://stream.nakji.network/ws?streams=nakji.woofi_bsc.0_0_0.WooPPV3_WooSwap',
   })
 }
 
@@ -63,7 +63,7 @@ function processNakjiMessage(message) {
     }
   }
 
-  if (processed.Event === 'nakji.woofi.0_0_0.WOOPP_WooSwap') { // any swap
+  if (processed.Event.includes('WooSwap')) { // any swap
     processed.Data.usdVolume = STABLE_ADDRESSES.includes(processed.Data.fromToken)
       ? processed.Data.fromAmount.toFixed(8)
       : processed.Data.toAmount.toFixed(8)

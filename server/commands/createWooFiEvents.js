@@ -6,7 +6,7 @@ const { evmChain, moralis } = require('../lib/moralis')
 const createTokenContracts = require('../commands/createTokenContracts')
 
 const eventTypeMap = {
-  'nakji.woofi.0_0_0.WOOPP_WooSwap': {
+  'nakji.woofi_bsc.0_0_0.WooPPV3_WooSwap': {
     chain: 'bsc',
     db: 'woofi_swaps_bsc',
     type: 'swap',
@@ -22,6 +22,7 @@ async function createWooFiEvents({ events }) {
 
   const allEvents = []
   events.forEach(event => {
+    console.log(`event ==>`, event)
     const formatted = {
       chain: eventTypeMap[event.Event].chain,
     }
