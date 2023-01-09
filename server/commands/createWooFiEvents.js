@@ -5,14 +5,6 @@ const { snakeCase } = require('change-case')
 const { evmChain, moralis } = require('../lib/moralis')
 const createTokenContracts = require('../commands/createTokenContracts')
 
-const eventTypeMap = {
-  'nakji.woofi_bsc.0_0_0.WooPPV3_WooSwap': {
-    chain: 'bsc',
-    db: 'woofi_swaps_bsc',
-    type: 'swap',
-  },
-}
-
 const chainToMoralisChainMap = {
   'bsc': 'BSC',
 }
@@ -22,10 +14,8 @@ async function createWooFiEvents({ events }) {
 
   const allEvents = []
   events.forEach(event => {
-    console.log(`event ==>`, event)
-    const formatted = {
-      chain: eventTypeMap[event.Event].chain,
-    }
+    const { chain, dbName } = extractDetailsFromEventType(event.Event)
+    const formatted = { chain }
     for (const key in event.Data) {
       let snakeKey = snakeCase(key)
       if (['from', 'to'].includes(snakeKey)) snakeKey = snakeKey + '_address'
@@ -36,11 +26,10 @@ async function createWooFiEvents({ events }) {
       ? formatted.to_address
       : formatted.from_address
 
-    const eventDb = eventTypeMap[event.Event].db
-    if (insertsByTable[eventDb]) {
-      insertsByTable[eventDb].push(formatted)
+    if (insertsByTable[dbName]) {
+      insertsByTable[dbName].push(formatted)
     } else {
-      insertsByTable[eventDb] = [formatted]
+      insertsByTable[dbName] = [formatted]
     }
     allEvents.push(formatted)
   })
@@ -97,7 +86,14 @@ async function fetchAndSaveTokenContractsFromEvents({ events }) {
   }
 }
 
+function extractDetailsFromEventType(eventType) {
+  const chain = eventType.match(/nakji.woofi_([a-z]+)\./)[1]
+  const type = eventType.includes('WooSwap') ? 'swap' : 'invalid'
+  const dbName = `woofi_swaps_${chain}`
+  return { chain, type, dbName }
+}
+
 module.exports = {
   createWooFiEvents,
-  eventTypeMap,
+  extractDetailsFromEventType,
 }
