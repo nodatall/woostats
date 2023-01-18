@@ -7,6 +7,7 @@ const createTokenContracts = require('../commands/createTokenContracts')
 
 const chainToMoralisChainMap = {
   'bsc': 'BSC',
+  'avax': 'AVALANCHE',
 }
 
 async function createWooFiEvents({ events }) {
@@ -89,7 +90,8 @@ async function fetchAndSaveTokenContractsFromEvents({ events }) {
 function extractDetailsFromEventType(eventType) {
   const chain = eventType.match(/nakji.woofi_([a-z]+)\./)[1]
   const type = eventType.includes('WooSwap') ? 'swap' : 'invalid'
-  const dbName = `woofi_swaps_${chain}`
+  // const dbName = `woofi_swaps_${chain}`
+  const dbName = `woofi_swaps_bsc`
   return { chain, type, dbName }
 }
 

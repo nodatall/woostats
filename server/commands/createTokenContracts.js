@@ -11,6 +11,12 @@ const tokenLogoUrls = {
   'BTC': 'https://oss.woo.org/static/icons/BTC.png',
   'WOO': 'https://oss.woo.org/static/icons/WOO.png',
   'BUSD': 'https://oss.woo.org/static/icons/BUSD.png',
+  'BTC.b': 'https://oss.woo.org/static/icons/BTC.png',
+  'WBTC.e': 'https://oss.woo.org/static/icons/BTC.png',
+  'WETH.e': 'https://oss.woo.org/static/icons/ETH.png',
+  'WOO.e': 'https://oss.woo.org/static/icons/WOO.png',
+  'WAVAX': 'https://oss.woo.org/static/icons/AVAX.png',
+  'USDC': 'https://oss.woo.org/static/icons/USDC.png',
 }
 
 module.exports = async function createTokenContracts({ contracts }) {
