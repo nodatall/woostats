@@ -34,6 +34,10 @@ async function subscribeToStream({ endpoint }) {
 
   socketConnection.on('message', async messageStream => {
     for (const message of messageStream.toString().split('\n')) {
+      if (typeof message === 'string') {
+        console.error(message)
+        continue
+      }
       const event = processNakjiMessage(JSON.parse(message))
       await createWooFiEvents({ events: [event] })
       queueWooFiEventType(event.Event)
