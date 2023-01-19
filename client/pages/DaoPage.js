@@ -183,7 +183,7 @@ function TotalValueBox({ totalValue }) {
   return <ContentCard>
     <Stack sx={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
       <Typography variant="h5" sx={{ textAlign: 'right' }}>
-        Treasury Value
+        Total value
       </Typography>
       <Typography variant="h4" sx={{ color: 'secondary.main', ml: 2 }}>
         ${numeral(totalValue).format('0,0')}

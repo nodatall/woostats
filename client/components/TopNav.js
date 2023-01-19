@@ -60,8 +60,7 @@ export default function TopNav() {
           <WooPrice {...{ theme }} />
           <TopNavLink {...{ to: '/', pathname, text: 'Network' }} />
           {/* <TopNavLink {...{ to: '/woofi', pathname, text: 'WOOFi' }} /> */}
-          <TopNavLink {...{ to: '/dao', pathname, text: 'DAO' }} />
-          <TopNavLink {...{ to: '/token', pathname, text: 'Token' }} />
+          <TopNavLink {...{ to: '/dao', pathname, text: 'On chain' }} />
         </Toolbar>
       </AppBar>
     </Box>
