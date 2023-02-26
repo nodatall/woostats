@@ -1,6 +1,6 @@
 const { client, db } = require('../../database')
 
-const { eventTypeMap } = require('../../commands/createWooFiEvents')
+const { extractDetailsFromEventType } = require('../../commands/createWooFiEvents')
 const getRecentWooFiSwaps = require('./getRecentWooFiSwaps')
 const getTopWooFiSwaps = require('./getTopWooFiSwaps')
 const getDailySwapVolume = require('./getDailySwapVolume')
@@ -32,8 +32,8 @@ module.exports = async function getWooFiStats({ eventTypes, getAll = false }) {
     }
   } else {
     const getFunctionIndexesByChain = {}
-    for (const eventType of eventTypes) { // modify to loop per chain instead of event type
-      const { chain, type } = eventTypeMap[eventType]
+    for (const eventType of eventTypes) {
+      const { chain, type } = extractDetailsFromEventType(eventType)
       const getFunctionIndexes = eventGetFunctionMap[type]
       getFunctionIndexesByChain[chain] = getFunctionIndexesByChain[chain]
         ? getFunctionIndexesByChain[chain].add([...getFunctionIndexes])

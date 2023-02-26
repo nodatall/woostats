@@ -16,7 +16,7 @@ const STABLE_ADDRESSES = [
 
 async function start() {
   subscribeToStream({
-    endpoint: 'wss://stream.nakji.network/ws?streams=nakji.woofi.0_0_0.WOOPP_WooSwap',
+    endpoint: 'wss://stream.nakji.network/ws?streams=nakji.woofi_bsc.0_0_0.WooPPV4_WooSwap',
   })
 }
 
@@ -57,7 +57,7 @@ function processNakjiMessage(message) {
     if (!['ts', 'blockNumber', 'index'].includes(key)) {
       if (typeof message.Data[key] !== 'object')
         processed.Data[key] = Buffer.from(message.Data[key], 'base64').toString('hex')
-      if (key.includes('Amount')) processed.Data[key] = processNakjiNumber(processed.Data[key])
+      if (key.includes('Amount') || key.includes('swap')) processed.Data[key] = processNakjiNumber(processed.Data[key])
       if (['fromToken', 'toToken', 'from', 'to', 'rebateTo'].includes(key))
         processed.Data[key] = web3_eth.utils.toHex(processed.Data[key])
       if (key === 'txHash') processed.Data[key] = `0x${processed.Data[key]}`
@@ -67,7 +67,7 @@ function processNakjiMessage(message) {
     }
   }
 
-  if (processed.Event === 'nakji.woofi.0_0_0.WOOPP_WooSwap') { // any swap
+  if (processed.Event.includes('WooSwap')) { // any swap
     processed.Data.usdVolume = STABLE_ADDRESSES.includes(processed.Data.fromToken)
       ? processed.Data.fromAmount.toFixed(8)
       : processed.Data.toAmount.toFixed(8)
