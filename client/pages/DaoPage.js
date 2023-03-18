@@ -12,8 +12,11 @@ import { useAppState } from 'lib/appState'
 
 import Loading from 'components/Loading'
 import ContentCard from 'components/ContentCard'
+import ComingSoon from 'components/ComingSoon'
 
 export default function DaoPage(){
+  return <ComingSoon />
+
   const { wooDaoTreasuryBalance } = useAppState(['wooDaoTreasuryBalance'])
   const theme = useTheme()
 

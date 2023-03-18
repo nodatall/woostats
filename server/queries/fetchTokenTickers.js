@@ -1,20 +1,23 @@
-const nomicsRequest = require('../lib/nomics')
+const coingeckoRequest = require('../lib/coingecko')
+
+const idToSymbolMap = {
+  'bitcoin': 'BTC',
+  'woo-network': 'WOO',
+}
 
 module.exports = async function fetchTokenTickers({ tokens }) {
-  const response = await nomicsRequest(
-    '/currencies/ticker',
-    `&ids=${encodeURIComponent(tokens.join(','))}`
+  const response = await coingeckoRequest(
+    '/simple/price',
+    `&ids=${encodeURIComponent(tokens.join(','))}&vs_currencies=usd`
   )
+
   if (!response) return {}
   const tokenTickers = {}
-  response.forEach(ticker => {
-    const { id, logo_url, price } = ticker
-    tokenTickers[id] = { logoUrl: logo_url, price: +price }
-    if (id === 'REF2') {
-      tokenTickers.REF = tokenTickers[id]
-      delete tokenTickers[id]
-    }
-  })
+
+  for (const tokenId of Object.keys(response)) {
+    const symbol = idToSymbolMap[tokenId]
+    tokenTickers[symbol] = { price: +response[tokenId].usd }
+  }
 
   return tokenTickers
 }

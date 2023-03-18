@@ -58,7 +58,7 @@ export default function TopNav() {
             <TimePeriodSelect />
           }
           <WooPrice {...{ theme }} />
-          <TopNavLink {...{ to: '/', pathname, text: 'Network' }} />
+          <TopNavLink {...{ to: '/', pathname, text: 'Volume' }} />
           {/* <TopNavLink {...{ to: '/woofi', pathname, text: 'WOOFi' }} /> */}
           <TopNavLink {...{ to: '/dao', pathname, text: 'On chain' }} />
         </Toolbar>

@@ -12,7 +12,7 @@ const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHisto
 const updateWooFiEventsForLast = require('./commands/updateWooFiEventsForLast')
 
 const TOKENS = [
-  'BTC', 'NEAR', 'AVAX', 'REF2', 'WOO', 'BNB', 'ETH',
+  'bitcoin', 'woo-network',
 ]
 
 function start(socket){
@@ -30,18 +30,18 @@ function start(socket){
   })
 
   cron.schedule('*/5 * * * *', async () => { // 5 minutes
-    await updateWooDaoTreasury()
-    const wooDaoTreasuryBalance = await getWooDaoTreasuryBalance()
-    await memoryCache.update({ wooDaoTreasuryBalance })
-    socket.emit('send', { wooDaoTreasuryBalance })
+    // await updateWooDaoTreasury()
+    // const wooDaoTreasuryBalance = await getWooDaoTreasuryBalance()
+    // await memoryCache.update({ wooDaoTreasuryBalance })
+    // socket.emit('send', { wooDaoTreasuryBalance })
   })
 
   cron.schedule('0 * * * *', async () => { // hour
-    await updateWooTokenBurns()
+    // await updateWooTokenBurns()
     await updateWooFiEventsForLast({ hours: 12, socket })
-    const wooTokenBurns = await getWooTokenBurns()
-    await memoryCache.update({ wooTokenBurns })
-    socket.emit('send', { wooTokenBurns })
+    // const wooTokenBurns = await getWooTokenBurns()
+    // await memoryCache.update({ wooTokenBurns })
+    // socket.emit('send', { wooTokenBurns })
   })
 
   cron.schedule('0 0 * * *', async () => { // day
