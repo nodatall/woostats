@@ -10,10 +10,7 @@ const getWooTokenBurns = require('./queries/getWooTokenBurns')
 const getWooDaoTreasuryBalance = require('./queries/getWooDaoTreasuryBalance')
 const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHistory')
 const updateWooFiEventsForLast = require('./commands/updateWooFiEventsForLast')
-
-const TOKENS = [
-  'bitcoin', 'woo-network',
-]
+const { TOKENS } = require('./constants.js')
 
 function start(socket){
   cron.schedule('* * * * *', async () => { // minute
