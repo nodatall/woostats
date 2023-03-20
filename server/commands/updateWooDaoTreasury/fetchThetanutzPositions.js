@@ -1,5 +1,5 @@
 const { web3_bsc } = require('../../lib/web3')
-const chainLogos = require('../../lib/chainLogos')
+const { CHAIN_LOGOS } = require('../../lib/constants')
 const request = require('../../lib/request')
 const getTokenTickers = require('../../queries/getTokenTickers')
 const updatePositions = require('./updatePositions')
@@ -23,7 +23,7 @@ module.exports = async function fetchThetanutzPositions() {
         {
           name: 'Thetanuts',
           chain: 'bsc',
-          chainLogoUrl: chainLogos.bsc,
+          chainLogoUrl: CHAIN_LOGOS.bsc,
           value: value,
           details: [
             {

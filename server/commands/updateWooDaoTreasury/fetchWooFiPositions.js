@@ -1,6 +1,6 @@
 const { web3_avax } = require('../../lib/web3')
 const snowtraceRequest = require('../../lib/snowtrace')
-const chainLogos = require('../../lib/chainLogos')
+const { CHAIN_LOGOS } = require('../../lib/constants')
 const getTokenTickers = require('../../queries/getTokenTickers')
 const updatePositions = require('./updatePositions')
 
@@ -27,7 +27,7 @@ module.exports = async function fetchWooFiPositions() {
         {
           name: 'WooFi',
           chain: 'avax',
-          chainLogoUrl: chainLogos.avax,
+          chainLogoUrl: CHAIN_LOGOS.avax,
           value: value,
           details: [
             {

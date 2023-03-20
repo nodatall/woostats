@@ -3,7 +3,7 @@ const fetchEVMChainProtocolBalanceForAddress = require('../../queries/fetchEVMCh
 const getTokenTickers = require('../../queries/getTokenTickers')
 const { WOO_DAO_ETH_ADDRESS } = require('../../lib/treasury')
 const { addRewardsToProtocolBalance } = require('../../lib/treasury')
-const chainLogos = require('../../lib/chainLogos')
+const { CHAIN_LOGOS } = require('../../lib/constants')
 const dayjs = require('../../lib/dayjs')
 const updatePositions = require('./updatePositions')
 
@@ -73,7 +73,7 @@ function getTokenBalances({ ethTokenBalances, avalancheTokenBalances, bnbTokenBa
       value: +balance.amount * +balance.price,
     }
     if (balance.chain !== 'eth') {
-      tokenDetails.chainLogoUrl = chainLogos[balance.chain]
+      tokenDetails.chainLogoUrl = CHAIN_LOGOS[balance.chain]
     }
 
     tokenBalances.push(tokenDetails)

@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { useLocalStorage } from 'lib/storageHooks'
-import chainLogos from 'lib/chainLogos'
+import { CHAIN_LOGOS } from 'lib/constants'
 
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
@@ -128,7 +128,7 @@ function ChainButton({ text }) {
   let formattedText = formatChainText(text)
   if (formattedText !== 'All') {
     if (text === 'avalanche') text = 'avax'
-    image = <img src={chainLogos[text]} style={{ marginRight: '7px', width: '17px', height: '17px' }} />
+    image = <img src={CHAIN_LOGOS[text]} style={{ marginRight: '7px', width: '17px', height: '17px' }} />
   }
   return <Stack
     direction="row"

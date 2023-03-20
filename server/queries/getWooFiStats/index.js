@@ -8,7 +8,7 @@ const getDailyNumberOfWooFiSwaps = require('./getDailyNumberOfWooFiSwaps')
 const getDailyVolumeBySources = require('./getDailyVolumeBySources')
 const getDailyVolumeByAssets = require('./getDailyVolumeByAssets')
 const getTokensFromContracts = require('./getTokensFromContracts')
-const CHAINS = Object.keys(require('../../lib/chainLogos'))
+const CHAINS = Object.keys(require('../../lib/constants').CHAIN_LOGOS)
 
 const getFunctionIndexMap = {
   1: getRecentWooFiSwaps,

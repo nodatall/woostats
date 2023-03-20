@@ -1,10 +1,10 @@
-const fetchTotalMarketVolumeHistory = require('../queries/fetchTotalMarketVolumeHistory')
+const fetchTopExchangeVolumeHistory = require('../queries/fetchTopExchangeVolumeHistory')
 const knex = require('../database/knex')
 const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
 
 module.exports = async function updateTotalMarketVolumeHistory() {
-  const volumeHistory = await fetchTotalMarketVolumeHistory()
+  const volumeHistory = await fetchTopExchangeVolumeHistory()
   if (!volumeHistory) return
 
   const volumeHistoryInsert = volumeHistory.map(({ timestamp, volume }) => ({

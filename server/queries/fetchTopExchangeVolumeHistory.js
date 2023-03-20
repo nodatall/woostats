@@ -2,7 +2,7 @@ const nomicsRequest = require('../lib/nomics')
 const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
 
-module.exports = async function fetchTotalMarketVolumeHistory() {
+module.exports = async function fetchTopExchangeVolumeHistory() {
   const volumeRecords = await client.query('SELECT * FROM total_market_volume ORDER BY date DESC LIMIT 1')
 
   const start = volumeRecords.length === 0

@@ -1,9 +1,5 @@
 const coingeckoRequest = require('../lib/coingecko')
-
-const idToSymbolMap = {
-  'bitcoin': 'BTC',
-  'woo-network': 'WOO',
-}
+const { TOKENS } = require('../lib/constants')
 
 module.exports = async function fetchTokenTickers({ tokens }) {
   const response = await coingeckoRequest(
@@ -15,7 +11,7 @@ module.exports = async function fetchTokenTickers({ tokens }) {
   const tokenTickers = {}
 
   for (const tokenId of Object.keys(response)) {
-    const symbol = idToSymbolMap[tokenId]
+    const symbol = TOKENS[tokenId]
     tokenTickers[symbol] = { price: +response[tokenId].usd }
   }
 
