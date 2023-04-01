@@ -128,9 +128,8 @@ function SelectAndMACharts({
     )
   })
   const select = <FormControl
-    fullWidth
     sx={{
-      width: 'auto',
+      width: 'fit-content',
       mr: 2,
       mt: 0,
     }}
@@ -139,7 +138,7 @@ function SelectAndMACharts({
       value={selectedExchange}
       onChange={event => selectExchange(event.target.value)}
       sx={{
-        '.MuiSelect-select': { py: 1.25 },
+        '.MuiSelect-select': { py: .75 },
         '&:hover fieldset.MuiOutlinedInput-notchedOutline': {
           borderColor: 'rgb(213, 213, 213, 0.5)',
           borderWidth: '1px',
@@ -182,7 +181,8 @@ function SelectAndMACharts({
 
   return <TwoColumns>
     <VolumeOrLineChart {...{
-      title: `WOO % ${spotFut} marketshare vs ${title}`,
+      title: `WOO % ${spotFut} marketshare vs [${title}]`,
+      selectValue: title,
       datasets: [percentSeries],
       labels,
       select,
@@ -195,7 +195,7 @@ function SelectAndMACharts({
   </TwoColumns>
 }
 
-function VolumeOrLineChart({ title, datasets, wooDailyChartData, labels, select }) {
+function VolumeOrLineChart({ title, datasets, wooDailyChartData, labels, select, selectValue }) {
   const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
 
   if (datasets) datasets = datasets.map(dataset => ({ data: dataset }))
@@ -205,8 +205,9 @@ function VolumeOrLineChart({ title, datasets, wooDailyChartData, labels, select 
     labels,
     datasets,
     timePeriod,
+    select,
+    selectValue,
   }
-  if (select) props.subtitle = select
 
   let chart
   if (title.includes('%')) props.denominator = '%'

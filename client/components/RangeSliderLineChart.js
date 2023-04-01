@@ -13,7 +13,7 @@ import ChartTopBar from 'components/ChartTopBar'
 const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
 
 const RangeSliderLineChart = React.memo(function ({
-  title, labels, datasets, denominator = '$', subtitle, gradientIndex, timePeriod,
+  title, labels, datasets, denominator = '$', subtitle, gradientIndex, timePeriod, select, selectValue,
 }) {
   const isMA = title.includes('MA')
   const { range, setRange } = useDateRangeSlider({
@@ -29,8 +29,10 @@ const RangeSliderLineChart = React.memo(function ({
     }
   })
 
+  title = title.replace(`[${selectValue}]`, '')
+
   return <ContentCard sx={{ key: title }} >
-    <ChartTopBar {...{ title, subtitle, tooltip, denominator }} />
+    <ChartTopBar {...{ title, subtitle, tooltip, denominator, select }} />
     <Box ref={containerRef}>
       <LineChart {...{
         labels: isMA ? labels : reduceArrayToRange(labels, range),
