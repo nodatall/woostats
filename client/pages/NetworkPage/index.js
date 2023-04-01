@@ -5,10 +5,15 @@ import { SMA } from 'technicalindicators'
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
 import { lineColors } from 'lib/chart'
+import { TOP_SPOT_EXCHANGES, TOP_FUTURES_EXCHANGES } from 'lib/constants'
+import dayjs from 'lib/dayjs'
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
 
 import Loading from 'components/Loading'
 import TwoColumns from 'components/TwoColumns'
@@ -21,16 +26,18 @@ export default function NetworkPage() {
 
   const {
     wooSpotVolume = [],
-    aggregateVolume,
     wooFuturesVolume,
+    topFuturesExchangeVolumes,
+    topSpotExchangeVolumes,
   } = useAppState(
-    ['wooSpotVolume', 'wooFuturesVolume', 'aggregateVolume']
+    ['wooSpotVolume', 'wooFuturesVolume', 'topFuturesExchangeVolumes', 'topSpotExchangeVolumes']
   )
 
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
     (!wooFuturesVolume || wooFuturesVolume.length === 0) ||
-    (!aggregateVolume || aggregateVolume.length == 0)
+    (!topFuturesExchangeVolumes || topFuturesExchangeVolumes.length == 0) ||
+    (!topSpotExchangeVolumes || topSpotExchangeVolumes.length == 0)
   ) return <Loading />
 
   const {
@@ -56,63 +63,166 @@ export default function NetworkPage() {
       }
     )
 
-  const { percentSeries, aggregateVolumeSeries } = aggregateVolume
-    .slice(0, -1)
-    .reduce(
-      (acc, { volume }, index) => {
-        const wooSpotVolume = wooVolumeSeries[index]
-        const aggregatePlusWoo = +volume + wooSpotVolume
-        acc.aggregateVolumeSeries.push(aggregatePlusWoo)
-        acc.percentSeries.push((wooVolumeSeries[index] / aggregatePlusWoo) * 100)
-        return acc
-      },
-      {
-        aggregateVolumeSeries: [],
-        percentSeries: [],
-      }
-    )
-
-  const charts = []
-  ;[
-    { title: 'Daily WOO Network volume' },
-    { title: 'Daily Network volume [day] day MA', datasets: [wooVolumeSeries] },
-    { title: 'WOO Network % of total market volume', datasets: [percentSeries] },
-    { title: 'WOO Network % of total [day] day MA', datasets: [percentSeries] },
-    { title: 'Total crypto market volume', datasets: [aggregateVolumeSeries] },
-    { title: 'Total market volume [day] day MA', datasets: [aggregateVolumeSeries] },
-  ].forEach(({ title, datasets },) => {
-    if (datasets) datasets = datasets.map(dataset => ({ data: dataset }))
-    const props = {
-      title,
-      key: title,
-      labels: wooVolumeLabels,
-      datasets,
-      timePeriod,
-    }
-
-    let chart
-    if (title.includes('%')) props.denominator = '%'
-    if (title.includes('MA')) chart = <MAChart {...props} />
-    else {
-      chart = title === 'Daily WOO Network volume'
-        ? <DailyVolumeChart {...{ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }} />
-        : <RangeSliderLineChart {...props} />
-    }
-    charts.push(chart)
-  })
-
   return <Box>
     <AggregateNetworkVolumeBox />
     <TwoColumns>
-      {charts}
+      <VolumeOrLineChart {...{
+        title: 'Daily WOO Network volume',
+        wooDailyChartData: { wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries },
+        labels: wooVolumeLabels,
+      }}/>
+      <VolumeOrLineChart {...{
+        title: 'Daily Network volume [day] day MA',
+        datasets: [wooVolumeSeries],
+        labels: wooVolumeLabels,
+      }}/>
     </TwoColumns>
+    <FuturesComparisonCharts />
+    <SpotComparisonCharts />
   </Box>
+}
+
+function SpotComparisonCharts() {
+  const {
+    topSpotExchangeVolumes, wooSpotVolume
+  } = useAppState(
+    ['topSpotExchangeVolumes', 'wooSpotVolume']
+  )
+
+  return <SelectAndMACharts {...{
+    wooVolumeSeries: wooSpotVolume.slice(0, -1),
+    localStorageKey: 'spotComparisonDropdown',
+    storageDefault: 'aggregateSpot',
+    exchangeMap: TOP_SPOT_EXCHANGES,
+    volumeHistories: topSpotExchangeVolumes,
+  }}/>
+}
+
+function FuturesComparisonCharts() {
+  const {
+    topFuturesExchangeVolumes, wooFuturesVolume
+  } = useAppState(
+    ['topFuturesExchangeVolumes', 'wooFuturesVolume']
+  )
+
+  return <SelectAndMACharts {...{
+    wooVolumeSeries: wooFuturesVolume.slice(0, -1),
+    localStorageKey: 'futuresComparisonDropdown',
+    storageDefault: 'aggregateFutures',
+    exchangeMap: TOP_FUTURES_EXCHANGES,
+    volumeHistories: topFuturesExchangeVolumes,
+  }}/>
+}
+
+function SelectAndMACharts({
+  localStorageKey, storageDefault, exchangeMap, wooVolumeSeries, volumeHistories,
+}) {
+  const [selectedExchange = storageDefault, selectExchange] = useLocalStorage(localStorageKey)
+  const title = exchangeMap[selectedExchange] || 'top exchanges'
+  const selectMenuItems = [
+    <MenuItem value={storageDefault} key={storageDefault}>Top exchanges</MenuItem>
+  ]
+  Object.keys(exchangeMap).map(topExchange => {
+    selectMenuItems.push(
+      <MenuItem value={topExchange} key={topExchange}>{exchangeMap[topExchange]}</MenuItem>
+    )
+  })
+  const select = <FormControl
+    fullWidth
+    sx={{
+      width: 'auto',
+      mr: 2,
+      mt: 0,
+    }}
+  >
+    <Select
+      value={selectedExchange}
+      onChange={event => selectExchange(event.target.value)}
+      sx={{
+        '.MuiSelect-select': { py: 1.25 },
+        '&:hover fieldset.MuiOutlinedInput-notchedOutline': {
+          borderColor: 'rgb(213, 213, 213, 0.5)',
+          borderWidth: '1px',
+        },
+        '&.Mui-focused fieldset.MuiOutlinedInput-notchedOutline': {
+          borderColor: 'rgb(213, 213, 213, 0.5)',
+          borderWidth: '1px',
+        }
+      }}
+    >
+      {selectMenuItems}
+    </Select>
+  </ FormControl>
+
+  let currentExchangeSeries = volumeHistories.find(([topExchange]) => topExchange === selectedExchange)[1]
+  const wooVolumesMap = {}
+  wooVolumeSeries.forEach(({ date, volume }) => wooVolumesMap[date] = volume)
+
+  const { percentSeries, topExchangeSeries, labels } = currentExchangeSeries
+    .reduce(
+      (acc, { volume, date }, index) => {
+        if (!wooVolumesMap[date]) return acc
+        let percent = (wooVolumesMap[date] / volume) * 100
+        if (percent > 1000) {
+          percent = acc.percentSeries[index - 1]
+        }
+        acc.topExchangeSeries.push((+volume))
+        acc.percentSeries.push(percent)
+        acc.labels.push(date)
+        return acc
+      },
+      {
+        topExchangeSeries: [],
+        percentSeries: [],
+        labels: []
+      }
+    )
+
+  const spotFut = localStorageKey.includes('spot') ? 'spot' : 'futures'
+
+  return <TwoColumns>
+    <VolumeOrLineChart {...{
+      title: `WOO % ${spotFut} marketshare vs ${title}`,
+      datasets: [percentSeries],
+      labels,
+      select,
+    }} />
+    <VolumeOrLineChart {...{
+      title: `WOO % ${spotFut} vs ${title} [day] day MA`,
+      datasets: [percentSeries],
+      labels,
+    }} />
+  </TwoColumns>
+}
+
+function VolumeOrLineChart({ title, datasets, wooDailyChartData, labels, select }) {
+  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
+
+  if (datasets) datasets = datasets.map(dataset => ({ data: dataset }))
+  const props = {
+    title,
+    key: title,
+    labels,
+    datasets,
+    timePeriod,
+  }
+  if (select) props.subtitle = select
+
+  let chart
+  if (title.includes('%')) props.denominator = '%'
+  if (title.includes('MA')) chart = <MAChart {...props} />
+  else {
+    chart = title === 'Daily WOO Network volume'
+      ? <DailyVolumeChart {...{ ...wooDailyChartData, ...props }} />
+      : <RangeSliderLineChart {...props} />
+  }
+  return chart
 }
 
 function MAChart({ ...props }) {
   const [maLength = 50, setMaLength] = useLocalStorage('maLength')
 
-  props.datasets[0].data = SMA.calculate({ period: maLength, values: props.datasets[0].data })
+  props.datasets[0].data = SMA.calculate({ values: props.datasets[0].data, period: maLength }).filter(percent => percent > 0)
   props.labels = props.labels.slice(maLength - 1)
   props.title = props.title.replace('[day]', maLength)
 

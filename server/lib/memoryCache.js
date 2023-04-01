@@ -5,7 +5,14 @@ const memoryCache = {}
 
 const cacheKeysByCacheName = {
   general: ['tokenTickers'],
-  network: ['aggregateVolume', 'wooSpotVolume', 'wooFuturesVolume', 'wooSpotVolumeToday', 'wooFuturesVolumeToday'],
+  network: [
+    'wooSpotVolume',
+    'wooFuturesVolume',
+    'wooSpotVolumeToday',
+    'wooFuturesVolumeToday',
+    'topSpotExchangeVolumes',
+    'topFuturesExchangeVolumes',
+  ],
   dao: ['wooDaoTreasuryBalance'],
   woofi: [
     'recentWooFiSwaps:bsc',

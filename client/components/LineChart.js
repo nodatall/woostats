@@ -105,7 +105,7 @@ export default function LineChart({
           fontColor: '#bfbfc9',
           callback: num => {
             const value = num < 1000 ? num : numeral(num).format('0a')
-            return denominator === '%' ? `${value}${denominator}` : `${denominator}${value}`
+            return denominator === '%' ? `${value.toFixed(1)}${denominator}` : `${denominator}${value}`
           },
           lineHeight: 2,
         },

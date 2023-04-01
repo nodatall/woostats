@@ -15,18 +15,18 @@ const TOP_SPOT_EXCHANGE_IDS = Object.keys(TOP_SPOT_EXCHANGES)
 
 const TOP_FUTURES_EXCHANGES = {
   'binance_futures': 'Binance',
-  'deepcoin_derivatives': 'Deepcoin',
   'okex_swap': 'OKX',
   'bybit': 'Bybit',
-  'btcex_futures': 'BTCEX',
-  'bitrue_futures': 'Bitrue',
-  'bingx_futures': 'BingX',
-  'bitget_futures': 'Bitget',
-  'bitmart_futures': 'Bitmart',
-  'phemex_futures': 'Phemex',
+  'mxc_futures': 'MEXC Global',
+  'kumex': 'KuCoin',
+  'gate_futures': 'Gate.io',
+  'deribit': 'Deribit',
+  'dydx_perpetual': 'dYdX',
+  'huobi_dm': 'Huobi',
+  'bitmex': 'Bitmex',
 }
 
-const TOP_FUTURES_EXCHANGE_IDS = Object.keys(TOP_SPOT_EXCHANGES)
+const TOP_FUTURES_EXCHANGE_IDS = Object.keys(TOP_FUTURES_EXCHANGES)
 
 const CHAIN_LOGOS = {
   bsc: 'https://assets.debank.com/static/media/bsc.3d1e2f26.svg',

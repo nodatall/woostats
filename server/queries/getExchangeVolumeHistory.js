@@ -1,6 +1,6 @@
 const { client } = require('../database')
 
-module.exports = async function getExchangeVolumes({ exchangeId }) {
+module.exports = async function getExchangeVolumeHistorys({ exchangeId }) {
   const records = await client.query(
     `
       SELECT date, volume FROM volume_by_exchange
