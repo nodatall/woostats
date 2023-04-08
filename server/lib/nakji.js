@@ -16,7 +16,7 @@ const STABLE_ADDRESSES = [
 
 async function start() {
   subscribeToStream({
-    endpoint: 'wss://stream.nakji.network/ws?streams=nakji.woofi_bsc.0_0_0.WooPPV4_WooSwap',
+    endpoint: `wss://stream.nakji.network/ws/${process.env.NAKJI_API_KEY}?streams=nakji.woofi_bsc.0_0_0.WooPPV4_WooSwap`,
   })
 }
 
