@@ -41,14 +41,16 @@ export default function NetworkPage() {
   ) return <Loading />
 
   const {
-    labels: wooVolumeLabels, series: wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries,
+    labels: wooVolumeLabels, series: wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, wooTotalVolumesWithDates
   } = wooSpotVolume
     .slice(0, -1)
     .reduce(
       (acc, { date, volume }) => {
         const { volume: futuresVolume } = wooFuturesVolume.find(futuresVol => futuresVol.date === date) || { volume: 0 }
+        const aggregateVolume = +volume + +futuresVolume
         acc.labels.push(date)
-        acc.series.push(+volume + +futuresVolume)
+        acc.series.push(aggregateVolume)
+        acc.wooTotalVolumesWithDates.push({ date, volume: aggregateVolume })
         if (futuresVolume > 0) {
           acc.wooSpotVolumeSeries.push(+volume)
           acc.wooFuturesVolumeSeries.push(+futuresVolume)
@@ -60,6 +62,7 @@ export default function NetworkPage() {
         series: [],
         wooSpotVolumeSeries: [],
         wooFuturesVolumeSeries: [],
+        wooTotalVolumesWithDates: [],
       }
     )
 
@@ -77,9 +80,100 @@ export default function NetworkPage() {
         labels: wooVolumeLabels,
       }}/>
     </TwoColumns>
+    <CombinedComparisonCharts {...{ wooTotalVolumesWithDates }} />
     <FuturesComparisonCharts />
     <SpotComparisonCharts />
   </Box>
+}
+
+function CombinedComparisonCharts({ wooTotalVolumesWithDates }) {
+  const {
+    topSpotExchangeVolumes, topFuturesExchangeVolumes,
+  } = useAppState(
+    ['topSpotExchangeVolumes', 'topFuturesExchangeVolumes']
+  )
+
+  const exchangeMap = {
+    'aggregate': 'Top Exchanges',
+    'binance': 'Binance',
+    'okex': 'OKX',
+    'gdax': 'Coinbase',
+    'kucoin': 'KuCoin',
+    'bybit': 'Bybit',
+    'mxc': 'MXC',
+    'binance_us': 'Binance US',
+    'bitmex': 'BitMEX',
+    'kraken': 'Kraken',
+    'huobi': 'Huobi',
+  }
+  const indexes = [
+    [1,1, 'binance'],
+    [2, 3, 'okex'],
+    [null, 2, 'gdax'],
+    [5, 7, 'kucoin'],
+    [3, 6, 'bybit'],
+    [4, 4, 'mxc'],
+    [null, 8, 'binance_us'],
+    [10, null, 'bitmex'],
+    [null, 5, 'kraken'],
+    [9, 9, 'huobi']
+  ]
+  const aggregateMap = {}
+  const volumeHistories = []
+  indexes.forEach(pair => {
+    const subAggregateMap = {}
+    const [futuresIndex, spotIndex] = pair
+    const spotExchange = spotIndex && topSpotExchangeVolumes[spotIndex]
+    const futuresExchange = futuresIndex && topFuturesExchangeVolumes[futuresIndex]
+    if (!spotExchange || !futuresExchange) {
+      const exchangeVolumes = (spotExchange || futuresExchange)[1]
+      exchangeVolumes.forEach(({ date, volume }) => {
+        aggregateMap[date] = aggregateMap[date] || 0
+        aggregateMap[date] += +volume
+      })
+      volumeHistories.push([pair[2], exchangeVolumes])
+    } else {
+      const spotExchangeVolumes = spotExchange && spotExchange[1]
+      const futuresExchangeVolumes = futuresExchange && futuresExchange[1]
+      spotExchangeVolumes.forEach(({ date, volume }) => {
+        aggregateMap[date] = aggregateMap[date] || 0
+        aggregateMap[date] += +volume
+        subAggregateMap[date] = subAggregateMap[date] || 0
+        subAggregateMap[date] += +volume
+      })
+      futuresExchangeVolumes.forEach(({ date, volume }) => {
+        aggregateMap[date] = aggregateMap[date] || 0
+        aggregateMap[date] += +volume
+        subAggregateMap[date] = subAggregateMap[date] || 0
+        subAggregateMap[date] += +volume
+      })
+      volumeHistories.push(
+        [
+          pair[2],
+          Object.entries(subAggregateMap)
+            .sort((a,b) => new Date(a[0]) - new Date(b[0]))
+            .map(([date, volume]) => ({ date, volume }))
+        ]
+      )
+    }
+  })
+  const aggregateVolumes = []
+  Object.entries(aggregateMap)
+    .sort((a,b) => new Date(a[0]) - new Date(b[0]))
+    .forEach(([date, volume]) => {
+      aggregateVolumes.push({ volume, date })
+    })
+  volumeHistories.unshift(['aggregate', aggregateVolumes])
+
+  console.log(`volumeHistories ==>`, volumeHistories)
+
+  return <SelectAndMACharts {...{
+    wooVolumeSeries: wooTotalVolumesWithDates.slice(0, -1),
+    localStorageKey: 'combinedComparisonDropdown',
+    storageDefault: 'aggregate',
+    exchangeMap,
+    volumeHistories,
+  }}/>
 }
 
 function SpotComparisonCharts() {

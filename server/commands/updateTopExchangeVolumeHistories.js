@@ -22,7 +22,7 @@ module.exports = async function updateTopExchangeVolumeHistories({ memoryCache, 
 
   const topFuturesExchangeVolumes = []
   for (const exchangeId of TOP_FUTURES_EXCHANGE_IDS) {
-    await updateExchangeVolumeHistory({ exchangeId, isFutures: true })
+    await updateExchangeVolumeHistory({ exchangeId })
     const exchangeVolumeHistory = await getExchangeVolumeHistory({ exchangeId })
 
     topFuturesExchangeVolumes.push([exchangeId, exchangeVolumeHistory])
