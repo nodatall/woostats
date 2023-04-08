@@ -41,7 +41,7 @@ module.exports = async function updateTopExchangeVolumeHistories({ memoryCache, 
     .forEach(([date, volume]) => {
       aggregateTopSpot.push({ volume, date })
     })
-  topSpotExchangeVolumes.unshift(['aggregateSpot', aggregateTopSpot.reverse()])
+  topSpotExchangeVolumes.unshift(['aggregateSpot', aggregateTopSpot])
 
   const aggregateFuturesMap = {}
   topFuturesExchangeVolumes.forEach(([, exchangeVolumeHistory]) => {
@@ -56,7 +56,7 @@ module.exports = async function updateTopExchangeVolumeHistories({ memoryCache, 
     .forEach(([date, volume]) => {
       aggregateTopFutures.push({ volume, date })
     })
-  topFuturesExchangeVolumes.unshift(['aggregateFutures', aggregateTopFutures.reverse()])
+  topFuturesExchangeVolumes.unshift(['aggregateFutures', aggregateTopFutures])
 
   await memoryCache.update({ topSpotExchangeVolumes, topFuturesExchangeVolumes })
   socket.emit('send', { topSpotExchangeVolumes, topFuturesExchangeVolumes })
