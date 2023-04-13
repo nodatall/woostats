@@ -6,6 +6,7 @@ const dayjs = require('./dayjs')
 const logger = require('./logger')
 const { createWooFiEvents } = require('../commands/createWooFiEvents')
 const { queueWooFiEventType } = require('../commands/processWooFiEvents')
+const { NAJKJI_BSC_WOOFI_WOOSWAPS } = require('./constants')
 
 const STABLE_ADDRESSES = [
   '0xe9e7cea3dedca5984780bafc599bd69add087d56',  // BUSD
@@ -16,7 +17,7 @@ const STABLE_ADDRESSES = [
 
 async function start() {
   subscribeToStream({
-    endpoint: `wss://stream.nakji.network/ws/${process.env.NAKJI_API_KEY}?streams=nakji.woofi_bsc.0_0_0.WooPPV4_WooSwap`,
+    endpoint: `wss://stream.nakji.network/ws/${process.env.NAKJI_API_KEY}?streams=${streams}`,
   })
 }
 
