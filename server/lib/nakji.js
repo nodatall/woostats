@@ -16,6 +16,7 @@ const STABLE_ADDRESSES = [
 ]
 
 async function start() {
+  const streams = NAJKJI_BSC_WOOFI_WOOSWAPS.join('&streams=')
   subscribeToStream({
     endpoint: `wss://stream.nakji.network/ws/${process.env.NAKJI_API_KEY}?streams=${streams}`,
   })
