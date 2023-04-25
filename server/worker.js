@@ -8,6 +8,7 @@ const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHist
 const updateWooTokenBurns = require('./commands/updateWooTokenBurns')
 const updateWooDaoTreasury = require('./commands/updateWooDaoTreasury')
 const updateWooFiEventsForLast = require('./commands/updateWooFiEventsForLast')
+const updateWooOnChain = require('./commands/updateWooOnChain')
 
 const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
 const getWooTokenBurns = require('./queries/getWooTokenBurns')
@@ -28,6 +29,10 @@ async function start(socket){
 
   cron.schedule('* * * * *', async () => { // minute
     await updateTopExchangeVolumeHistories({ memoryCache, socket})
+  })
+
+  cron.schedule('*/5 * * * *', async () => { // 5 minutes
+    await updateWooOnChain({ memoryCache, socket })
   })
 
   cron.schedule('0 * * * *', async () => { // hour
