@@ -1,0 +1,23 @@
+HEROKU_APP_NAME="wooostats"
+LOCAL_DB_NAME="woostats"
+
+# Create a backup of the Heroku Postgres database
+echo "Creating a backup of the Heroku Postgres database..."
+heroku pg:backups:capture --app $HEROKU_APP_NAME
+
+# Download the latest backup
+echo "Downloading the latest backup..."
+heroku pg:backups:download --app $HEROKU_APP_NAME
+
+# Get the name of the downloaded backup file
+BACKUP_FILE_NAME="$(ls -t latest.dump* | head -n 1)"
+
+# Restore the backup to the local database
+echo "Restoring the backup to the local database..."
+pg_restore --verbose --clean --no-acl --no-owner -h localhost -U `./scripts/postgres-user` -d $LOCAL_DB_NAME $BACKUP_FILE_NAME
+
+# Remove the downloaded backup file
+echo "Cleaning up the downloaded backup file..."
+rm $BACKUP_FILE_NAME
+
+echo "Done!"
