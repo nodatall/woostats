@@ -16,6 +16,8 @@ const getTotalMarketVolumeHistory = require('./queries/getTotalMarketVolumeHisto
 
 async function start(socket){
   cron.schedule('* * * * *', async () => { // minute
+    updateTopExchangeVolumeHistories({ memoryCache, socket})
+
     const tokenTickers = await updateTokenTickers({ tokens: TOKEN_IDS })
     await memoryCache.update({ tokenTickers })
 
@@ -26,17 +28,13 @@ async function start(socket){
     socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume })
   })
 
-  cron.schedule('* * * * *', async () => { // minute
-    await updateTopExchangeVolumeHistories({ memoryCache, socket})
-  })
-
   cron.schedule('0 * * * *', async () => { // hour
     await updateWooFiEventsForLast({ hours: 12, socket })
   })
 
   cron.schedule('0 0 * * *', async () => { // day
-    await updateExchangeVolumeHistory({ exchangeId: 'wootrade', forceUpdate: true })
-    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', forceUpdate: true })
+    await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
+    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
     await memoryCache.update({ wooSpotVolume, wooFuturesVolume })
