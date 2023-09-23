@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 
 import { SMA } from 'technicalindicators'
 
@@ -114,19 +114,44 @@ function FuturesComparisonCharts() {
   }}/>
 }
 
+
 function SelectAndMACharts({
   localStorageKey, storageDefault, exchangeMap, wooVolumeSeries, volumeHistories,
 }) {
+  const componentRef = useRef()
+  const [savedHeight, setSavedHeight] = useState()
   const [selectedExchange = storageDefault, selectExchange] = useLocalStorage(localStorageKey)
+
+  useEffect(() => {
+    if (componentRef.current) {
+      setSavedHeight(componentRef.current.offsetHeight);
+    }
+  }, [])
+
+  useEffect(() => {
+    if (componentRef.current && savedHeight) {
+      componentRef.current.style.height = `${savedHeight}px`
+    }
+  }, [savedHeight])
+
+  const handleExchangeChange = newExchange => {
+    setSavedHeight(componentRef.current.offsetHeight)
+    selectExchange(newExchange)
+  }
+
   const title = exchangeMap[selectedExchange] || 'top exchanges'
-  const selectMenuItems = [
-    <MenuItem value={storageDefault} key={storageDefault}>Top exchanges</MenuItem>
-  ]
-  Object.keys(exchangeMap).map(topExchange => {
-    selectMenuItems.push(
-      <MenuItem value={topExchange} key={topExchange}>{exchangeMap[topExchange]}</MenuItem>
+
+  const selectMenuItems = useMemo(() => {
+    const items = [<MenuItem value={storageDefault} key={storageDefault}>Top exchanges</MenuItem>]
+    return items.concat(
+      Object.keys(exchangeMap).map(topExchange => (
+        <MenuItem value={topExchange} key={topExchange}>
+          {exchangeMap[topExchange]}
+        </MenuItem>
+      ))
     )
-  })
+  }, [exchangeMap, storageDefault])
+
   const select = <FormControl
     sx={{
       width: 'fit-content',
@@ -136,7 +161,9 @@ function SelectAndMACharts({
   >
     <Select
       value={selectedExchange}
-      onChange={event => selectExchange(event.target.value)}
+      onChange={event => {
+        handleExchangeChange(event.target.value)
+      }}
       sx={{
         '.MuiSelect-select': { py: .75 },
         '&:hover fieldset.MuiOutlinedInput-notchedOutline': {
@@ -153,7 +180,10 @@ function SelectAndMACharts({
     </Select>
   </ FormControl>
 
-  let currentExchangeSeries = volumeHistories.find(([topExchange]) => topExchange === selectedExchange)[1]
+  const currentExchangeSeries = useMemo(() => {
+    return volumeHistories.find(([topExchange]) => topExchange === selectedExchange)[1];
+  }, [selectedExchange, volumeHistories])
+
   const wooVolumesMap = {}
   wooVolumeSeries.forEach(({ date, volume }) => wooVolumesMap[date] = volume)
 
@@ -180,18 +210,21 @@ function SelectAndMACharts({
   const spotFut = localStorageKey.includes('spot') ? 'spot' : 'futures'
 
   return <TwoColumns>
-    <VolumeOrLineChart {...{
-      title: `WOO % ${spotFut} marketshare vs [${title}]`,
-      selectValue: title,
-      datasets: [percentSeries],
-      labels,
-      select,
-    }} />
+    <div ref={componentRef}>
+      <VolumeOrLineChart {...{
+        title: `WOO % ${spotFut} marketshare vs [${title}]`,
+        selectValue: title,
+        datasets: [percentSeries],
+        labels,
+        select,
+      }} />
+    </div>
     <VolumeOrLineChart {...{
       title: `WOO % ${spotFut} vs ${title} [day] day MA`,
       datasets: [percentSeries],
       labels,
     }} />
+
   </TwoColumns>
 }
 
