@@ -33,8 +33,8 @@ async function start(socket){
   })
 
   cron.schedule('0 0 * * *', async () => { // day
-    await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
-    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
+    await updateExchangeVolumeHistory({ exchangeId: 'wootrade', forceUpdate: true })
+    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', forceUpdate: true })
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
     await memoryCache.update({ wooSpotVolume, wooFuturesVolume })
