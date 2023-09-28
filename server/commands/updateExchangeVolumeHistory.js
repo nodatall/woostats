@@ -7,12 +7,12 @@ const updateTokenPriceHistory = require('../commands/updateTokenPriceHistory')
 const fetchExchangeVolumeHistory = require('../queries/fetchExchangeVolumeHistory')
 const getTokenPriceHistory = require('../queries/getTokenPriceHistory')
 
-module.exports = async function updateExchangeVolumeHistory({ exchangeId, forceUpdate, isFutures }) {
+module.exports = async function updateExchangeVolumeHistory({ exchangeId, forceUpdate, isFutures, getAll }) {
   await updateTokenPriceHistory({ tokenId: 'bitcoin' })
   const bitcoinHistory = await getTokenPriceHistory({ tokenId: 'bitcoin' })
 
   const beginning = isFutures ? WOO_FUTURES_START_DATE : undefined
-  const volumeHistory = await fetchExchangeVolumeHistory({ exchangeId, forceUpdate, beginning })
+  const volumeHistory = await fetchExchangeVolumeHistory({ exchangeId, forceUpdate, beginning, getAll })
   if (!volumeHistory || !bitcoinHistory) return
 
   const btcPriceMap = {}
