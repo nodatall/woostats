@@ -24,7 +24,8 @@ module.exports = async function updateExchangeVolumeHistory({ exchangeId, forceU
   let volumeHistoryUpdate = []
   const last7 = []
   volumeHistory.reverse().forEach(([date, volumeInBTC]) => {
-    const formattedDate = dayjs.tz(date).format('YYYY-MM-DD')
+    const adjustedDate = dayjs.tz(date).subtract(1, 'day')
+    const formattedDate = adjustedDate.format('YYYY-MM-DD')
     if (formattedDate === dayjs.tz().format('YYYY-MM-DD')) return
     if (seenDateMap[formattedDate]) return
     seenDateMap[formattedDate] = true
