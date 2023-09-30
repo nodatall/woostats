@@ -1,8 +1,3 @@
-const { camelCase } = require('change-case')
-
-const nomicsRequest = require('../lib/nomics')
-const { client } = require('../database')
-const dayjs = require('../lib/dayjs')
 const { TOP_SPOT_EXCHANGE_IDS, TOP_FUTURES_EXCHANGE_IDS } = require('../lib/constants')
 
 const updateExchangeVolumeHistory = require('./updateExchangeVolumeHistory')
@@ -58,7 +53,10 @@ module.exports = async function updateTopExchangeVolumeHistories({ memoryCache, 
     })
   topFuturesExchangeVolumes.unshift(['aggregateFutures', aggregateTopFutures])
 
-  await memoryCache.update({ topSpotExchangeVolumes, topFuturesExchangeVolumes })
-  socket.emit('send', { topSpotExchangeVolumes, topFuturesExchangeVolumes })
+  await updateExchangeVolumeHistory({ exchangeId: 'woofi' })
+  const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi' })
+
+  await memoryCache.update({ topSpotExchangeVolumes, topFuturesExchangeVolumes, woofiVolumeHistory })
+  socket.emit('send', { topSpotExchangeVolumes, topFuturesExchangeVolumes, woofiVolumeHistory })
   running = false
 }
