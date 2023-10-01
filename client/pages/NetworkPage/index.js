@@ -29,15 +29,17 @@ export default function NetworkPage() {
     wooFuturesVolume,
     topFuturesExchangeVolumes,
     topSpotExchangeVolumes,
+    woofiVolumeHistory,
   } = useAppState(
-    ['wooSpotVolume', 'wooFuturesVolume', 'topFuturesExchangeVolumes', 'topSpotExchangeVolumes']
+    ['wooSpotVolume', 'wooFuturesVolume', 'topFuturesExchangeVolumes', 'topSpotExchangeVolumes', 'woofiVolumeHistory']
   )
 
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
     (!wooFuturesVolume || wooFuturesVolume.length === 0) ||
     (!topFuturesExchangeVolumes || topFuturesExchangeVolumes.length == 0) ||
-    (!topSpotExchangeVolumes || topSpotExchangeVolumes.length == 0)
+    (!topSpotExchangeVolumes || topSpotExchangeVolumes.length == 0) ||
+    (!woofiVolumeHistory || woofiVolumeHistory.length == 0)
   ) return <Loading />
 
   const {
@@ -63,18 +65,42 @@ export default function NetworkPage() {
       }
     )
 
+  const {
+    woofiVolumeSeries,
+    woofiVolumeLabels,
+  } = woofiVolumeHistory.slice(0, -1).reduce((acc, { date, volume }) => {
+    acc.woofiVolumeSeries.push(+volume)
+    acc.woofiVolumeLabels.push(date)
+    return acc
+  }, {
+    woofiVolumeSeries: [],
+    woofiVolumeLabels: [],
+  })
+
   return <Box>
     <AggregateNetworkVolumeBox />
     <TwoColumns>
       <VolumeOrLineChart {...{
-        title: 'Daily WOO Network volume',
+        title: 'Daily WOO X volume',
         wooDailyChartData: { wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries },
         labels: wooVolumeLabels,
       }}/>
       <VolumeOrLineChart {...{
-        title: 'Daily Network volume [day] day MA',
+        title: 'Daily WOO X volume [day] day MA',
         datasets: [wooVolumeSeries],
         labels: wooVolumeLabels,
+      }}/>
+    </TwoColumns>
+    <TwoColumns>
+      <VolumeOrLineChart {...{
+        title: 'Daily WOOFi volume',
+        datasets: [woofiVolumeSeries],
+        labels: woofiVolumeLabels,
+      }}/>
+      <VolumeOrLineChart {...{
+        title: 'Daily WOOFi volume [day] day MA',
+        datasets: [woofiVolumeSeries],
+        labels: woofiVolumeLabels,
       }}/>
     </TwoColumns>
     <FuturesComparisonCharts />
@@ -246,7 +272,7 @@ function VolumeOrLineChart({ title, datasets, wooDailyChartData, labels, select,
   if (title.includes('%')) props.denominator = '%'
   if (title.includes('MA')) chart = <MAChart {...props} />
   else {
-    chart = title === 'Daily WOO Network volume'
+    chart = title === 'Daily WOO X volume'
       ? <DailyVolumeChart {...{ ...wooDailyChartData, ...props }} />
       : <RangeSliderLineChart {...props} />
   }

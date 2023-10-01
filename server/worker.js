@@ -5,30 +5,35 @@ const { TOKEN_IDS } = require('./lib/constants.js')
 const updateTokenTickers = require('./commands/updateTokenTickers')
 const updateTopExchangeVolumeHistories = require('./commands/updateTopExchangeVolumeHistories')
 const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHistory')
+const updateWoofi24hrVolume = require('./commands/updateWoofi24hrVolume')
 
 const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
 
 async function start(socket){
   cron.schedule('* * * * *', async () => { // minute
     updateTopExchangeVolumeHistories({ memoryCache, socket})
+    await updateWoofi24hrVolume()
 
     const tokenTickers = await updateTokenTickers({ tokens: TOKEN_IDS })
     await memoryCache.update({ tokenTickers })
 
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
+    const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi'})
 
-    await memoryCache.update({ wooSpotVolume, wooFuturesVolume })
-    socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume })
+    await memoryCache.update({ wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
+    socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
   })
 
   cron.schedule('0 0 * * *', async () => { // day
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade', forceUpdate: true })
     await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', forceUpdate: true })
+    await updateExchangeVolumeHistory({ exchangeId: 'woofi', forceUpdate: true })
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
-    await memoryCache.update({ wooSpotVolume, wooFuturesVolume })
-    socket.emit('send', { wooSpotVolume, wooFuturesVolume })
+    const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi' })
+    await memoryCache.update({ wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
+    socket.emit('send', { wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
   })
 }
 

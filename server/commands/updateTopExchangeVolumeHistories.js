@@ -53,10 +53,7 @@ module.exports = async function updateTopExchangeVolumeHistories({ memoryCache, 
     })
   topFuturesExchangeVolumes.unshift(['aggregateFutures', aggregateTopFutures])
 
-  await updateExchangeVolumeHistory({ exchangeId: 'woofi' })
-  const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi' })
-
-  await memoryCache.update({ topSpotExchangeVolumes, topFuturesExchangeVolumes, woofiVolumeHistory })
-  socket.emit('send', { topSpotExchangeVolumes, topFuturesExchangeVolumes, woofiVolumeHistory })
+  await memoryCache.update({ topSpotExchangeVolumes, topFuturesExchangeVolumes })
+  socket.emit('send', { topSpotExchangeVolumes, topFuturesExchangeVolumes })
   running = false
 }
