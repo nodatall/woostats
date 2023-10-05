@@ -13,9 +13,9 @@ export default function AggregateNetworkVolumeBox() {
   const {
     wooSpotVolumeToday,
     wooFuturesVolumeToday,
-    woofiVolumeHistory,
+    woofiVolumeToday,
   } = useAppState(
-    ['wooSpotVolumeToday', 'wooFuturesVolumeToday', 'woofiVolumeHistory']
+    ['wooSpotVolumeToday', 'wooFuturesVolumeToday', 'woofiVolumeToday']
   )
   const theme = useTheme()
   const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
@@ -84,7 +84,7 @@ export default function AggregateNetworkVolumeBox() {
             mt: 1,
           }
         }}>
-          ${numeral(+woofiVolumeHistory[woofiVolumeHistory.length - 1].volume).format('0,0')}
+          ${numeral(+woofiVolumeToday).format('0,0')}
         </Typography>
         <Typography variant="h5" sx={{ textAlign: 'right' }}>
           24hr {<WoofiLogo/>} volume

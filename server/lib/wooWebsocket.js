@@ -1,7 +1,7 @@
 const WebSocket = require('ws')
 
 const memoryCache = require('./memoryCache')
-const updateDailyExchangeVolume = require('../commands/updateDailyExchangeVolume')
+const update24hrExchangeVolume = require('../commands/update24hrExchangeVolume')
 const logger = require('../lib/logger')
 
 async function openWooWebsocket(socket) {
@@ -50,8 +50,8 @@ async function openWooWebsocket(socket) {
           wooFuturesVolumeToday: 0,
         })
 
-        await updateDailyExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
-        await updateDailyExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
+        await update24hrExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
+        await update24hrExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
 
         await memoryCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
         socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })

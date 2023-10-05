@@ -10,9 +10,11 @@ const cacheKeysByCacheName = {
     'wooFuturesVolume',
     'wooSpotVolumeToday',
     'wooFuturesVolumeToday',
+    'woofiVolumeToday',
     'topSpotExchangeVolumes',
     'topFuturesExchangeVolumes',
     'woofiVolumeHistory',
+    'exchangeVolumes24hr',
   ],
   dao: ['wooDaoTreasuryBalance'],
   woofi: [

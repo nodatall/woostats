@@ -11,11 +11,15 @@ const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
 
 async function start(socket){
   cron.schedule('* * * * *', async () => { // minute
-    updateTopExchangeVolumeHistories({ memoryCache, socket})
-    await updateWoofi24hrVolume()
-
     const tokenTickers = await updateTokenTickers({ tokens: TOKEN_IDS })
     await memoryCache.update({ tokenTickers })
+
+    updateTopExchangeVolumeHistories({ memoryCache, socket})
+
+    await updateWoofi24hrVolume({ memoryCache, socket})
+    await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
+    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', isFutures: true })
+    await updateExchangeVolumeHistory({ exchangeId: 'woofi' })
 
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
@@ -23,17 +27,6 @@ async function start(socket){
 
     await memoryCache.update({ wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
     socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
-  })
-
-  cron.schedule('0 0 * * *', async () => { // day
-    await updateExchangeVolumeHistory({ exchangeId: 'wootrade', forceUpdate: true })
-    await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', forceUpdate: true })
-    await updateExchangeVolumeHistory({ exchangeId: 'woofi', forceUpdate: true })
-    const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
-    const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
-    const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi' })
-    await memoryCache.update({ wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
-    socket.emit('send', { wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
   })
 }
 

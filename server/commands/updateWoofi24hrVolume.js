@@ -1,7 +1,7 @@
 const request = require('../lib/request')
-const updateDailyExchangeVolume = require('./updateDailyExchangeVolume')
+const update24hrExchangeVolume = require('./update24hrExchangeVolume')
 
-module.exports = async function updateWoofi24hrVolume() {
+module.exports = async function updateWoofi24hrVolume({ socket, memoryCache }) {
   const response = await request({
     name: 'fetchWoofi24hrVolume',
     serverUrl: 'https://fi-api.woo.org/multi_total_stat',
@@ -9,5 +9,10 @@ module.exports = async function updateWoofi24hrVolume() {
 
   if (!response || response.status !== "ok") return
 
-  await updateDailyExchangeVolume({ exchangeId: 'woofi', volume: response.data.past_24h_volume / 1e18 })
+  const woofiVolumeToday = response.data.past_24h_volume / 1e18
+
+  await update24hrExchangeVolume({ exchangeId: 'woofi', volume: woofiVolumeToday })
+
+  await memoryCache.update({ woofiVolumeToday })
+  socket.emit('send', { woofiVolumeToday })
 }
