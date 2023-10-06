@@ -22,8 +22,6 @@ import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import AggregateNetworkVolumeBox from './AggregateNetworkVolumeBox'
 
 export default function NetworkPage() {
-  const [timePeriod = -1, _] = useLocalStorage('wooFiTimePeriod')
-
   const {
     wooSpotVolume = [],
     wooFuturesVolume,
@@ -45,7 +43,6 @@ export default function NetworkPage() {
   const {
     labels: wooVolumeLabels, series: wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries,
   } = wooSpotVolume
-    .slice(0, -1)
     .reduce(
       (acc, { date, volume }) => {
         const { volume: futuresVolume } = wooFuturesVolume.find(futuresVol => futuresVol.date === date) || { volume: 0 }
@@ -68,7 +65,7 @@ export default function NetworkPage() {
   const {
     woofiVolumeSeries,
     woofiVolumeLabels,
-  } = woofiVolumeHistory.slice(0, -1).reduce((acc, { date, volume }) => {
+  } = woofiVolumeHistory.reduce((acc, { date, volume }) => {
     acc.woofiVolumeSeries.push(+volume)
     acc.woofiVolumeLabels.push(date)
     return acc
@@ -116,7 +113,7 @@ function SpotComparisonCharts() {
   )
 
   return <SelectAndMACharts {...{
-    wooVolumeSeries: wooSpotVolume.slice(0, -1),
+    wooVolumeSeries: wooSpotVolume,
     localStorageKey: 'spotComparisonDropdown',
     storageDefault: 'aggregateSpot',
     exchangeMap: TOP_SPOT_EXCHANGES,
@@ -132,7 +129,7 @@ function FuturesComparisonCharts() {
   )
 
   return <SelectAndMACharts {...{
-    wooVolumeSeries: wooFuturesVolume.slice(0, -1),
+    wooVolumeSeries: wooFuturesVolume,
     localStorageKey: 'futuresComparisonDropdown',
     storageDefault: 'aggregateFutures',
     exchangeMap: TOP_FUTURES_EXCHANGES,
