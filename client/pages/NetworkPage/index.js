@@ -210,21 +210,19 @@ function SelectAndMACharts({
   const wooVolumesMap = {}
   wooVolumeSeries.forEach(({ date, volume }) => wooVolumesMap[date] = volume)
 
-  const { percentSeries, topExchangeSeries, labels } = currentExchangeSeries
+  const { percentSeries, labels } = currentExchangeSeries
     .reduce(
       (acc, { volume, date }, index) => {
         if (!wooVolumesMap[date]) return acc
         let percent = (wooVolumesMap[date] / volume) * 100
-        if (percent > 1000) {
+        if (percent > 1600) {
           percent = acc.percentSeries[index - 1]
         }
-        acc.topExchangeSeries.push((+volume))
         acc.percentSeries.push(percent)
         acc.labels.push(date)
         return acc
       },
       {
-        topExchangeSeries: [],
         percentSeries: [],
         labels: []
       }
