@@ -19,7 +19,7 @@ export default function AggregateNetworkVolumeBox() {
   )
   const theme = useTheme()
   const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
-  const spotAndFuturesElements = ['Spot', 'Futures'].map(category => {
+  const spotAndFuturesElements = ['Futures', 'Spot'].map(category => {
     const topStackStyle = theme => ({
       ...stackBaseStyle,
       mr: category === 'Spot' ? 2 : 0,
