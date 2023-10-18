@@ -15,18 +15,23 @@ const cacheKeysByCacheName = {
     'topFuturesExchangeVolumes',
     'woofiVolumeHistory',
     'exchangeVolumes24hr',
+    'dailyWoofiVolumeByChain',
   ],
-  dao: ['wooDaoTreasuryBalance'],
+  dao: [
+    // 'wooDaoTreasuryBalance'
+  ],
   woofi: [
-    'recentWooFiSwaps:bsc',
-    'topWooFiSwaps:bsc',
-    'dailyWooFiSwapVolume:bsc',
-    'dailyNumberOfWooFiSwaps:bsc',
-    'dailyWooFiVolumeBySources:bsc',
-    'dailyWooFiVolumeByAssets:bsc',
-    'wooFiAssetTokens',
+    // 'recentWooFiSwaps:bsc',
+    // 'topWooFiSwaps:bsc',
+    // 'dailyWooFiSwapVolume:bsc',
+    // 'dailyNumberOfWooFiSwaps:bsc',
+    // 'dailyWooFiVolumeBySources:bsc',
+    // 'dailyWooFiVolumeByAssets:bsc',
+    // 'wooFiAssetTokens',
   ],
-  token: ['wooTokenBurns'],
+  token: [
+    // 'wooTokenBurns'
+  ],
 }
 const CACHE_NAMES = Object.keys(cacheKeysByCacheName)
 
@@ -37,8 +42,19 @@ async function get(cacheName) {
 
 async function initializeCache(cacheName) {
   const cache = await getCache(cacheName)
+  const initialCacheLength = Object.keys(cache).length
   if (!cache) return
-  await update({ ...cache })
+  for (let key in cache) {
+    if (!cacheKeysByCacheName[cacheName].includes(key)) {
+      console.error(`key "${key}" not in cacheKeysByCacheName for cacheName "${cacheName}"`)
+      delete cache[key]
+    }
+  }
+  if (Object.keys(cache).length !== initialCacheLength) {
+    await updateCache({ cacheName, cache })
+  } else {
+    await update({ ...cache })
+  }
 }
 
 async function update(changes) {

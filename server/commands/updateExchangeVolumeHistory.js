@@ -8,10 +8,15 @@ const updateTokenPriceHistory = require('../commands/updateTokenPriceHistory')
 const fetchExchangeVolumeHistory = require('../queries/fetchExchangeVolumeHistory')
 const getTokenPriceHistory = require('../queries/getTokenPriceHistory')
 
-module.exports = async function updateExchangeVolumeHistory({ exchangeId, forceUpdate, isFutures, getAll }) {
+module.exports = async function updateExchangeVolumeHistory({
+  exchangeId, forceUpdate, isFutures, getAll, memoryCache, socket
+}) {
   let volumeHistoryUpdate = []
   if (exchangeId === 'woofi') {
-    volumeHistoryUpdate = await fetchWoofiVolumeData()
+    const { dailyTotalWoofiVolume, dailyWoofiVolumeByChain } = await fetchWoofiVolumeData()
+    volumeHistoryUpdate = dailyTotalWoofiVolume
+    await memoryCache.update({ dailyWoofiVolumeByChain })
+    socket.emit('send', { dailyWoofiVolumeByChain })
   } else {
     volumeHistoryUpdate = await fetchExchangeVolumeData(exchangeId, isFutures, forceUpdate, getAll)
   }
@@ -26,13 +31,28 @@ async function fetchWoofiVolumeData() {
     name: 'getWoofiVolumeFromDefiLlama',
     serverUrl: 'https://api.llama.fi/summary/dexs/woofi?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true&dataType=dailyVolume',
   })
-  if (!response.totalDataChart) return []
+  if (!response.totalDataChart) return {}
 
-  return response.totalDataChart.map(([rawDate, volume]) => ({
+  const dailyTotalWoofiVolume = response.totalDataChart.map(([rawDate, volume]) => ({
     date: dayjs.tz(rawDate * 1000).format('YYYY-MM-DD'),
     exchange: 'woofi',
     volume,
   }))
+  const dailyWoofiVolumeByChain = response.totalDataChartBreakdown.map(([date, volumes]) => {
+    const volumeByChain = {}
+    for (let chain in volumes) {
+      volumeByChain[chain] = volumes[chain]['WOOFi Swap']
+    }
+    return {
+      date: dayjs.tz(date * 1000).format('YYYY-MM-DD'),
+      volumeByChain,
+    }
+  })
+
+  return {
+    dailyTotalWoofiVolume,
+    dailyWoofiVolumeByChain,
+  }
 }
 
 async function fetchExchangeVolumeData(exchangeId, isFutures, forceUpdate, getAll) {

@@ -16,10 +16,10 @@ async function start(socket){
 
     updateTopExchangeVolumeHistories({ memoryCache, socket})
 
-    await updateWoofi24hrVolume({ memoryCache, socket})
+    await updateWoofi24hrVolume({ memoryCache, socket })
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
     await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', isFutures: true })
-    await updateExchangeVolumeHistory({ exchangeId: 'woofi' })
+    await updateExchangeVolumeHistory({ exchangeId: 'woofi', memoryCache, socket })
 
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
