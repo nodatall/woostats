@@ -35,8 +35,8 @@ export default function SwapsListTable({ swaps, minDate, title }) {
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
     .map(swap => {
       const date = minDate
-        ? dayjs.tz(swap.date).format('HH:mm:ss')
-        : dayjs.tz(swap.date).format('DD/MM/YY HH:mm')
+        ? dayjs(swap.date).utc().format('HH:mm:ss')
+        : dayjs(swap.date).utc().format('DD/MM/YY HH:mm')
       return <TableRow
         hover={true}
         key={`${swap.txHash}${swap.fromSymbol}${swap.toSymbol}${swap.usdVolume}`}

@@ -187,7 +187,7 @@ const VolumeBySourcesChart = React.memo(function () {
       </Stack>
       <Stack direction="row" justifyContent="center" sx={{ mt: 1 }}>
         <Typography variant="body1">
-          {dayjs(dateLabels[range[0] - 1]).format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).format('MM/DD/YYYY')}
+          {dayjs(dateLabels[range[0] - 1]).utc().format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).utc().format('MM/DD/YYYY')}
         </Typography>
       </Stack>
       <RangeSlider {...{ range, labels: dateLabels, setRange }} />

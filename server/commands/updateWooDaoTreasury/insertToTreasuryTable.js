@@ -3,7 +3,7 @@ const { client } = require('../../database')
 const dayjs = require('../../lib/dayjs')
 
 module.exports = async function insertIntoTreasuryTable({ tokens = [], protocolBalances = [] }) {
-  const today = dayjs.tz().format('YYYY-MM-DD')
+  const today = dayjs().utc().format('YYYY-MM-DD')
   const latest = await client.one(`SELECT date, in_protocols, tokens FROM treasury_balances ORDER BY date DESC LIMIT 1;`)
   if (latest.date === today) {
     tokens = [

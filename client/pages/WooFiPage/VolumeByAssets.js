@@ -99,7 +99,7 @@ function VolumeByAssetsBarChart({ dateLabels, dailyWooFiVolumeByAssets }) {
   let tempSymbols
   for (const asset of dailyWooFiVolumeByAssets) {
     const { date, symbol, volume } = asset
-    const _date = dayjs(date)
+    const _date = dayjs(date).utc()
     if (_date.isBefore(dateLabels[0])) continue
     if (_date.isAfter(dateLabels[dateLabels.length - 1])) break
     datasets[tokenToDatasetIndexMap[symbol]].data.push(volume)
@@ -125,7 +125,7 @@ function VolumeByAssetsTable({ dateLabels, dailyWooFiVolumeByAssets, range }) {
   const volumeByAssets = {}
 
   for (const asset of dailyWooFiVolumeByAssets) {
-    const date = dayjs(asset.date)
+    const date = dayjs(asset.date).utc()
     if (date.isBefore(dateLabels[range[0]])) continue
     if (date.isAfter(dateLabels[range[1]])) break
     const key = `${asset.symbol}${asset.chain}`
@@ -190,7 +190,7 @@ function VolumeByAssetsTable({ dateLabels, dailyWooFiVolumeByAssets, range }) {
     </Table>
     <Stack direction="row" justifyContent="center" sx={{ pt: 2 }}>
       <Typography variant="body1">
-        {dayjs(dateLabels[range[0] - 1]).format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).format('MM/DD/YYYY')}
+        {dayjs(dateLabels[range[0] - 1]).utc().format('MM/DD/YYYY')} - {dayjs(dateLabels[range[1] - 1]).utc().format('MM/DD/YYYY')}
       </Typography>
     </Stack>
   </>

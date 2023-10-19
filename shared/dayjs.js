@@ -5,6 +5,5 @@ const isSameOrBefore = require('dayjs/plugin/isSameOrBefore')
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(isSameOrBefore)
-dayjs.tz.setDefault('Atlantic/St_Helena')
 
 module.exports = dayjs

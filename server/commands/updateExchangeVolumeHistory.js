@@ -34,7 +34,7 @@ async function fetchWoofiVolumeData() {
   if (!response.totalDataChart) return {}
 
   const dailyTotalWoofiVolume = response.totalDataChart.map(([rawDate, volume]) => ({
-    date: dayjs.tz(rawDate * 1000).format('YYYY-MM-DD'),
+    date: dayjs(rawDate * 1000).utc().format('YYYY-MM-DD'),
     exchange: 'woofi',
     volume,
   }))
@@ -44,7 +44,7 @@ async function fetchWoofiVolumeData() {
       volumeByChain[chain] = volumes[chain]['WOOFi Swap']
     }
     return {
-      date: dayjs.tz(date * 1000).format('YYYY-MM-DD'),
+      date: dayjs(date * 1000).utc().format('YYYY-MM-DD'),
       volumeByChain,
     }
   })
@@ -56,24 +56,25 @@ async function fetchWoofiVolumeData() {
 }
 
 async function fetchExchangeVolumeData(exchangeId, isFutures, forceUpdate, getAll) {
-  await updateTokenPriceHistory({ tokenId: 'bitcoin' })
-  const bitcoinHistory = await getTokenPriceHistory({ tokenId: 'bitcoin' })
-
   const beginning = isFutures ? WOO_FUTURES_START_DATE : undefined
   const volumeHistory = await fetchExchangeVolumeHistory({ exchangeId, forceUpdate, beginning, getAll })
-  if (!volumeHistory || !bitcoinHistory) return []
+  if (!volumeHistory) return []
+
+  await updateTokenPriceHistory({ tokenId: 'bitcoin' })
+  const bitcoinHistory = await getTokenPriceHistory({ tokenId: 'bitcoin' })
+  if (!bitcoinHistory) return []
 
   const btcPriceMap = {}
   bitcoinHistory.forEach(({ date, price }) => {
-    btcPriceMap[dayjs.tz(date).format('YYYY-MM-DD')] = price
+    btcPriceMap[dayjs(date).utc().format('YYYY-MM-DD')] = price
   })
 
   const seenDateMap = {}
   const last7 = []
   return volumeHistory.reverse().flatMap(([date, volumeInBTC]) => {
-    const adjustedDate = dayjs.tz(date).subtract(1, 'day')
+    const adjustedDate = dayjs(date).utc().subtract(1, 'day')
     const formattedDate = adjustedDate.format('YYYY-MM-DD')
-    if (formattedDate === dayjs.tz().format('YYYY-MM-DD') || seenDateMap[formattedDate]) {
+    if (formattedDate === dayjs().utc().format('YYYY-MM-DD') || seenDateMap[formattedDate]) {
       return []
     }
     seenDateMap[formattedDate] = true

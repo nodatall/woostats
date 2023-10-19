@@ -6,7 +6,6 @@ import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
 import { lineColors } from 'lib/chart'
 import { TOP_SPOT_EXCHANGES, TOP_FUTURES_EXCHANGES } from 'lib/constants'
-import dayjs from 'lib/dayjs'
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
