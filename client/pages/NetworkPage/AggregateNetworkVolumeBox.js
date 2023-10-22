@@ -22,7 +22,7 @@ export default function AggregateNetworkVolumeBox() {
   const spotAndFuturesElements = ['Futures', 'Spot'].map(category => {
     const topStackStyle = theme => ({
       ...stackBaseStyle,
-      mr: category === 'Spot' ? 2 : 0,
+      mr: category === 'Futures' ? 2 : 0,
       [theme.breakpoints.down('xs')]: {
         mr: 0,
       }
