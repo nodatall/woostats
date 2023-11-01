@@ -16,7 +16,6 @@ module.exports = async function updateExchangeVolumeHistory({
   if (exchangeId === 'woofi') {
     const { dailyTotalWoofiVolume, dailyWoofiVolumeByChain } = await fetchWoofiVolumeData()
     volumeHistoryUpdate = dailyTotalWoofiVolume
-    logger.debug(`last two defilamma woofi volume entries: ${JSON.stringify(dailyTotalWoofiVolume.slice(-2))}`)
     await memoryCache.update({ dailyWoofiVolumeByChain })
     socket.emit('send', { dailyWoofiVolumeByChain })
   } else {
@@ -34,6 +33,8 @@ async function fetchWoofiVolumeData() {
     serverUrl: 'https://api.llama.fi/summary/dexs/woofi?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true&dataType=dailyVolume',
   })
   if (!response.totalDataChart) return {}
+
+  logger.debug(`last two raw defilamma woofi volume entries: ${JSON.stringify(response.totalDataChart.slice(-2))}`)
 
   const dailyTotalWoofiVolume = response.totalDataChart.map(([rawDate, volume]) => ({
     date: dayjs.utc(rawDate * 1000).format('YYYY-MM-DD'),
