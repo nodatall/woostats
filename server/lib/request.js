@@ -20,7 +20,7 @@ async function request({
     if (params) requestUrl += params
     const options = {
       headers: {
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-store',
         'Pragma': 'no-cache',
         'Expires': '0',
         ...headers,
