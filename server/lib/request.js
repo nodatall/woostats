@@ -18,7 +18,14 @@ async function request({
     if (keyString || params) requestUrl += `?${keyString}`
     logger.debug(`${name} ${requestUrl} ${params}`)
     if (params) requestUrl += params
-    const options = { headers }
+    const options = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        ...headers,
+      }
+    }
     const response = await axios[method](requestUrl, options)
     result = response.data
   } catch(error) {
