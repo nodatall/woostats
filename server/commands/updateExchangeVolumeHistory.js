@@ -1,6 +1,7 @@
 const knex = require('../database/knex')
 const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
+const logger = require('../lib/logger')
 const request = require('../lib/request')
 const { WOO_FUTURES_START_DATE } = require('../lib/constants')
 
@@ -15,6 +16,7 @@ module.exports = async function updateExchangeVolumeHistory({
   if (exchangeId === 'woofi') {
     const { dailyTotalWoofiVolume, dailyWoofiVolumeByChain } = await fetchWoofiVolumeData()
     volumeHistoryUpdate = dailyTotalWoofiVolume
+    logger.debug(`last two defilamma woofi volume entries: ${JSON.stringify(dailyTotalWoofiVolume.slice(-2))}`)
     await memoryCache.update({ dailyWoofiVolumeByChain })
     socket.emit('send', { dailyWoofiVolumeByChain })
   } else {
