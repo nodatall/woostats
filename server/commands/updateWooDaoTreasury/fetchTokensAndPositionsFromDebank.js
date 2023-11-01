@@ -53,7 +53,7 @@ module.exports = async function fetchTokensAndPositionsFromDebank() {
     callerName: 'fetchPositionsFromDebank',
     protocolNames: ['Uniswap V3', 'Biswap'],
     fetchUpdate: fetchPositionsUpdate,
-    updateExisting: dayjs().utc().minute() > 4,
+    updateExisting: dayjs.utc().minute() > 4,
   })
 }
 

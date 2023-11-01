@@ -11,7 +11,7 @@ module.exports = async function updateTokenPriceHistory({ tokenId }) {
   const dateSeenMap = {}
   const tokenPriceHistoryUpdate = []
   tokenPriceHistory.forEach(([date, price]) => {
-    const formattedDate = dayjs(date).utc().format('YYYY-MM-DD')
+    const formattedDate = dayjs.utc(date).format('YYYY-MM-DD')
     if (dateSeenMap[formattedDate]) return
     tokenPriceHistoryUpdate.push({
       date: formattedDate,

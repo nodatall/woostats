@@ -5,9 +5,9 @@ const dayjs = require('../lib/dayjs')
 module.exports = async function fetchCoingeckoHistoricalData({
   path, beginning = WOO_NETWORK_START_DATE, params = '',
 }) {
-  beginning = dayjs(beginning).utc().unix()
+  beginning = dayjs.utc(beginning).unix()
   const volumeHistory = []
-  let to = dayjs().utc().unix()
+  let to = dayjs.utc().unix()
   let from = to - (86400 * 30)
   let last = from
   while (last > beginning) {
@@ -23,7 +23,7 @@ module.exports = async function fetchCoingeckoHistoricalData({
     to = from
     from = to - (86400 * 30)
     if (from < beginning) from = beginning
-    last = dayjs(thirtyDayVolume[thirtyDayVolume.length - 1][0]).utc().unix()
+    last = dayjs.utc(thirtyDayVolume[thirtyDayVolume.length - 1][0]).unix()
   }
 
   return volumeHistory

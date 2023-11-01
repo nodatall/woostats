@@ -13,7 +13,7 @@ module.exports = async function fetchExchangeVolumeHistory({ exchangeId, forceUp
     return await fetchCoingeckoHistoricalData({ path: `/exchanges/${exchangeId}/volume_chart/range`, beginning })
 
   const latestDate = volumeRecord[0].date
-  const yesterday = dayjs().utc().subtract(1, 'day').format('YYYY-MM-DD')
+  const yesterday = dayjs.utc().subtract(1, 'day').format('YYYY-MM-DD')
   if (
     (latestDate !== yesterday) ||
     forceUpdate
