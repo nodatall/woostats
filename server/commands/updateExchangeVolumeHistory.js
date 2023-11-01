@@ -30,7 +30,7 @@ module.exports = async function updateExchangeVolumeHistory({
 async function fetchWoofiVolumeData() {
   const response = await request({
     name: 'getWoofiVolumeFromDefiLlama',
-    serverUrl: 'https://api.llama.fi/summary/dexs/woofi?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true&dataType=dailyVolume',
+    serverUrl: 'https://api.llama.fi/summary/dexs/woofi?dataType=dailyVolume',
   })
   if (!response.totalDataChart) return {}
 
