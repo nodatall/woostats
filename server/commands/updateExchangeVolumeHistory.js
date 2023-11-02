@@ -30,7 +30,7 @@ module.exports = async function updateExchangeVolumeHistory({
 async function fetchWoofiVolumeData() {
   const response = await request({
     name: 'getWoofiVolumeFromDefiLlama',
-    serverUrl: 'https://api.llama.fi/summary/dexs/woofi?dataType=dailyVolume',
+    serverUrl: `https://api.llama.fi/summary/dexs/woofi?dataType=dailyVolume&random${generateUrlSafeString(5)}`,
   })
   if (!response.totalDataChart) return {}
 
@@ -99,4 +99,13 @@ async function updateVolumeDataInDatabase(volumeHistoryUpdate) {
     [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
   )
   await client.query(`${query}`)
+}
+
+function generateUrlSafeString(length = 10) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result
 }
