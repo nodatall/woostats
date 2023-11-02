@@ -1,7 +1,6 @@
 const knex = require('../database/knex')
 const { client } = require('../database')
 const dayjs = require('../lib/dayjs')
-const logger = require('../lib/logger')
 const request = require('../lib/request')
 const { WOO_FUTURES_START_DATE } = require('../lib/constants')
 
@@ -33,8 +32,6 @@ async function fetchWoofiVolumeData() {
     serverUrl: `https://api.llama.fi/summary/dexs/woofi?dataType=dailyVolume&random${generateUrlSafeString(5)}`,
   })
   if (!response.totalDataChart) return {}
-
-  logger.debug(`last two raw defilamma woofi volume entries: ${JSON.stringify(response.totalDataChart.slice(-2))}`)
 
   const dailyTotalWoofiVolume = response.totalDataChart.map(([rawDate, volume]) => ({
     date: dayjs.utc(rawDate * 1000).format('YYYY-MM-DD'),
