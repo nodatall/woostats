@@ -19,20 +19,14 @@ async function start(socket){
     await updateWoofi24hrVolume({ memoryCache, socket })
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
     await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', isFutures: true })
+    await updateExchangeVolumeHistory({ exchangeId: 'woofi', memoryCache, socket })
 
+    const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi'})
     const wooSpotVolume = await getExchangeVolumeHistory({ exchangeId: 'wootrade' })
     const wooFuturesVolume = await getExchangeVolumeHistory({ exchangeId: 'woo_network_futures' })
 
-    await memoryCache.update({ wooSpotVolume, wooFuturesVolume })
-    socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume })
-  })
-
-  cron.schedule('*/10 * * * *', async () => {
-    await updateExchangeVolumeHistory({ exchangeId: 'woofi', memoryCache, socket })
-    const woofiVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi'})
-
-    await memoryCache.update({ woofiVolumeHistory })
-    socket.emit('send', { woofiVolumeHistory })
+    await memoryCache.update({ wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
+    socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
   })
 }
 
