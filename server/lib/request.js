@@ -38,7 +38,11 @@ async function request({
     const response = await axios(config)
     result = response.data
   } catch (error) {
-    logger.log('error', `${name} ${error.config.url} ${JSON.stringify(error.response ? error.response.data : error)}`)
+    if (error.config) {
+      logger.log('error', `${name} ${error.config.url} ${JSON.stringify(error.response ? error.response.data : error)}`)
+    } else {
+      logger.log('error', `${name} ${error.message}`)
+    }
   }
 
   if (result) logger.debug(`${name} result ${JSON.stringify(result).slice(0,500)}`)

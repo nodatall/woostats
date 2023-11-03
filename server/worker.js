@@ -30,7 +30,7 @@ async function start(socket){
     socket.emit('send', { tokenTickers, wooSpotVolume, wooFuturesVolume, woofiVolumeHistory })
   })
 
-  cron.schedule('*/10 * * * *', async () => { // minute
+  cron.schedule('*/10 * * * *', async () => { // 10 minutes
     updateWoofiFeeHistory()
   })
 }
