@@ -9,26 +9,35 @@ async function request({
   path = '',
   params,
   headers = {},
+  data,
 }) {
   if (!name) throw new Error('name is required')
   let result
 
   try {
     let requestUrl = `${serverUrl}${path}`
-    if (keyString || params) requestUrl += `?${keyString}`
-    logger.debug(`${name} ${requestUrl} ${params}`)
-    if (params) requestUrl += params
-    const options = {
+    if (keyString || params) requestUrl += `?${keyString}${params}` // Combined keyString and params here
+
+    const config = {
+      method: method,
+      url: requestUrl,
       headers: {
         'Cache-Control': 'no-store',
         'Pragma': 'no-cache',
         'Expires': '0',
         ...headers,
-      }
+      },
     }
-    const response = await axios[method](requestUrl, options)
+
+    if (['post', 'put', 'patch'].includes(method)) {
+      config.data = data
+    }
+
+    logger.debug(`${name} ${config.url} ${JSON.stringify(data)}`)
+
+    const response = await axios(config)
     result = response.data
-  } catch(error) {
+  } catch (error) {
     logger.log('error', `${name} ${error.config.url} ${JSON.stringify(error.response ? error.response.data : error)}`)
   }
 
