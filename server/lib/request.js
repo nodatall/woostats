@@ -5,7 +5,6 @@ async function request({
   name,
   method = 'get',
   serverUrl,
-  keyString = '',
   path = '',
   params,
   headers = {},
@@ -16,7 +15,10 @@ async function request({
 
   try {
     let requestUrl = `${serverUrl}${path}`
-    if (keyString || params) requestUrl += `?${keyString}${params}` // Combined keyString and params here
+    if (params) {
+      const searchParams = new URLSearchParams(params).toString()
+      requestUrl += `?${searchParams}`
+    }
 
     const config = {
       method: method,

@@ -49,9 +49,11 @@ const RangeSliderLineChart = React.memo(function ({
   </ContentCard>
 }, function(prevProps, nextProps) {
   if (prevProps.timePeriod !== nextProps.timePeriod) return false
+  if (!isEqual(prevProps.datasets, nextProps.datasets)) return false
   for (const prop in prevProps) {
-    if (prop === 'datasets' && isEqual(prevProps[prop].data, nextProps[prop].data)) return true
-    if (!isEqual(prevProps[prop], nextProps[prop])) return false
+    if (prop !== 'datasets' && !isEqual(prevProps[prop], nextProps[prop])) {
+      return false
+    }
   }
   return true
 })
