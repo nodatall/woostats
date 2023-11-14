@@ -3,15 +3,23 @@ const { client } = require('../database')
 const fetchWoofiProDailyVolumeHistory = require('../queries/fetchWoofiProDailyVolumeHistory')
 const request = require('../lib/request')
 const dayjs = require('../lib/dayjs')
+let running = false
 
 module.exports = async function updateWoofiProDailyVolumeHistory() {
-  const volumeHistory = await fetchWoofiProDailyVolumeHistory()
+  if (running) return
+  running = true
+
+  const { volumeHistory, accountAddressMap } = await fetchWoofiProDailyVolumeHistory()
+  if (!volumeHistory || !accountAddressMap) {
+    running = false
+    return
+  }
 
   const update = []
-  volumeHistory.forEach(({ perp_volume, account_id, date }) => {
+  deduplicateData(volumeHistory).forEach(({ perp_volume, account_id, date }) => {
     update.push({
       volume: perp_volume,
-      account_id,
+      account_id: accountAddressMap[account_id],
       date,
     })
   })
@@ -43,4 +51,19 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
       data: csv,
     }
   })
+
+  running = false
+}
+
+function deduplicateData(data) {
+  const uniqueEntries = new Map()
+
+  data.forEach(entry => {
+    const uniqueKey = `${entry.account_id}-${entry.date}-${entry.volume}`
+    if (!uniqueEntries.has(uniqueKey)) {
+      uniqueEntries.set(uniqueKey, entry)
+    }
+  })
+
+  return Array.from(uniqueEntries.values())
 }

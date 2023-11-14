@@ -12,13 +12,11 @@ const updateWoofiProDailyVolumeHistory = require('./commands/updateWoofiProDaily
 const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
 
 async function start(socket){
-
   cron.schedule('* * * * *', async () => { // minute
     const tokenTickers = await updateTokenTickers({ tokens: TOKEN_IDS })
     await memoryCache.update({ tokenTickers })
 
     updateTopExchangeVolumeHistories({ memoryCache, socket })
-    updateWoofiProDailyVolumeHistory()
 
     await updateWoofi24hrVolume({ memoryCache, socket })
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
@@ -34,6 +32,7 @@ async function start(socket){
   })
 
   cron.schedule('*/10 * * * *', async () => { // 10 minutes
+    updateWoofiProDailyVolumeHistory()
     updateWoofiFeeHistory()
   })
 }
