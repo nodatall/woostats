@@ -1,13 +1,15 @@
 const orderlyRequest = require('../lib/orderlyRequest')
 const dayjs = require('dayjs')
+const { client } = require('../database')
 
 module.exports = async function fetchWoofiProDailyVolumeHistory() {
-  const startDate = '2023-10-23'
+  const latest = await client.one(`SELECT date FROM woofi_pro_daily_volume_by_account ORDER BY date DESC LIMIT 1;`)
+  let startDate = (latest && latest.date) || '2023-10-23'
   const endDate = dayjs.utc().format('YYYY-MM-DD')
   const pageSize = 500
 
   const accountIdsAndAddresses = await fetchAllPages('/v1/volume/broker/daily', { start_date: startDate, end_date: endDate, aggregateBy: 'account' }, pageSize)
-  if (!accountIdsAndAddresses) return
+  if (!accountIdsAndAddresses) return {}
 
   const accountAddressMap = {}
   accountIdsAndAddresses.forEach(({ account_id, address }) => {
@@ -15,7 +17,7 @@ module.exports = async function fetchWoofiProDailyVolumeHistory() {
   })
 
   const volumeHistory = await fetchAllPages('/v1/volume/broker/daily', { start_date: startDate, end_date: endDate }, pageSize)
-  if (!volumeHistory) return
+  if (!volumeHistory) return {}
 
   return {
     volumeHistory,
@@ -40,7 +42,7 @@ async function fetchAllPages(requestPath, params, pageSize) {
 
     hasMore = response.data.rows.length === pageSize
     page++
-    await delay(1000)
+    await delay(10000)
   }
 
   return allResults

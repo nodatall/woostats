@@ -32,7 +32,8 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
 
   const header = ['date', 'account_id', 'volume']
 
-  const csvRows = update.map(item => [
+  const queryResult = await client.query(`SELECT * FROM woofi_pro_daily_volume_by_account ORDER BY date ASC;`)
+  const csvRows = queryResult.map(item => [
     dayjs.utc(item.date).toISOString(),
     item.account_id,
     item.volume,

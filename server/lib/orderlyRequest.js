@@ -46,7 +46,7 @@ module.exports = async function orderlyRequest({ method, path, params }) {
   })
 
   if (response && response.success !== true) {
-    logger.log('orderlyRequest error', `${response}`)
+    logger.log('error', 'orderlyRequest error', `${response}`)
   }
 
   return response
