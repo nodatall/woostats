@@ -3,8 +3,7 @@ const dayjs = require('dayjs')
 const { client } = require('../database')
 
 module.exports = async function fetchWoofiProDailyVolumeHistory() {
-  const latest = await client.one(`SELECT date FROM woofi_pro_daily_volume_by_account ORDER BY date DESC LIMIT 1;`)
-  let startDate = (latest && latest.date) || '2023-10-23'
+  let startDate = '2023-10-23'
   const endDate = dayjs.utc().format('YYYY-MM-DD')
   const pageSize = 500
 
@@ -15,6 +14,9 @@ module.exports = async function fetchWoofiProDailyVolumeHistory() {
   accountIdsAndAddresses.forEach(({ account_id, address }) => {
     accountAddressMap[account_id] = address
   })
+
+  const latest = await client.one(`SELECT date FROM woofi_pro_daily_volume_by_account ORDER BY date DESC LIMIT 1;`)
+  if (latest && latest.date) startDate = latest.date
 
   const volumeHistory = await fetchAllPages('/v1/volume/broker/daily', { start_date: startDate, end_date: endDate }, pageSize)
   if (!volumeHistory) return {}
