@@ -44,7 +44,7 @@ async function fetchAllPages(requestPath, params, pageSize) {
 
     hasMore = response.data.rows.length === pageSize
     page++
-    await delay(10000)
+    await delay(3400)
   }
 
   return allResults
