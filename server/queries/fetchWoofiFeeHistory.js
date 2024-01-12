@@ -42,7 +42,7 @@ async function fetchFeeTxHistory({contractAddress, apiKey, serverUrl}) {
       params,
     })
 
-    if (response.result.length > 0) {
+    if (response.result && response.result.length > 0) {
       results.push(...response.result)
       currentPage++
       await delay(210)

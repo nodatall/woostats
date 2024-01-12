@@ -31,6 +31,10 @@ let theme = createTheme({
     success: {
       main: '#34815e',
     },
+    purple: {
+      main: '#ae85de',
+    }
+
   },
   breakpoints: {
     values: {

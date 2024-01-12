@@ -8,14 +8,16 @@ import Stack from '@mui/material/Stack'
 
 import { useAppState } from 'lib/appState'
 import ContentCard from 'components/ContentCard'
+import woofiProLogo from '../../assets/woofipro-branding.png'
 
 export default function AggregateNetworkVolumeBox() {
   const {
     wooSpotVolumeToday,
     wooFuturesVolumeToday,
     woofiVolumeToday,
+    woofiPro24hrVolume = 0,
   } = useAppState(
-    ['wooSpotVolumeToday', 'wooFuturesVolumeToday', 'woofiVolumeToday']
+    ['wooSpotVolumeToday', 'wooFuturesVolumeToday', 'woofiVolumeToday', 'woofiPro24hrVolume']
   )
   const theme = useTheme()
   const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
@@ -78,7 +80,7 @@ export default function AggregateNetworkVolumeBox() {
       }}>
         <Typography variant="h4" sx={{
           color:  'primary.main',
-          mr: 2,
+          mr: 1,
           [theme.breakpoints.down('xs')]: {
             mr: 0,
             mt: 1,
@@ -87,7 +89,28 @@ export default function AggregateNetworkVolumeBox() {
           ${numeral(+woofiVolumeToday).format('0,0')}
         </Typography>
         <Typography variant="h5" sx={{ textAlign: 'right' }}>
-          24hr {<WoofiLogo/>} volume
+          {<WoofiLogo/>}
+        </Typography>
+      </Stack>
+      <Divider textAlign="center" sx={{ width: '260px', my: 2 }} />
+      <Stack sx={{
+        ...stackBaseStyle,
+        [theme.breakpoints.down('xs')]: {
+          flexDirection: 'column-reverse',
+        }
+      }}>
+        <Typography variant="h4" sx={{
+          color: 'purple.main',
+          mr: 2,
+          [theme.breakpoints.down('xs')]: {
+            mr: 0,
+            mt: 1,
+          }
+        }}>
+          ${numeral(+woofiPro24hrVolume).format('0,0')}
+        </Typography>
+        <Typography variant="h5" sx={{ textAlign: 'right' }}>
+          {<WoofiLogo/>}{<img src={woofiProLogo} style={{ marginLeft: '5px', width: '25px' }} />}
         </Typography>
       </Stack>
     </Stack>
@@ -130,3 +153,4 @@ function WoofiLogo() {
     <rect style={{ fill: 'url(#linear-gradient-3)'}} x="1584.57" y="137.3" width="74.89" height="196.58" />
   </svg>
 }
+
