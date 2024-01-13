@@ -21,7 +21,7 @@ async function openOrderlyWebsocket(socket) {
     if ((Date.now() - lastUpdate) > 20000) {
       orderlySocket.terminate()
       clearInterval(updateTimeout)
-      openWooWebsocket(socket)
+      openOrderlyWebsocket(socket)
     }
   }, 5000)
 
