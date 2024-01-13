@@ -17,6 +17,7 @@ const cacheKeysByCacheName = {
     'exchangeVolumes24hr',
     'dailyWoofiVolumeByChain',
     'woofiPro24hrVolume',
+    'woofiProVolumeHistory',
   ],
   dao: [
     // 'wooDaoTreasuryBalance'

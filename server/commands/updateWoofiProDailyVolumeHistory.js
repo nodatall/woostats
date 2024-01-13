@@ -16,11 +16,27 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   }
 
   const update = []
+  const volumeHistoryUpdate = []
+  const aggregatedVolumes = {}
+
   deduplicateData(volumeHistory).forEach(({ perp_volume, account_id, date }) => {
     update.push({
       volume: perp_volume,
       account_id: accountAddressMap[account_id],
       date,
+    })
+
+    if (!aggregatedVolumes[date]) {
+      aggregatedVolumes[date] = 0
+    }
+    aggregatedVolumes[date] += perp_volume
+  })
+
+  Object.entries(aggregatedVolumes).forEach(([date, volume]) => {
+    volumeHistoryUpdate.push({
+      date,
+      exchange: 'woofi_pro',
+      volume
     })
   })
 
@@ -29,6 +45,12 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     [knex('woofi_pro_daily_volume_by_account').insert(update)],
   )
   await client.query(`${query}`)
+
+  const queryAggregated = knex.raw(
+    `? ON CONFLICT (date, exchange) DO UPDATE SET volume = EXCLUDED.volume;`,
+    [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
+  )
+  await client.query(`${queryAggregated}`)
 
   const header = ['date', 'account_id', 'volume']
 

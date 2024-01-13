@@ -32,8 +32,11 @@ async function start(socket){
   })
 
   cron.schedule('*/10 * * * *', async () => { // 10 minutes
-    updateWoofiProDailyVolumeHistory()
     updateWoofiFeeHistory()
+    await updateWoofiProDailyVolumeHistory()
+    const woofiProVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi_pro' })
+    await memoryCache.update({ woofiProVolumeHistory })
+    socket.emit('send', { woofiProVolumeHistory })
   })
 }
 

@@ -3,9 +3,21 @@ const dayjs = require('dayjs')
 const { client } = require('../database')
 
 module.exports = async function fetchWoofiProDailyVolumeHistory() {
-  let startDate = '2023-10-23'
+  let startDate
   const endDate = dayjs.utc().format('YYYY-MM-DD')
   const pageSize = 500
+
+  try {
+    const latest = await client.oneOrNone(`SELECT date FROM woofi_pro_daily_volume_by_account ORDER BY date DESC LIMIT 1;`)
+    if (latest && latest.date) {
+      startDate = dayjs.utc(latest.date).format('YYYY-MM-DD')
+    } else {
+      startDate = '2023-10-23' // Default start date if no data is found in the table
+    }
+  } catch (error) {
+    console.error('Error fetching latest date:', error)
+    return {}
+  }
 
   const accountIdsAndAddresses = await fetchAllPages('/v1/volume/broker/daily', { start_date: startDate, end_date: endDate, aggregateBy: 'account' }, pageSize)
   if (!accountIdsAndAddresses) return {}
