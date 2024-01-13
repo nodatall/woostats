@@ -319,7 +319,7 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
   if (isTotal) {
     props.datasets = [{ data: wooVolumeSeries }]
   } else {
-    props.title = props.title === 'Daily WOOFi volume' ? 'WOOFi swap vs pro volumes' : `WOO X spot vs futures volumes`
+    props.title = props.title === 'Daily WOOFi volume' ? 'WOOFi swap vs pro' : `WOO X spot vs futures`
     props.datasets = [
       { data: wooFuturesVolumeSeries },
       { data: wooSpotVolumeSeries.slice(-(wooFuturesVolumeSeries.length)) },
