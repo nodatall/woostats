@@ -9,7 +9,7 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   if (running) return
   running = true
 
-  const { volumeHistory, accountAddressMap } = await fetchWoofiProDailyVolumeHistory()
+  const { volumeHistory, accountAddressMap, isFullHistory } = await fetchWoofiProDailyVolumeHistory()
   if (!volumeHistory || !accountAddressMap) {
     running = false
     return
@@ -32,13 +32,24 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     aggregatedVolumes[date] += perp_volume
   })
 
-  Object.entries(aggregatedVolumes).forEach(([date, volume]) => {
-    volumeHistoryUpdate.push({
-      date,
-      exchange: 'woofi_pro',
-      volume
+  if (isFullHistory) {
+    const allData = await client.query(`SELECT date, sum(volume) as volume FROM woofi_pro_daily_volume_by_account GROUP BY date;`)
+    allData.forEach(({ date, volume }) => {
+      volumeHistoryUpdate.push({
+        date,
+        exchange: 'woofi_pro',
+        volume
+      })
     })
-  })
+  } else {
+    Object.entries(aggregatedVolumes).forEach(([date, volume]) => {
+      volumeHistoryUpdate.push({
+        date,
+        exchange: 'woofi_pro',
+        volume
+      })
+    })
+  }
 
   const query = knex.raw(
     `? ON CONFLICT (account_id, date) DO UPDATE SET volume = EXCLUDED.volume;`,
