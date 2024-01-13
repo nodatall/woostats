@@ -32,7 +32,7 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     aggregatedVolumes[date] += perp_volume
   })
 
-  if (isFullHistory) {
+  if (!isFullHistory) {
     const allData = await client.query(`SELECT date, sum(volume) as volume FROM woofi_pro_daily_volume_by_account GROUP BY date;`)
     allData.forEach(({ date, volume }) => {
       volumeHistoryUpdate.push({
