@@ -27,8 +27,16 @@ export default function NetworkPage() {
     topFuturesExchangeVolumes,
     topSpotExchangeVolumes,
     woofiVolumeHistory,
+    woofiProVolumeHistory,
   } = useAppState(
-    ['wooSpotVolume', 'wooFuturesVolume', 'topFuturesExchangeVolumes', 'topSpotExchangeVolumes', 'woofiVolumeHistory']
+    [
+      'wooSpotVolume',
+      'wooFuturesVolume',
+      'topFuturesExchangeVolumes',
+      'topSpotExchangeVolumes',
+      'woofiVolumeHistory',
+      'woofiProVolumeHistory'
+    ]
   )
 
   if (
@@ -63,13 +71,24 @@ export default function NetworkPage() {
 
   const {
     woofiVolumeSeries,
+    woofiProVolumeSeries,
+    woofiTotalVolumeSeries,
     woofiVolumeLabels,
-  } = woofiVolumeHistory.reduce((acc, { date, volume }) => {
-    acc.woofiVolumeSeries.push(+volume)
-    acc.woofiVolumeLabels.push(date)
+  } = woofiVolumeHistory.reduce((acc, spotEntry) => {
+    const { date: spotDate, volume: spotVolume } = spotEntry
+    const proEntry = woofiProVolumeHistory.find(entry => entry.date === spotDate)
+    const proVolume = proEntry ? +proEntry.volume : 0
+
+    acc.woofiVolumeSeries.push(+spotVolume)
+    acc.woofiProVolumeSeries.push(proVolume)
+    acc.woofiTotalVolumeSeries.push(+spotVolume + proVolume)
+    acc.woofiVolumeLabels.push(spotDate)
+
     return acc
   }, {
     woofiVolumeSeries: [],
+    woofiProVolumeSeries: [],
+    woofiTotalVolumeSeries: [],
     woofiVolumeLabels: [],
   })
 
@@ -90,12 +109,16 @@ export default function NetworkPage() {
     <TwoColumns>
       <VolumeOrLineChart {...{
         title: 'Daily WOOFi volume',
-        datasets: [woofiVolumeSeries],
+        wooDailyChartData: {
+          wooVolumeSeries: woofiTotalVolumeSeries,
+          wooSpotVolumeSeries: woofiVolumeSeries,
+          wooFuturesVolumeSeries: woofiProVolumeSeries,
+        },
         labels: woofiVolumeLabels,
       }}/>
       <VolumeOrLineChart {...{
         title: 'Daily WOOFi volume [day] day MA',
-        datasets: [woofiVolumeSeries],
+        datasets: [woofiTotalVolumeSeries],
         labels: woofiVolumeLabels,
       }}/>
     </TwoColumns>
@@ -266,8 +289,8 @@ function VolumeOrLineChart({ title, datasets, wooDailyChartData, labels, select,
   if (title.includes('%')) props.denominator = '%'
   if (title.includes('MA')) chart = <MAChart {...props} />
   else {
-    chart = title === 'Daily WOO X volume'
-      ? <DailyVolumeChart {...{ ...wooDailyChartData, ...props }} />
+    chart = (title === 'Daily WOO X volume') || (title === 'Daily WOOFi volume')
+      ? <DailyVolumeChart {...{ title, ...wooDailyChartData, ...props }} />
       : <RangeSliderLineChart {...props} />
   }
   return chart
@@ -291,32 +314,46 @@ function MAChart({ ...props }) {
 }
 
 function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }) {
-  const [isTotal = 1, setIsTotal] = useLocalStorage('dailyVolumeToggle')
+  const localStorageKey = props.title === 'Daily WOOFi volume' ? 'woofiDailyVolumeToggle' : 'wooXDailyVolumeToggle';
+
+  const [isTotal = 1, setIsTotal] = useLocalStorage(localStorageKey)
 
   if (isTotal) {
     props.datasets = [{ data: wooVolumeSeries }]
   } else {
-    props.title = `Daily spot vs futures volumes`
+    props.title = props.title === 'Daily WOOFi volume' ? 'WOOFi swap vs pro volumes' : `WOO X spot vs futures volumes`
     props.datasets = [
       { data: wooFuturesVolumeSeries },
       { data: wooSpotVolumeSeries.slice(-(wooFuturesVolumeSeries.length)) },
     ]
     props.labels = props.labels.slice(-(wooFuturesVolumeSeries.length))
   }
-  props.subtitle = <ButtonGroupSelector {...{
-    sx: { mt: 1 },
-    values: [
-      1,
-      0,
-    ],
-    valueElements: [
+
+  const subtitleElements = props.title.includes('WOOFi') ?
+    [
+      <Stack direction="row">
+        <Typography sx={{ color: lineColors[1] }} component="span">Swap</Typography>
+        &nbsp;&nbsp;vs&nbsp;&nbsp;
+        <Typography sx={{ color: lineColors[0] }} component="span">Pro</Typography>
+      </Stack>,
+      'Total',
+    ] :
+    [
       <Stack direction="row">
         <Typography sx={{ color: lineColors[1] }} component="span">Spot</Typography>
         &nbsp;&nbsp;vs&nbsp;&nbsp;
         <Typography sx={{ color: lineColors[0] }} component="span">Futures</Typography>
       </Stack>,
       'Total',
+    ];
+
+  props.subtitle = <ButtonGroupSelector {...{
+    sx: { mt: 1 },
+    values: [
+      1,
+      0,
     ],
+    valueElements: subtitleElements,
     current: isTotal,
     setCurrent: setIsTotal,
   }}/>

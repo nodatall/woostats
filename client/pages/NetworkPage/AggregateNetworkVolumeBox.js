@@ -1,14 +1,12 @@
 import React from 'react'
 import numeral from 'numeral'
 
-import { useTheme } from '@mui/material/styles'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 
 import { useAppState } from 'lib/appState'
 import ContentCard from 'components/ContentCard'
-import woofiProLogo from '../../assets/woofipro-branding.png'
 
 export default function AggregateNetworkVolumeBox() {
   const {
@@ -19,99 +17,56 @@ export default function AggregateNetworkVolumeBox() {
   } = useAppState(
     ['wooSpotVolumeToday', 'wooFuturesVolumeToday', 'woofiVolumeToday', 'woofiPro24hrVolume']
   )
-  const theme = useTheme()
   const stackBaseStyle = { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }
-  const spotAndFuturesElements = ['Futures', 'Spot'].map(category => {
-    const topStackStyle = theme => ({
-      ...stackBaseStyle,
-      mr: category === 'Futures' ? 2 : 0,
-      [theme.breakpoints.down('xs')]: {
-        mr: 0,
-      }
+
+  const createVolumeElements = (spotVolume, futuresVolume, labelPrefix) => {
+    const categories = labelPrefix === 'Woofi' ? ['Pro', 'Swap'] : ['Futures', 'Spot']
+
+    return categories.map(category => {
+      const volume = category === 'Spot' || category === 'Swap' ? spotVolume : futuresVolume
+      return (
+        <Stack sx={{ ...stackBaseStyle, mr: category === 'Futures' || category === 'Pro' ? 2 : 0 }} key={category}>
+          <Typography variant="h6" sx={{ textAlign: 'right', opacity: .6 }}>
+            {`${category}`}
+          </Typography>
+          <Typography variant="h6" sx={{ ml: 2 }}>
+            ${numeral(volume).format('0,0')}
+          </Typography>
+        </Stack>
+      )
     })
-    return <Stack sx={topStackStyle} key={category}>
-      <Typography variant="h6" sx={{ textAlign: 'right', opacity: .6 }}>
-        {category}
-      </Typography>
-      <Typography variant="h6" sx={{ ml: 2 }}>
-        ${numeral(category === 'Spot' ? wooSpotVolumeToday : wooFuturesVolumeToday).format('0,0')}
-      </Typography>
-    </Stack>
-  })
+  }
+
+  const wooVolumesElements = createVolumeElements(wooSpotVolumeToday, wooFuturesVolumeToday, 'WOO X')
+  const woofiVolumesElements = createVolumeElements(woofiVolumeToday, woofiPro24hrVolume, 'Woofi')
 
   return <ContentCard>
     <Stack sx={{ alignItems: 'center', py: 2 }}>
-      <Stack sx={{
-        ...stackBaseStyle,
-        [theme.breakpoints.down('xs')]: {
-          flexDirection: 'column-reverse',
-        },
-        mb: 2,
-      }}>
-        <Typography variant="h4" sx={{
-          color: 'secondary.main',
-          mr: 2,
-          [theme.breakpoints.down('xs')]: {
-            mr: 0,
-            mt: 1,
-          }
-        }}>
+      {/* WOO X Volumes */}
+      <Stack sx={{ ...stackBaseStyle, mb: 2 }}>
+        <Typography variant="h4" sx={{ color: 'secondary.main', mr: 2 }}>
           ${numeral(+wooSpotVolumeToday + +wooFuturesVolumeToday).format('0,0')}
         </Typography>
-        <Typography variant="h5" sx={{ textAlign: 'right' }}>
+        <Typography variant="h5">
           24hr {<WooxLogo />} volume
         </Typography>
       </Stack>
-      <Stack sx={{
-        ...stackBaseStyle,
-        flexWrap: 'wrap',
-        [theme.breakpoints.down('xs')]: {
-          flexDirection: 'column',
-        }
-      }}>
-        {spotAndFuturesElements}
+      <Stack sx={{ ...stackBaseStyle, flexWrap: 'wrap' }}>
+        {wooVolumesElements}
       </Stack>
       <Divider textAlign="center" sx={{ width: '260px', my: 2 }} />
-      <Stack sx={{
-        ...stackBaseStyle,
-        [theme.breakpoints.down('xs')]: {
-          flexDirection: 'column-reverse',
-        }
-      }}>
-        <Typography variant="h4" sx={{
-          color:  'primary.main',
-          mr: 1,
-          [theme.breakpoints.down('xs')]: {
-            mr: 0,
-            mt: 1,
-          }
-        }}>
-          ${numeral(+woofiVolumeToday).format('0,0')}
+
+      {/* Woofi Volumes */}
+      <Stack sx={{ ...stackBaseStyle, mb: 2 }}>
+        <Typography variant="h4" sx={{ color: 'primary.main', mr: 2 }}>
+          ${numeral(+woofiVolumeToday + +woofiPro24hrVolume).format('0,0')}
         </Typography>
-        <Typography variant="h5" sx={{ textAlign: 'right' }}>
-          {<WoofiLogo/>}
+        <Typography variant="h5">
+          24hr {<WoofiLogo />} volume
         </Typography>
       </Stack>
-      <Divider textAlign="center" sx={{ width: '260px', my: 2 }} />
-      <Stack sx={{
-        ...stackBaseStyle,
-        [theme.breakpoints.down('xs')]: {
-          flexDirection: 'column-reverse',
-        }
-      }}>
-        <Typography variant="h4" sx={{
-          color: 'purple.main',
-          mr: 2,
-          [theme.breakpoints.down('xs')]: {
-            mr: 0,
-            mt: 1,
-          }
-        }}>
-          ${numeral(+woofiPro24hrVolume).format('0,0')}
-        </Typography>
-        <Typography variant="h5" sx={{ textAlign: 'right' }}>
-          {<WoofiLogo/>}{<img src={woofiProLogo} style={{ marginLeft: '5px', width: '25px' }} />}
-        </Typography>
+      <Stack sx={{ ...stackBaseStyle, flexWrap: 'wrap' }}>
+        {woofiVolumesElements}
       </Stack>
     </Stack>
   </ContentCard>
