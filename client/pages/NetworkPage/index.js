@@ -55,10 +55,8 @@ export default function NetworkPage() {
         const { volume: futuresVolume } = wooFuturesVolume.find(futuresVol => futuresVol.date === date) || { volume: 0 }
         acc.labels.push(date)
         acc.series.push(+volume + +futuresVolume)
-        if (futuresVolume > 0) {
-          acc.wooSpotVolumeSeries.push(+volume)
-          acc.wooFuturesVolumeSeries.push(+futuresVolume)
-        }
+        acc.wooSpotVolumeSeries.push(+volume)
+        acc.wooFuturesVolumeSeries.push(futuresVolume ? +futuresVolume : 0)
         return acc
       },
       {
@@ -314,9 +312,9 @@ function MAChart({ ...props }) {
 }
 
 function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolumeSeries, ...props }) {
-  const localStorageKey = props.title === 'Daily WOOFi volume' ? 'woofiDailyVolumeToggle' : 'wooXDailyVolumeToggle';
-
+  const localStorageKey = props.title === 'Daily WOOFi volume' ? 'woofiDailyVolumeToggle' : 'wooXDailyVolumeToggle'
   const [isTotal = 1, setIsTotal] = useLocalStorage(localStorageKey)
+  const chartKey = props.title.includes('WOO X') ? 'wooXVolumeChart' : 'woofiVolumeChart'
 
   if (isTotal) {
     props.datasets = [{ data: wooVolumeSeries }]
@@ -345,7 +343,7 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
         <Typography sx={{ color: lineColors[0] }} component="span">Futures</Typography>
       </Stack>,
       'Total',
-    ];
+    ]
 
   props.subtitle = <ButtonGroupSelector {...{
     sx: { mt: 1 },
@@ -358,5 +356,5 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
     setCurrent: setIsTotal,
   }}/>
 
-  return <RangeSliderLineChart {...props} />
+  return <RangeSliderLineChart {...props} chartKey={chartKey} />
 }

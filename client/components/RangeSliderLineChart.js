@@ -13,11 +13,13 @@ import ChartTopBar from 'components/ChartTopBar'
 const reduceArrayToRange = (arr, range) => arr.slice(range[0] - 1, range[1])
 
 const RangeSliderLineChart = React.memo(function ({
-  title, labels, datasets, denominator = '$', subtitle, gradientIndex, timePeriod, select, selectValue,
+  chartKey, title, labels, datasets, denominator = '$', subtitle, gradientIndex, timePeriod, select, selectValue,
 }) {
   const isMA = title.includes('MA')
+  const sliderKey = chartKey || title
+
   const { range, setRange } = useDateRangeSlider({
-    length: labels.length, title, defaultPeriod: timePeriod,
+    length: labels.length, title: sliderKey, defaultPeriod: timePeriod,
   })
   const containerRef = useRef()
   const [tooltip, setTooltip] = useState({})
@@ -31,22 +33,24 @@ const RangeSliderLineChart = React.memo(function ({
 
   title = title.replace(`[${selectValue}]`, '')
 
-  return <ContentCard sx={{ key: title }} >
-    <ChartTopBar {...{ title, subtitle, tooltip, denominator, select }} />
-    <Box ref={containerRef}>
-      <LineChart {...{
-        labels: isMA ? labels : reduceArrayToRange(labels, range),
-        datasets,
-        tooltip,
-        setTooltip,
-        parentRef: containerRef,
-        denominator,
-        gradientIndex,
-      }}
-      />
-    </Box>
-    {!isMA && <RangeSlider {...{ range, labels, setRange }} />}
-  </ContentCard>
+  return (
+    <ContentCard sx={{ key: sliderKey }} >
+      <ChartTopBar {...{ title, subtitle, tooltip, denominator, select }} />
+      <Box ref={containerRef}>
+        <LineChart {...{
+          labels: isMA ? labels : reduceArrayToRange(labels, range),
+          datasets,
+          tooltip,
+          setTooltip,
+          parentRef: containerRef,
+          denominator,
+          gradientIndex,
+        }}
+        />
+      </Box>
+      {!isMA && <RangeSlider {...{ range, labels, setRange }} />}
+    </ContentCard>
+  )
 }, function(prevProps, nextProps) {
   if (prevProps.timePeriod !== nextProps.timePeriod) return false
   if (!isEqual(prevProps.datasets, nextProps.datasets)) return false
