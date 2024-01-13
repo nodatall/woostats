@@ -16,19 +16,40 @@ async function openOrderlyWebsocket(socket) {
     }))
   })
 
+  let lastUpdate = Date.now()
+  let updateTimeout = setInterval(() => {
+    if ((Date.now() - lastUpdate) > 20000) {
+      orderlySocket.terminate()
+      clearInterval(updateTimeout)
+      openWooWebsocket(socket)
+    }
+  }, 5000)
+
   orderlySocket.on('message', async messageStream => {
     const message = JSON.parse(messageStream.toString())
 
-    if (message.topic === 'tickers') {
-      let totalVolume = 0
+    if (message.event === 'ping') {
+      orderlySocket.send(JSON.stringify({
+        event: 'pong',
+      }))
+    } else if (message.topic === 'tickers') {
+      if (!orderlySocket.debounce) {
+        orderlySocket.debounce = 1
 
-      message.data.forEach(ticker => {
-        totalVolume += ticker.amount
-      })
+        let totalVolume = 0
 
-      await update24hrExchangeVolume({ exchangeId: 'woofi_pro', volume: totalVolume })
-      await memoryCache.update({ woofiPro24hrVolume: totalVolume })
-      socket.emit('send', { woofiPro24hrVolume: totalVolume })
+        message.data.forEach(ticker => {
+          totalVolume += ticker.amount
+        })
+
+        await update24hrExchangeVolume({ exchangeId: 'woofi_pro', volume: totalVolume })
+        await memoryCache.update({ woofiPro24hrVolume: totalVolume })
+        socket.emit('send', { woofiPro24hrVolume: totalVolume })
+        lastUpdate = Date.now()
+        setTimeout(() => {
+          orderlySocket.debounce = null
+        }, 1000)
+      }
     }
   })
 
