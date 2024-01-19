@@ -38,7 +38,7 @@ export default function AggregateNetworkVolumeBox() {
   }
 
   const wooVolumesElements = createVolumeElements(wooSpotVolumeToday, wooFuturesVolumeToday, 'WOO X')
-  const woofiVolumesElements = createVolumeElements(woofiVolumeToday, woofiPro24hrVolume, 'Woofi')
+  // const woofiVolumesElements = createVolumeElements(woofiVolumeToday, woofiPro24hrVolume, 'Woofi')
 
   return <ContentCard>
     <Stack sx={{ alignItems: 'center', py: 2 }}>
@@ -59,15 +59,16 @@ export default function AggregateNetworkVolumeBox() {
       {/* Woofi Volumes */}
       <Stack sx={{ ...stackBaseStyle, mb: 2 }}>
         <Typography variant="h4" sx={{ color: 'primary.main', mr: 2 }}>
-          ${numeral(+woofiVolumeToday + +woofiPro24hrVolume).format('0,0')}
+          {/* ${numeral(+woofiVolumeToday + +woofiPro24hrVolume).format('0,0')} */}
+          ${numeral(+woofiVolumeToday).format('0,0')}
         </Typography>
         <Typography variant="h5">
           24hr {<WoofiLogo />} volume
         </Typography>
       </Stack>
-      <Stack sx={{ ...stackBaseStyle, flexWrap: 'wrap' }}>
+      {/* <Stack sx={{ ...stackBaseStyle, flexWrap: 'wrap' }}>
         {woofiVolumesElements}
-      </Stack>
+      </Stack> */}
     </Stack>
   </ContentCard>
 }
