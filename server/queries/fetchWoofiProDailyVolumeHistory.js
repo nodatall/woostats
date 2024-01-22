@@ -5,7 +5,7 @@ const { client } = require('../database')
 module.exports = async function fetchWoofiProDailyVolumeHistory() {
   let startDate
   const endDate = dayjs.utc().format('YYYY-MM-DD')
-  const defaultStartDate = '2023-10-23'
+  const defaultStartDate = '2023-10-25'
   const pageSize = 500
   let isFullHistory = false
 

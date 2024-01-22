@@ -19,7 +19,7 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   const volumeHistoryUpdate = []
   const aggregatedVolumes = {}
 
-  deduplicateData(volumeHistory).forEach(({ perp_volume, account_id, date }) => {
+  combineDuplicateData(volumeHistory).forEach(({ perp_volume, account_id, date }) => {
     update.push({
       volume: perp_volume,
       account_id: accountAddressMap[account_id],
@@ -62,7 +62,6 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
   )
   await client.query(`${queryAggregated}`)
-
   const header = ['date', 'account_id', 'volume']
 
   const queryResult = await client.query(`SELECT * FROM woofi_pro_daily_volume_by_account ORDER BY date ASC;`)
@@ -89,15 +88,20 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   running = false
 }
 
-function deduplicateData(data) {
-  const uniqueEntries = new Map()
+function combineDuplicateData(data) {
+  const combinedEntries = {}
 
   data.forEach(entry => {
-    const uniqueKey = `${entry.account_id}-${entry.date}-${entry.volume}`
-    if (!uniqueEntries.has(uniqueKey)) {
-      uniqueEntries.set(uniqueKey, entry)
+    const uniqueKey = `${entry.account_id}-${entry.date}`
+    if (combinedEntries[uniqueKey]) {
+      combinedEntries[uniqueKey].perp_volume += entry.perp_volume
+    } else {
+      combinedEntries[uniqueKey] = {
+        ...entry,
+        volume: entry.perp_volume
+      }
     }
   })
 
-  return Array.from(uniqueEntries.values())
+  return Object.values(combinedEntries)
 }
