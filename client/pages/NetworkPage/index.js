@@ -72,10 +72,12 @@ export default function NetworkPage() {
     woofiProVolumeSeries,
     woofiTotalVolumeSeries,
     woofiVolumeLabels,
-  } = woofiVolumeHistory.reduce((acc, spotEntry) => {
+  } = woofiVolumeHistory.reduce((acc, spotEntry, index, array) => {
     const { date: spotDate, volume: spotVolume } = spotEntry
     const proEntry = woofiProVolumeHistory.find(entry => entry.date === spotDate)
     const proVolume = proEntry ? +proEntry.volume : 0
+
+    if (index === array.length - 1 && proVolume === 0 && +spotVolume > 0) return acc
 
     acc.woofiVolumeSeries.push(+spotVolume)
     acc.woofiProVolumeSeries.push(proVolume)
