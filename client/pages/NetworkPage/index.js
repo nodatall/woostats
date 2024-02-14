@@ -92,6 +92,7 @@ export default function NetworkPage() {
     woofiVolumeLabels: [],
   })
 
+
   return <Box>
     <AggregateNetworkVolumeBox />
     <TwoColumns>

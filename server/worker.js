@@ -10,8 +10,12 @@ const updateWoofiFeeHistory = require('./commands/updateWoofiFeeHistory')
 const updateWoofiProDailyVolumeHistory = require('./commands/updateWoofiProDailyVolumeHistory')
 
 const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
+const getAllOrderlyTradesForAccount = require('./queries/getAllOrderlyTradesForAccount')
 
 async function start(socket){
+  await getAllOrderlyTradesForAccount()
+
+  return
   cron.schedule('* * * * *', async () => { // minute
     const tokenTickers = await updateTokenTickers({ tokens: TOKEN_IDS })
     await memoryCache.update({ tokenTickers })
