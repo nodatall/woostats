@@ -33,11 +33,25 @@ async function fetchWoofiVolumeData() {
   })
   if (!response.totalDataChart) return {}
 
-  const dailyTotalWoofiVolume = response.totalDataChart.map(([rawDate, volume]) => ({
-    date: dayjs.utc(rawDate * 1000).format('YYYY-MM-DD'),
-    exchange: 'woofi',
-    volume,
-  }))
+  const repeatVolumeIndicator = 124097512
+  const repeatedVolumeStartDate = dayjs('2024-03-04')
+  const repeatedVolumeEndDate = repeatedVolumeStartDate.add(21, 'day')
+
+  const dailyTotalWoofiVolume = response.totalDataChart.map(([rawDate, volume]) => {
+    const date = dayjs.utc(rawDate * 1000).format('YYYY-MM-DD')
+    const volumeDate = dayjs.utc(rawDate * 1000)
+
+    if (volume === repeatVolumeIndicator && volumeDate.isAfter(repeatedVolumeStartDate) && volumeDate.isBefore(repeatedVolumeEndDate)) {
+      volume = 0
+    }
+
+    return {
+      date,
+      exchange: 'woofi',
+      volume,
+    }
+  })
+
   const dailyWoofiVolumeByChain = response.totalDataChartBreakdown.map(([date, volumes]) => {
     const volumeByChain = {}
     for (let chain in volumes) {
