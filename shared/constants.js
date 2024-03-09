@@ -19,11 +19,14 @@ const TOP_FUTURES_EXCHANGES = {
   'bybit': 'Bybit',
   'mxc_futures': 'MEXC Global',
   'kumex': 'KuCoin',
+  'kwenta_derivatives': 'Kwenta (Synthetix)',
   'gate_futures': 'Gate.io',
   'deribit': 'Deribit',
   'dydx_perpetual': 'dYdX',
+  'dydx_chain': 'dYdX Chain',
   'huobi_dm': 'Huobi',
   'bitmex': 'Bitmex',
+  'coinbase_international_derivatives': 'Coinbase International'
 }
 
 const TOP_FUTURES_EXCHANGE_IDS = Object.keys(TOP_FUTURES_EXCHANGES)
