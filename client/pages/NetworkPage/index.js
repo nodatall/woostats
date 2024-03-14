@@ -26,8 +26,8 @@ export default function NetworkPage() {
     wooFuturesVolume,
     topFuturesExchangeVolumes,
     topSpotExchangeVolumes,
-    woofiVolumeHistory,
-    woofiProVolumeHistory,
+    woofiVolumeHistory = [],
+    woofiProVolumeHistory = [],
   } = useAppState(
     [
       'wooSpotVolume',
@@ -38,6 +38,10 @@ export default function NetworkPage() {
       'woofiProVolumeHistory'
     ]
   )
+
+  const completeWoofiVolumeHistory = useMemo(() => {
+    return calculateCompletWoofiVolumeHistory({ woofiProVolumeHistory, woofiVolumeHistory });
+  }, [woofiProVolumeHistory, woofiVolumeHistory])
 
   if (
     (!wooSpotVolume || wooSpotVolume.length === 0) ||
@@ -67,12 +71,13 @@ export default function NetworkPage() {
       }
     )
 
+
   const {
     woofiVolumeSeries,
     woofiProVolumeSeries,
     woofiTotalVolumeSeries,
     woofiVolumeLabels,
-  } = woofiVolumeHistory.reduce((acc, spotEntry, index, array) => {
+  } = completeWoofiVolumeHistory.reduce((acc, spotEntry, index, array) => {
     const { date: spotDate, volume: spotVolume } = spotEntry
     const proEntry = woofiProVolumeHistory.find(entry => entry.date === spotDate)
     const proVolume = proEntry ? +proEntry.volume : 0
@@ -359,4 +364,29 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
   }}/>
 
   return <RangeSliderLineChart {...props} chartKey={chartKey} />
+}
+
+function calculateCompletWoofiVolumeHistory({ woofiProVolumeHistory, woofiVolumeHistory }) {
+  const latestProVolumeDate = woofiProVolumeHistory.reduce((latest, entry) => {
+    return latest > entry.date ? latest : entry.date
+  }, '2024-03-08')
+
+  const woofiVolumeHistoryMap = woofiVolumeHistory.reduce((map, entry) => {
+    map[entry.date] = entry
+    return map
+  }, {})
+
+  let currentDate = new Date('2024-03-09')
+  const endDate = new Date(latestProVolumeDate)
+  const updatedHistory = [...woofiVolumeHistory]
+
+  while (currentDate <= endDate) {
+    const dateString = currentDate.toISOString().split('T')[0]
+    if (!woofiVolumeHistoryMap[dateString]) {
+      updatedHistory.push({ date: dateString, volume: 0 })
+    }
+    currentDate.setDate(currentDate.getDate() + 1)
+  }
+
+  return updatedHistory.sort((a, b) => a.date.localeCompare(b.date))
 }
