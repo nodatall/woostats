@@ -8,6 +8,7 @@ const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHist
 const updateWoofi24hrVolume = require('./commands/updateWoofi24hrVolume')
 const updateWoofiFeeHistory = require('./commands/updateWoofiFeeHistory')
 const updateWoofiProDailyVolumeHistory = require('./commands/updateWoofiProDailyVolumeHistory')
+const updateTotalWoofiMp = require('./commands/updateTotalWoofiMp')
 
 const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
 
@@ -33,6 +34,7 @@ async function start(socket){
 
   cron.schedule('*/10 * * * *', async () => { // 10 minutes
     updateWoofiFeeHistory()
+    await updateTotalWoofiMp()
     await updateWoofiProDailyVolumeHistory()
     const woofiProVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi_pro' })
     await memoryCache.update({ woofiProVolumeHistory })
