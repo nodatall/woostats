@@ -7,12 +7,11 @@ const logger = require('../lib/logger')
 
 async function openOrderlyWebsocket(socket) {
   const orderlySocket = new WebSocket(`wss://ws-evm.orderly.org/ws/stream/${process.env.ORDERLY_ACCOUNT_ID}`)
-
   orderlySocket.on('open', () => {
     orderlySocket.send(JSON.stringify({
       id: uuid.v4(),
       event: 'subscribe',
-      topic: 'tickers'
+      topic: 'woofi_pro$tickers'
     }))
   })
 
@@ -32,7 +31,7 @@ async function openOrderlyWebsocket(socket) {
       orderlySocket.send(JSON.stringify({
         event: 'pong',
       }))
-    } else if (message.topic === 'tickers') {
+    } else if (message.topic === 'woofi_pro$tickers') {
       if (!orderlySocket.debounce) {
         orderlySocket.debounce = 1
 
