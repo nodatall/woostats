@@ -91,7 +91,7 @@ const config = {
         minifyURLs: production,
       },
       meta: {
-        description: 'Unofficial community stats site for the Woo Network',
+        description: 'Unofficial WOO community stats site',
       },
       cache: false,
     }),

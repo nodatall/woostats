@@ -1,6 +1,6 @@
 # [woostats](https://woostats.io/)
 
-Unofficial community site for the WOO Network
+Unofficial community site for WOO
 
 ## Run locally
 

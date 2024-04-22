@@ -86,7 +86,7 @@ function Footer() {
       variant="body1"
       sx={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.3)', pb: 2 }}
     >
-      Unofficial community site for the WOO Network & DAO
+      Unofficial community site for WOO X & WOOFi
     </ Typography>
   </Stack>
 }
