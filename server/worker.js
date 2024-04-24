@@ -19,7 +19,7 @@ async function start(socket){
 
     updateTopExchangeVolumeHistories({ memoryCache, socket })
 
-    // await updateWoofi24hrVolume({ memory Cache, socket })
+    await updateWoofi24hrVolume({ memoryCache, socket })
     await updateExchangeVolumeHistory({ exchangeId: 'wootrade' })
     await updateExchangeVolumeHistory({ exchangeId: 'woo_network_futures', isFutures: true })
     await updateExchangeVolumeHistory({ exchangeId: 'woofi', memoryCache, socket })
