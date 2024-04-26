@@ -3,6 +3,9 @@ const { client } = require('../database')
 const fetchWoofiProDailyVolumeHistory = require('../queries/fetchWoofiProDailyVolumeHistory')
 const request = require('../lib/request')
 const dayjs = require('../lib/dayjs')
+const fs = require('fs')
+const tempFile = './temp.csv'
+
 let running = false
 
 module.exports = async function updateWoofiProDailyVolumeHistory() {
@@ -72,18 +75,33 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   ].join(','))
 
   const csv = [header.join(','), ...csvRows].join('\n')
-  await request({
-    name: `updateWoofiProDailyVolumeHistoryDuneTable`,
-    method: 'post',
-    serverUrl: 'https://api.dune.com/api/v1/table/upload/csv',
-    headers: {
-      'X-Dune-Api-Key': process.env.DUNE_API_KEY,
-    },
-    data: {
-      'table_name': 'woofi_pro_daily_volume_by_account',
-      data: csv,
-    }
-  })
+
+  fs.writeFileSync(tempFile, csv)
+
+  const fileSizeInBytes = fs.statSync(tempFile).size
+  const fileSizeInMB = fileSizeInBytes / (1024 * 1024)
+
+  if (fileSizeInMB <= 200) {
+    await request({
+      name: `updateWoofiProDailyVolumeHistoryDuneTable`,
+      method: 'post',
+      serverUrl: 'https://api.dune.com/api/v1/table/upload/csv',
+      headers: {
+        'X-Dune-Api-Key': process.env.DUNE_API_KEY,
+      },
+      data: {
+        data: csv,
+        description: 'Woofi Pro Daily Volume by Account',
+        table_name: 'woofi_pro_daily_volume_by_account',
+        is_private: false,
+      },
+    })
+  } else {
+    console.log('CSV file size exceeds the 200 MB limit. Please reduce the data size.')
+  }
+
+  fs.unlinkSync(tempFile)
+  console.log(`CSV file size: ${fileSizeInMB} MB`)
 
   running = false
 }

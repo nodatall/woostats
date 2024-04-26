@@ -6,7 +6,7 @@ const updateTokenTickers = require('./commands/updateTokenTickers')
 const updateTopExchangeVolumeHistories = require('./commands/updateTopExchangeVolumeHistories')
 const updateExchangeVolumeHistory = require('./commands/updateExchangeVolumeHistory')
 const updateWoofi24hrVolume = require('./commands/updateWoofi24hrVolume')
-const updateWoofiFeeHistory = require('./commands/updateWoofiFeeHistory')
+// const updateWoofiFeeHistory = require('./commands/updateWoofiFeeHistory')
 const updateWoofiProDailyVolumeHistory = require('./commands/updateWoofiProDailyVolumeHistory')
 const updateTotalWoofiMp = require('./commands/updateTotalWoofiMp')
 
@@ -33,7 +33,7 @@ async function start(socket){
   })
 
   cron.schedule('*/10 * * * *', async () => { // 10 minutes
-    updateWoofiFeeHistory()
+    // updateWoofiFeeHistory()
     await updateTotalWoofiMp()
     await updateWoofiProDailyVolumeHistory()
     const woofiProVolumeHistory = await getExchangeVolumeHistory({ exchangeId: 'woofi_pro' })

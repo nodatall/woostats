@@ -29,13 +29,14 @@ async function request({
         'Expires': '0',
         ...headers,
       },
+      maxBodyLength: Infinity,
     }
 
     if (['post', 'put', 'patch'].includes(method)) {
       config.data = data
     }
 
-    logger.debug(`${name} ${config.url} ${JSON.stringify(data)}`)
+    logger.debug(`${name} ${config.url} ${JSON.stringify(data) || ''.slice(0,500)}`)
 
     const response = await axios(config)
     result = response.data
