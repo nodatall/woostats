@@ -21,8 +21,10 @@ module.exports = async function updateExchangeVolumeHistory({
     volumeHistoryUpdate = await fetchExchangeVolumeData(exchangeId, isFutures, forceUpdate, getAll)
   }
 
+  const validVolumeHistoryUpdate = volumeHistoryUpdate.filter(entry => entry.volume !== null && entry.volume !== undefined)
+
   if (volumeHistoryUpdate.length > 0) {
-    await updateVolumeDataInDatabase(volumeHistoryUpdate)
+    await updateVolumeDataInDatabase(validVolumeHistoryUpdate)
   }
 }
 
