@@ -9,7 +9,10 @@ const tempFile = './temp.csv'
 let running = false
 
 module.exports = async function updateWoofiProDailyVolumeHistory() {
-  if (running) return
+  if (running) {
+    console.log('updateWoofiProDailyVolumeHistory is already running.')
+    return
+  }
   running = true
 
   const { volumeHistory, accountAddressMap, isFullHistory } = await fetchWoofiProDailyVolumeHistory()
