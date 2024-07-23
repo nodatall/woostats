@@ -25,8 +25,8 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     await updateDatabase(update, volumeHistoryUpdate)
     const csv = await generateCSV()
 
-    await uploadCSV(csv)
-    cleanUpTempFile()
+    const fileSizeInMB = await uploadCSV(csv)
+    cleanUpTempFile(fileSizeInMB)
   } catch (error) {
     console.error('Error in updateWoofiProDailyVolumeHistory:', error)
   } finally {
@@ -128,9 +128,11 @@ async function uploadCSV(csv) {
   } else {
     console.log('CSV file size exceeds the 200 MB limit. Please reduce the data size.')
   }
+
+  return fileSizeInMB
 }
 
-function cleanUpTempFile() {
+function cleanUpTempFile(fileSizeInMB) {
   fs.unlinkSync(tempFile)
   console.log(`CSV file size: ${fileSizeInMB} MB`)
 }
