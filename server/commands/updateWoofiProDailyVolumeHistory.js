@@ -15,14 +15,27 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   }
   running = true
 
-  const { volumeHistory, accountAddressMap, isFullHistory } = await fetchWoofiProDailyVolumeHistory()
-  if (!volumeHistory || !accountAddressMap) {
-    running = false
-    return
-  }
+  try {
+    const { volumeHistory, accountAddressMap, isFullHistory } = await fetchWoofiProDailyVolumeHistory()
+    if (!volumeHistory || !accountAddressMap) return
 
+    const { update, aggregatedVolumes } = prepareUpdateData(volumeHistory, accountAddressMap)
+    const volumeHistoryUpdate = await prepareVolumeHistoryUpdate(isFullHistory, aggregatedVolumes)
+
+    await updateDatabase(update, volumeHistoryUpdate)
+    const csv = await generateCSV()
+
+    await uploadCSV(csv)
+    cleanUpTempFile()
+  } catch (error) {
+    console.error('Error in updateWoofiProDailyVolumeHistory:', error)
+  } finally {
+    running = false
+  }
+}
+
+function prepareUpdateData(volumeHistory, accountAddressMap) {
   const update = []
-  const volumeHistoryUpdate = []
   const aggregatedVolumes = {}
 
   combineDuplicateData(volumeHistory).forEach(({ perp_volume, account_id, date }) => {
@@ -37,6 +50,12 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     }
     aggregatedVolumes[date] += perp_volume
   })
+
+  return { update, aggregatedVolumes }
+}
+
+async function prepareVolumeHistoryUpdate(isFullHistory, aggregatedVolumes) {
+  const volumeHistoryUpdate = []
 
   if (!isFullHistory) {
     const allData = await client.query(`SELECT date, sum(volume) as volume FROM woofi_pro_daily_volume_by_account GROUP BY date;`)
@@ -57,6 +76,10 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     })
   }
 
+  return volumeHistoryUpdate
+}
+
+async function updateDatabase(update, volumeHistoryUpdate) {
   const query = knex.raw(
     `? ON CONFLICT (account_id, date) DO UPDATE SET volume = EXCLUDED.volume;`,
     [knex('woofi_pro_daily_volume_by_account').insert(update)],
@@ -68,8 +91,10 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
   )
   await client.query(`${queryAggregated}`)
-  const header = ['date', 'account_id', 'volume']
+}
 
+async function generateCSV() {
+  const header = ['date', 'account_id', 'volume']
   const queryResult = await client.query(`SELECT * FROM woofi_pro_daily_volume_by_account ORDER BY date ASC;`)
   const csvRows = queryResult.map(item => [
     dayjs.utc(item.date).toISOString(),
@@ -77,10 +102,11 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     item.volume,
   ].join(','))
 
-  const csv = [header.join(','), ...csvRows].join('\n')
+  return [header.join(','), ...csvRows].join('\n')
+}
 
+async function uploadCSV(csv) {
   fs.writeFileSync(tempFile, csv)
-
   const fileSizeInBytes = fs.statSync(tempFile).size
   const fileSizeInMB = fileSizeInBytes / (1024 * 1024)
 
@@ -102,11 +128,11 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
   } else {
     console.log('CSV file size exceeds the 200 MB limit. Please reduce the data size.')
   }
+}
 
+function cleanUpTempFile() {
   fs.unlinkSync(tempFile)
   console.log(`CSV file size: ${fileSizeInMB} MB`)
-
-  running = false
 }
 
 function combineDuplicateData(data) {
