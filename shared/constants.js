@@ -19,7 +19,7 @@ const TOP_FUTURES_EXCHANGES = {
   'bybit': 'Bybit',
   'mxc_futures': 'MEXC Global',
   'kumex': 'KuCoin',
-  'kwenta_derivatives': 'Kwenta (Synthetix)',
+  // 'kwenta_derivatives': 'Kwenta (Synthetix)',
   'gate_futures': 'Gate.io',
   'deribit': 'Deribit',
   'dydx_perpetual': 'dYdX',
