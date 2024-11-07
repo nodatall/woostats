@@ -4,8 +4,8 @@ const fs = require('fs')
 const { Parser } = require('json2csv')
 
 module.exports = async function fetchTradesHistory() {
-  const startDate = dayjs.utc('2023-11-01').startOf('day').valueOf()
-  const endDate = dayjs.utc('2024-02-15').startOf('day').valueOf()
+  const startDate = dayjs.utc('2024-08-01').startOf('day').valueOf()
+  const endDate = dayjs.utc('2024-10-24').startOf('day').valueOf()
   const pageSize = 500
   const requestPath = '/v1/trades'
   const params = { start_t: startDate, end_t: endDate }
@@ -23,9 +23,16 @@ module.exports = async function fetchTradesHistory() {
     {
       time: '2024-01-03 04:09:28',
       instrument: 'PERP_BTC_USDC',
-      price: 1,
-      quantity: 1,
-      liquidationFee: 1
+      price: 41479,
+      quantity: 4.93,
+      liquidationFee: 4517.55
+    },
+    {
+      time: '2024-06-17 18:45:04',
+      instrument: 'PERP_WOO_USDC',
+      price: 0.2,
+      quantity: 202834,
+      liquidationFee: 1474.43,
     }
   ]
   liquidations.forEach(liquidation => {
@@ -79,9 +86,9 @@ async function fetchAllPages(requestPath, params, pageSize) {
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
-
 function consolidateTradesByMonth(tradesHistory) {
   const monthlySummary = {}
+  const positions = {}  // To track positions per symbol
 
   tradesHistory.forEach(trade => {
     const month = dayjs(trade.executed_timestamp).format('YYYY-MM')
@@ -89,16 +96,46 @@ function consolidateTradesByMonth(tradesHistory) {
       monthlySummary[month] = { profitLoss: 0, fees: 0 }
     }
 
+    const symbol = trade.symbol
     const quantity = parseFloat(trade.executed_quantity)
     const fee = parseFloat(trade.fee)
     const executedPrice = parseFloat(trade.executed_price)
-    const totalValue = (executedPrice * quantity) - fee
+    const tradeValue = executedPrice * quantity
 
-    if (trade.side.toUpperCase() === 'SELL') {
-      monthlySummary[month].profitLoss += totalValue
-    } else {
-      monthlySummary[month].profitLoss -= totalValue
+    if (!positions[symbol]) {
+      positions[symbol] = { position: 0, avgPrice: 0 }
     }
+
+    const positionData = positions[symbol]
+
+    if (trade.side.toUpperCase() === 'BUY') {
+      // Adjust position and average price when buying
+      const newPosition = positionData.position + quantity
+      positionData.avgPrice =
+        (positionData.position * positionData.avgPrice + tradeValue) / newPosition
+      positionData.position = newPosition
+    } else {
+      // Handle sell - close long or open short
+      let realizedPnl = 0
+      if (positionData.position > 0) {
+        const sellQuantity = Math.min(quantity, positionData.position)
+        realizedPnl += sellQuantity * (executedPrice - positionData.avgPrice)
+        positionData.position -= sellQuantity
+
+        // If there is excess sell quantity, this opens a short
+        if (quantity > sellQuantity) {
+          positionData.position = -(quantity - sellQuantity)
+          positionData.avgPrice = executedPrice
+        }
+      } else {
+        // If selling when already in short, increase short position
+        positionData.position -= quantity
+        positionData.avgPrice = executedPrice
+      }
+
+      monthlySummary[month].profitLoss += realizedPnl
+    }
+
     monthlySummary[month].fees += fee
   })
 
@@ -108,3 +145,4 @@ function consolidateTradesByMonth(tradesHistory) {
     'Total Fees': fees.toFixed(2)
   }))
 }
+
