@@ -323,6 +323,17 @@ function DailyVolumeChart({ wooVolumeSeries, wooSpotVolumeSeries, wooFuturesVolu
   const [isTotal = 1, setIsTotal] = useLocalStorage(localStorageKey)
   const chartKey = props.title.includes('WOO X') ? 'wooXVolumeChart' : 'woofiVolumeChart'
 
+  if (wooSpotVolumeSeries.length && wooFuturesVolumeSeries.length) {
+    const lastSpotVolume = wooSpotVolumeSeries[wooSpotVolumeSeries.length - 1]
+    const lastFuturesVolume = wooFuturesVolumeSeries[wooFuturesVolumeSeries.length - 1]
+
+    if (lastSpotVolume === 0 || lastFuturesVolume === 0) {
+      wooSpotVolumeSeries = wooSpotVolumeSeries.slice(0, -1)
+      wooFuturesVolumeSeries = wooFuturesVolumeSeries.slice(0, -1)
+      props.labels = props.labels.slice(0, -1)
+    }
+  }
+
   if (isTotal) {
     props.datasets = [{ data: wooVolumeSeries }]
   } else {
