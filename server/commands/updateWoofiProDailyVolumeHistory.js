@@ -80,17 +80,25 @@ async function prepareVolumeHistoryUpdate(isFullHistory, aggregatedVolumes) {
 }
 
 async function updateDatabase(update, volumeHistoryUpdate) {
-  const query = knex.raw(
-    `? ON CONFLICT (account_id, date) DO UPDATE SET volume = EXCLUDED.volume;`,
-    [knex('woofi_pro_daily_volume_by_account').insert(update)],
-  )
-  await client.query(`${query}`)
+  const query = knex('woofi_pro_daily_volume_by_account')
+    .insert(update)
+    .onConflict(['account_id', 'date'])
+    .merge(['volume']);
 
-  const queryAggregated = knex.raw(
-    `? ON CONFLICT (date, exchange) DO UPDATE SET volume = EXCLUDED.volume;`,
-    [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
-  )
-  await client.query(`${queryAggregated}`)
+  await client.query(`${query}`)
+    .catch(error => {
+      console.error('Error in updateWoofiProDailyVolumeHistory:', error)
+    })
+
+  const aggregateQuery = knex('volume_by_exchange')
+    .insert(volumeHistoryUpdate)
+    .onConflict(['date', 'exchange'])
+    .merge(['volume']);
+
+  await client.query(`${aggregateQuery}`)
+    .catch(error => {
+      console.error('Error in updateWoofiProDailyVolumeHistory:', error)
+    })
 }
 
 async function generateCSV() {

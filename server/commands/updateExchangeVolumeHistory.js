@@ -107,11 +107,15 @@ async function fetchExchangeVolumeData(exchangeId, isFutures, forceUpdate, getAl
 }
 
 async function updateVolumeDataInDatabase(volumeHistoryUpdate) {
-  const query = knex.raw(
-    `? ON CONFLICT (date, exchange) DO UPDATE SET volume = EXCLUDED.volume;`,
-    [knex('volume_by_exchange').insert(volumeHistoryUpdate)],
-  )
+  const query = knex('volume_by_exchange')
+    .insert(volumeHistoryUpdate)
+    .onConflict(['date', 'exchange'])
+    .merge(['volume'])
+
   await client.query(`${query}`)
+    .catch(error => {
+      console.error('Error in updateExchangeVolumeHistory:', error)
+    })
 }
 
 function generateUrlSafeString(length = 10) {
