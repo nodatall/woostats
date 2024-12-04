@@ -19,11 +19,10 @@ const TOP_FUTURES_EXCHANGES = {
   'bybit': 'Bybit',
   'mxc_futures': 'MEXC Global',
   'kumex': 'KuCoin',
-  // 'kwenta_derivatives': 'Kwenta (Synthetix)',
+  'kraken_futures': 'Kraken',
   'gate_futures': 'Gate.io',
   'deribit': 'Deribit',
-  'dydx_perpetual': 'dYdX',
-  'dydx_chain': 'dYdX Chain',
+  'hyperliquid': 'Hyperliquid',
   'huobi_dm': 'Huobi',
   'bitmex': 'Bitmex',
   'coinbase_international_derivatives': 'Coinbase International'
