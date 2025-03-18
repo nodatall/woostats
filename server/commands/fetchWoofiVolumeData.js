@@ -4,7 +4,7 @@ const dayjs = require('../lib/dayjs')
 const request = require('../lib/request')
 const { WOO_FUTURES_START_DATE } = require('../lib/constants')
 
-const updateTokenPriceHistory = require('../commands/updateTokenPriceHistory')
+const updateTokenPriceHistory = require('./updateTokenPriceHistory')
 const fetchExchangeVolumeHistory = require('../queries/fetchExchangeVolumeHistory')
 const getTokenPriceHistory = require('../queries/getTokenPriceHistory')
 

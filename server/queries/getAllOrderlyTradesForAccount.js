@@ -4,8 +4,8 @@ const dayjs = require('../lib/dayjs')
 const { Parser } = require('json2csv')
 
 module.exports = async function fetchTradesHistory() {
-  const startDate = '2024-08-01'
-  const endDate = '2024-12-31'
+  const startDate = '2024-12-01'
+  const endDate = '2025-01-31'
   const startDateUnix = dayjs.utc(startDate).startOf('day').valueOf()
   const endDateUnix = dayjs.utc(endDate).startOf('day').valueOf()
 
@@ -47,6 +47,7 @@ async function fetchAllPages(requestPath, params, pageSize) {
   while (hasMore) {
     const response = await orderlyRequest({
       path: requestPath,
+      // params: { ...params, page }
       params: { ...params, page, size: pageSize }
     })
 
