@@ -5,7 +5,7 @@ import { SMA } from 'technicalindicators'
 import { useAppState } from 'lib/appState'
 import { useLocalStorage } from 'lib/storageHooks'
 import { lineColors } from 'lib/chart'
-import { TOP_SPOT_EXCHANGES, TOP_FUTURES_EXCHANGES } from 'lib/constants'
+import { TOP_FUTURES_EXCHANGES } from 'lib/constants'
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -128,24 +128,7 @@ export default function NetworkPage() {
       }}/>
     </TwoColumns>
     <FuturesComparisonCharts />
-    <SpotComparisonCharts />
   </Box>
-}
-
-function SpotComparisonCharts() {
-  const {
-    topSpotExchangeVolumes, wooSpotVolume
-  } = useAppState(
-    ['topSpotExchangeVolumes', 'wooSpotVolume']
-  )
-
-  return <SelectAndMACharts {...{
-    wooVolumeSeries: wooSpotVolume,
-    localStorageKey: 'spotComparisonDropdown',
-    storageDefault: 'aggregateSpot',
-    exchangeMap: TOP_SPOT_EXCHANGES,
-    volumeHistories: topSpotExchangeVolumes,
-  }}/>
 }
 
 function FuturesComparisonCharts() {
