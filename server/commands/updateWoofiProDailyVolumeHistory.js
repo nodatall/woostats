@@ -123,11 +123,7 @@ async function updateDatabase(update, volumeHistoryUpdate) {
 
 async function generateCSV() {
   const header = ['date', 'account_id', 'volume']
-  const queryResult = await client.query(`
-    SELECT * FROM woofi_pro_daily_volume_by_account
-    WHERE date::timestamptz >= now() - interval '30 days'
-    ORDER BY date ASC;
-  `)
+  const queryResult = await client.query(`SELECT * FROM woofi_pro_daily_volume_by_account ORDER BY date ASC;`)
   const csvRows = queryResult.map(item => [
     dayjs.utc(item.date).toISOString(),
     item.account_id,
