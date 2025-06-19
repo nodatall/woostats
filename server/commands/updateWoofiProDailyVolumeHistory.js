@@ -21,6 +21,7 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
     if (!volumeHistory || !accountAddressMap) return
 
     const { update, aggregatedVolumes } = prepareUpdateData(volumeHistory, accountAddressMap)
+    checkForDuplicateKeys(update)
     const volumeHistoryUpdate = await prepareVolumeHistoryUpdate(isFullHistory, aggregatedVolumes)
 
     await updateDatabase(update, volumeHistoryUpdate)
@@ -36,23 +37,41 @@ module.exports = async function updateWoofiProDailyVolumeHistory() {
 }
 
 function prepareUpdateData(volumeHistory, accountAddressMap) {
-  const update = []
+  const updateMap = {}
   const aggregatedVolumes = {}
 
-  combineDuplicateData(volumeHistory).forEach(({ perp_volume, account_id, date }) => {
-    update.push({
-      volume: perp_volume,
-      account_id: accountAddressMap[account_id],
-      date,
-    })
+  for (const { perp_volume, account_id, date } of volumeHistory) {
+    const mappedAccountId = accountAddressMap[account_id]
+    if (!mappedAccountId) continue // skip unknown mappings
 
-    if (!aggregatedVolumes[date]) {
-      aggregatedVolumes[date] = 0
+    const key = `${mappedAccountId}-${date}`
+
+    if (!updateMap[key]) {
+      updateMap[key] = {
+        account_id: mappedAccountId,
+        date,
+        volume: perp_volume,
+      }
+    } else {
+      updateMap[key].volume += perp_volume
     }
-    aggregatedVolumes[date] += perp_volume
-  })
 
-  return { update, aggregatedVolumes }
+    aggregatedVolumes[date] = (aggregatedVolumes[date] || 0) + perp_volume
+  }
+
+  const update = Object.values(updateMap)
+
+  const dedupedUpdateMap = {}
+  for (const row of update) {
+    const key = `${row.account_id}-${row.date}`
+    if (!dedupedUpdateMap[key]) {
+      dedupedUpdateMap[key] = row
+    } else {
+      dedupedUpdateMap[key].volume += row.volume
+    }
+  }
+  const dedupedUpdate = Object.values(dedupedUpdateMap)
+  return { update: dedupedUpdate, aggregatedVolumes }
 }
 
 async function prepareVolumeHistoryUpdate(isFullHistory, aggregatedVolumes) {
@@ -161,19 +180,32 @@ function cleanUpTempFile(fileSizeInMB) {
 }
 
 function combineDuplicateData(data) {
-  const combinedEntries = {}
+  const combined = {}
 
-  data.forEach(entry => {
-    const uniqueKey = `${entry.account_id}-${entry.date}`
-    if (combinedEntries[uniqueKey]) {
-      combinedEntries[uniqueKey].perp_volume += entry.perp_volume
-    } else {
-      combinedEntries[uniqueKey] = {
-        ...entry,
-        volume: entry.perp_volume
+  for (const entry of data) {
+    const key = `${entry.account_id}-${entry.date}`
+
+    if (!combined[key]) {
+      combined[key] = {
+        account_id: entry.account_id,
+        date: entry.date,
+        perp_volume: entry.perp_volume,
       }
+    } else {
+      combined[key].perp_volume += entry.perp_volume
     }
-  })
+  }
 
-  return Object.values(combinedEntries)
+  return Object.values(combined)
+}
+
+function checkForDuplicateKeys(update) {
+  const seen = new Set()
+  for (const row of update) {
+    const key = `${row.account_id}-${row.date}`
+    if (seen.has(key)) {
+      console.error('❌ Duplicate detected in final update array:', key)
+    }
+    seen.add(key)
+  }
 }
