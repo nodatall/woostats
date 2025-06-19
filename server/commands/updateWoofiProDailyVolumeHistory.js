@@ -5,6 +5,7 @@ const request = require('../lib/request')
 const dayjs = require('../lib/dayjs')
 const fs = require('fs')
 const tempFile = './temp.csv'
+const axios = require('axios')
 
 let running = false
 
@@ -103,7 +104,11 @@ async function updateDatabase(update, volumeHistoryUpdate) {
 
 async function generateCSV() {
   const header = ['date', 'account_id', 'volume']
-  const queryResult = await client.query(`SELECT * FROM woofi_pro_daily_volume_by_account ORDER BY date ASC;`)
+  const queryResult = await client.query(`
+    SELECT * FROM woofi_pro_daily_volume_by_account
+    WHERE date::timestamptz >= now() - interval '30 days'
+    ORDER BY date ASC;
+  `)
   const csvRows = queryResult.map(item => [
     dayjs.utc(item.date).toISOString(),
     item.account_id,
@@ -118,23 +123,33 @@ async function uploadCSV(csv) {
   const fileSizeInBytes = fs.statSync(tempFile).size
   const fileSizeInMB = fileSizeInBytes / (1024 * 1024)
 
-  if (fileSizeInMB <= 200) {
-    await request({
-      name: `updateWoofiProDailyVolumeHistoryDuneTable`,
-      method: 'post',
-      serverUrl: 'https://api.dune.com/api/v1/table/upload/csv',
-      headers: {
-        'X-Dune-Api-Key': process.env.DUNE_API_KEY,
-      },
-      data: {
+  if (fileSizeInMB > 200) {
+    console.log('CSV file size exceeds the 200 MB limit. Please reduce the data size.')
+    return fileSizeInMB
+  }
+
+  try {
+    const response = await axios.post(
+      'https://api.dune.com/api/v1/table/upload/csv',
+      {
         data: csv,
         description: 'Woofi Pro Daily Volume by Account',
         table_name: 'woofi_pro_daily_volume_by_account',
-        is_private: false,
+        is_private: false
       },
-    })
-  } else {
-    console.log('CSV file size exceeds the 200 MB limit. Please reduce the data size.')
+      {
+        headers: {
+          'X-Dune-Api-Key': process.env.DUNE_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000, // 30 second timeout
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      }
+    )
+    console.log('Upload response:', response.status, response.statusText)
+  } catch (err) {
+    console.error('Upload failed:', err.code || err.message, err?.response?.data || '')
   }
 
   return fileSizeInMB
