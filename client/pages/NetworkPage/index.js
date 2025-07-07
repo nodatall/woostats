@@ -133,13 +133,27 @@ export default function NetworkPage() {
 
 function FuturesComparisonCharts() {
   const {
-    topFuturesExchangeVolumes, wooFuturesVolume
+    topFuturesExchangeVolumes, wooFuturesVolume, woofiProVolumeHistory
   } = useAppState(
-    ['topFuturesExchangeVolumes', 'wooFuturesVolume']
+    ['topFuturesExchangeVolumes', 'wooFuturesVolume', 'woofiProVolumeHistory']
   )
 
+  const combinedWooFuturesVolume = useMemo(() => {
+    if (!wooFuturesVolume || !woofiProVolumeHistory) return wooFuturesVolume || []
+
+    const woofiProVolumeMap = woofiProVolumeHistory.reduce((map, entry) => {
+      map[entry.date] = +entry.volume
+      return map
+    }, {})
+
+    return wooFuturesVolume.map(entry => ({
+      ...entry,
+      volume: +entry.volume + (woofiProVolumeMap[entry.date] || 0)
+    }))
+  }, [wooFuturesVolume, woofiProVolumeHistory])
+
   return <SelectAndMACharts {...{
-    wooVolumeSeries: wooFuturesVolume,
+    wooVolumeSeries: combinedWooFuturesVolume,
     localStorageKey: 'futuresComparisonDropdown',
     storageDefault: 'aggregateFutures',
     exchangeMap: TOP_FUTURES_EXCHANGES,
