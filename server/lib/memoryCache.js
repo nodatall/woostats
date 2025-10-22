@@ -1,5 +1,6 @@
 const updateCache = require('../commands/updateCache')
 const getCache = require('../queries/getCache')
+const logger = require('./logger')
 
 const memoryCache = {}
 
@@ -44,8 +45,13 @@ async function get(cacheName) {
 
 async function initializeCache(cacheName) {
   const cache = await getCache(cacheName)
+  if (!cache) {
+    logger.warn(`initializeCache received empty cache for "${cacheName}"; defaulting to {}`)
+    memoryCache[cacheName] = {}
+    await updateCache({ cacheName, cache: {} })
+    return
+  }
   const initialCacheLength = Object.keys(cache).length
-  if (!cache) return
   for (let key in cache) {
     if (!cacheKeysByCacheName[cacheName].includes(key)) {
       console.error(`key "${key}" not in cacheKeysByCacheName for cacheName "${cacheName}"`)
@@ -76,7 +82,7 @@ async function update(changes) {
 
     if (!memoryCache[cacheName]) {
       const existingCache = await getCache(cacheName)
-      updatedCache[cacheName] = existingCache
+      updatedCache[cacheName] = existingCache || {}
     }
 
     updatedCache[cacheName] = updatedCache[cacheName]
