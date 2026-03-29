@@ -13,7 +13,7 @@ const updateTotalWoofiMp = require('./commands/updateTotalWoofiMp')
 const getExchangeVolumeHistory = require('./queries/getExchangeVolumeHistory')
 
 async function start(socket){
-  cron.schedule('* * * * *', async () => { // minute
+  cron.schedule('*/5 * * * *', async () => { // 5 minutes
     const tokenTickers = await updateTokenTickers({ tokens: TOKEN_IDS })
     await memoryCache.update({ tokenTickers })
 

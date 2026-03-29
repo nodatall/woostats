@@ -5,7 +5,7 @@ const logger = require('./logger')
 const memoryCache = {}
 
 const cacheKeysByCacheName = {
-  general: ['tokenTickers'],
+  general: ['tokenTickers', 'tokenTickersUpdatedAt'],
   network: [
     'wooSpotVolume',
     'wooFuturesVolume',
