@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 const { server } = require('../server/app')
-const env = process.env.NODE_ENV
-const port = process.env.PORT
+const env = process.env.NODE_ENV || 'development'
+const port = process.env.PORT || 1337
 process.title = `Woo Stats PORT=${port}`
 
 // Start server

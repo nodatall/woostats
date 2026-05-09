@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "16.x"
+    "node": "22.x"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,8 +12,9 @@
     "build:dev": "NODE_OPTIONS=\"--openssl-legacy-provider\" webpack --colors --progress -w",
     "start:dev": "npm run build:dev & nodemon ./scripts/start",
     "start": "./scripts/start",
-    "heroku-postbuild": "webpack --colors --progress",
-    "heroku-cleanup": "npm run db:migrate up",
+    "railway:predeploy": "npm run db:migrate up",
+    "heroku-postbuild": "npm run build",
+    "heroku-cleanup": "npm run railway:predeploy",
     "db:migrate": "./scripts/db-migrate"
   },
   "author": "",
@@ -52,7 +53,6 @@
     "eslint-plugin-react": "^7.16.0",
     "express": "^4.17.1",
     "file-loader": "^6.2.0",
-    "heroku-ssl-redirect": "^0.1.1",
     "html-webpack-plugin": "^3.2.0",
     "json-parse-even-better-errors": "^2.3.1",
     "knex": "^1.0.1",
