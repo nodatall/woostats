@@ -25,41 +25,49 @@ async function openWooWebsocket(socket) {
   }, 5000)
 
   wooSocket.on('message', async messageStream => {
-    const message = JSON.parse(messageStream.toString())
+    try {
+      const message = JSON.parse(messageStream.toString())
 
-    if (message.event === 'ping') {
-      wooSocket.send(JSON.stringify({
-        event: 'pong',
-      }))
-    } else if (message.topic === 'tickers') {
-      if (!wooSocket.debounce) {
-        wooSocket.debounce = 1
+      if (message.event === 'ping') {
+        wooSocket.send(JSON.stringify({
+          event: 'pong',
+        }))
+      } else if (message.topic === 'tickers') {
+        if (!wooSocket.debounce) {
+          wooSocket.debounce = 1
 
-        const {
-          wooSpotVolumeToday,
-          wooFuturesVolumeToday,
-        } = message.data.reduce((acc, cur) => {
-          if (cur.symbol.indexOf('SPOT') !== -1) {
-            acc.wooSpotVolumeToday += cur.amount
-          } else {
-            acc.wooFuturesVolumeToday += cur.amount
-          }
-          return acc
-        }, {
-          wooSpotVolumeToday: 0,
-          wooFuturesVolumeToday: 0,
-        })
+          const {
+            wooSpotVolumeToday,
+            wooFuturesVolumeToday,
+          } = message.data.reduce((acc, cur) => {
+            if (cur.symbol.indexOf('SPOT') !== -1) {
+              acc.wooSpotVolumeToday += cur.amount
+            } else {
+              acc.wooFuturesVolumeToday += cur.amount
+            }
+            return acc
+          }, {
+            wooSpotVolumeToday: 0,
+            wooFuturesVolumeToday: 0,
+          })
 
-        await update24hrExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
-        await update24hrExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
+          await update24hrExchangeVolume({ exchangeId: 'wootrade', volume: wooSpotVolumeToday })
+          await update24hrExchangeVolume({ exchangeId: 'woo_network_futures', volume: wooFuturesVolumeToday })
 
-        await memoryCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
-        socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
-        lastUpdate = Date.now()
-        setTimeout(() => {
-          wooSocket.debounce = null
-        }, 1000)
+          await memoryCache.update({ wooSpotVolumeToday, wooFuturesVolumeToday })
+          socket.emit('send', { wooSpotVolumeToday, wooFuturesVolumeToday })
+          lastUpdate = Date.now()
+          setTimeout(() => {
+            wooSocket.debounce = null
+          }, 1000)
+        }
       }
+    } catch (error) {
+      wooSocket.debounce = null
+      logger.error('wooWebsocket message handler failed', {
+        message: error.message,
+        stack: error.stack,
+      })
     }
   })
 

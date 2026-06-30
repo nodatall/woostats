@@ -38,17 +38,35 @@ const cacheKeysByCacheName = {
 }
 const CACHE_NAMES = Object.keys(cacheKeysByCacheName)
 
-async function get(cacheName) {
+async function get(cacheName = 'general') {
   if (!memoryCache[cacheName]) await initializeCache(cacheName)
   return { ...memoryCache[cacheName] }
 }
 
 async function initializeCache(cacheName) {
-  const cache = await getCache(cacheName)
+  let cache
+  try {
+    cache = await getCache(cacheName)
+  } catch (error) {
+    logger.error(`initializeCache failed for "${cacheName}"`, {
+      message: error.message,
+      stack: error.stack,
+    })
+    memoryCache[cacheName] = memoryCache[cacheName] || {}
+    return
+  }
+
   if (!cache) {
     logger.warn(`initializeCache received empty cache for "${cacheName}"; defaulting to {}`)
     memoryCache[cacheName] = {}
-    await updateCache({ cacheName, cache: {} })
+    try {
+      await updateCache({ cacheName, cache: {} })
+    } catch (error) {
+      logger.error(`initializeCache failed to persist empty cache for "${cacheName}"`, {
+        message: error.message,
+        stack: error.stack,
+      })
+    }
     return
   }
   const initialCacheLength = Object.keys(cache).length
@@ -59,7 +77,15 @@ async function initializeCache(cacheName) {
     }
   }
   if (Object.keys(cache).length !== initialCacheLength) {
-    await updateCache({ cacheName, cache })
+    try {
+      await updateCache({ cacheName, cache })
+    } catch (error) {
+      logger.error(`initializeCache failed to persist sanitized cache for "${cacheName}"`, {
+        message: error.message,
+        stack: error.stack,
+      })
+    }
+    memoryCache[cacheName] = cache
   } else {
     await update({ ...cache })
   }
@@ -81,7 +107,15 @@ async function update(changes) {
     }
 
     if (!memoryCache[cacheName]) {
-      const existingCache = await getCache(cacheName)
+      let existingCache
+      try {
+        existingCache = await getCache(cacheName)
+      } catch (error) {
+        logger.error(`memoryCache.update failed to load existing cache for "${cacheName}"`, {
+          message: error.message,
+          stack: error.stack,
+        })
+      }
       updatedCache[cacheName] = existingCache || {}
     }
 
@@ -92,7 +126,14 @@ async function update(changes) {
   }
 
   for (const cacheName of [...updatedCacheNames]) {
-    await updateCache({ cacheName, cache: updatedCache[cacheName] })
+    try {
+      await updateCache({ cacheName, cache: updatedCache[cacheName] })
+    } catch (error) {
+      logger.error(`memoryCache.update failed to persist "${cacheName}"`, {
+        message: error.message,
+        stack: error.stack,
+      })
+    }
   }
   Object.assign(memoryCache, updatedCache)
 }
