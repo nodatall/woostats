@@ -26,13 +26,13 @@ Visual mockup: [ui-mockup-starchild-platform-stats.html](ui-mockup-starchild-pla
 
 ### 1. Add the persisted Star Child refresh
 
-- [ ] Add a separate `starchild` cache namespace containing the snapshot and update time so the existing database table and socket bootstrap include it without sharing the high-frequency network cache row.
-- [ ] Add a strict cache-write path that updates server memory only after the `starchild` row is saved successfully, throws on persistence failure, and leaves existing non-strict cache callers unchanged.
-- [ ] Add a server-side refresh command that requests the four counters with a five-second timeout, enforces the accepted counter contract, and persists and broadcasts only complete valid snapshots.
-- [ ] Run the refresh once when the worker starts and every 60 seconds afterward, with a guard that prevents overlapping executions.
-- [ ] Keep the last good database and memory snapshot unchanged when the upstream request times out, fails, returns malformed data, or cannot be written to the database.
-- [ ] Use Node 22's built-in test runner for focused coverage of valid data, missing or malformed counters, timeout and network failures, strict persistence and broadcast on success, and no state change or broadcast after upstream, validation, or database-write failure.
-- [ ] Add deterministic scheduling tests for the immediate startup refresh, 60-second cadence, and overlap suppression.
+- [x] Add a separate `starchild` cache namespace containing the snapshot and update time so the existing database table and socket bootstrap include it without sharing the high-frequency network cache row.
+- [x] Add a strict cache-write path that updates server memory only after the `starchild` row is saved successfully, throws on persistence failure, and leaves existing non-strict cache callers unchanged.
+- [x] Add a server-side refresh command that requests the four counters with a five-second timeout, enforces the accepted counter contract, and persists and broadcasts only complete valid snapshots.
+- [x] Run the refresh once when the worker starts and every 60 seconds afterward, with a guard that prevents overlapping executions.
+- [x] Keep the last good database and memory snapshot unchanged when the upstream request times out, fails, returns malformed data, or cannot be written to the database.
+- [x] Use Node 22's built-in test runner for focused coverage of valid data, missing or malformed counters, timeout and network failures, strict persistence and broadcast on success, and no state change or broadcast after upstream, validation, or database-write failure.
+- [x] Add deterministic scheduling tests for the immediate startup refresh, 60-second cadence, and overlap suppression.
 
 ### 2. Add the responsive stats bar
 

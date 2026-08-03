@@ -2,8 +2,6 @@ const updateCache = require('../commands/updateCache')
 const getCache = require('../queries/getCache')
 const logger = require('./logger')
 
-const memoryCache = {}
-
 const cacheKeysByCacheName = {
   general: ['tokenTickers', 'tokenTickersUpdatedAt'],
   network: [
@@ -35,107 +33,142 @@ const cacheKeysByCacheName = {
   token: [
     // 'wooTokenBurns'
   ],
+  starchild: [
+    'starchildPlatformStats',
+    'starchildPlatformStatsUpdatedAt',
+  ],
 }
 const CACHE_NAMES = Object.keys(cacheKeysByCacheName)
 
-async function get(cacheName = 'general') {
-  if (!memoryCache[cacheName]) await initializeCache(cacheName)
-  return { ...memoryCache[cacheName] }
-}
+function createMemoryCache({
+  persistCache = updateCache,
+  loadCache = getCache,
+  cacheLogger = logger,
+} = {}) {
+  const memoryCache = {}
 
-async function initializeCache(cacheName) {
-  let cache
-  try {
-    cache = await getCache(cacheName)
-  } catch (error) {
-    logger.error(`initializeCache failed for "${cacheName}"`, {
-      message: error.message,
-      stack: error.stack,
-    })
-    memoryCache[cacheName] = memoryCache[cacheName] || {}
-    return
+  async function get(cacheName = 'general') {
+    if (!memoryCache[cacheName]) await initializeCache(cacheName)
+    return { ...memoryCache[cacheName] }
   }
 
-  if (!cache) {
-    logger.warn(`initializeCache received empty cache for "${cacheName}"; defaulting to {}`)
-    memoryCache[cacheName] = {}
+  async function initializeCache(cacheName) {
+    let cache
     try {
-      await updateCache({ cacheName, cache: {} })
+      cache = await loadCache(cacheName)
     } catch (error) {
-      logger.error(`initializeCache failed to persist empty cache for "${cacheName}"`, {
+      cacheLogger.error(`initializeCache failed for "${cacheName}"`, {
         message: error.message,
         stack: error.stack,
       })
-    }
-    return
-  }
-  const initialCacheLength = Object.keys(cache).length
-  for (let key in cache) {
-    if (!cacheKeysByCacheName[cacheName].includes(key)) {
-      console.error(`key "${key}" not in cacheKeysByCacheName for cacheName "${cacheName}"`)
-      delete cache[key]
-    }
-  }
-  if (Object.keys(cache).length !== initialCacheLength) {
-    try {
-      await updateCache({ cacheName, cache })
-    } catch (error) {
-      logger.error(`initializeCache failed to persist sanitized cache for "${cacheName}"`, {
-        message: error.message,
-        stack: error.stack,
-      })
-    }
-    memoryCache[cacheName] = cache
-  } else {
-    await update({ ...cache })
-  }
-}
-
-async function update(changes) {
-  const updatedCache = { ...memoryCache }
-  const updatedCacheNames = new Set()
-
-  for (const key in changes) {
-    if (changes[key] === undefined) delete changes[key]
-    let cacheName
-    for (const _cacheName in cacheKeysByCacheName) {
-      if (cacheKeysByCacheName[_cacheName].includes(key)) cacheName = _cacheName
-    }
-    if (!cacheName) {
-      console.error(`no cache name in cacheKeysByCacheName matching "${key}"`)
-      continue
+      memoryCache[cacheName] = memoryCache[cacheName] || {}
+      return
     }
 
-    if (!memoryCache[cacheName]) {
-      let existingCache
+    if (!cache) {
+      cacheLogger.warn(`initializeCache received empty cache for "${cacheName}"; defaulting to {}`)
+      memoryCache[cacheName] = {}
       try {
-        existingCache = await getCache(cacheName)
+        await persistCache({ cacheName, cache: {} })
       } catch (error) {
-        logger.error(`memoryCache.update failed to load existing cache for "${cacheName}"`, {
+        cacheLogger.error(`initializeCache failed to persist empty cache for "${cacheName}"`, {
           message: error.message,
           stack: error.stack,
         })
       }
-      updatedCache[cacheName] = existingCache || {}
+      return
     }
-
-    updatedCache[cacheName] = updatedCache[cacheName]
-      ? { ...updatedCache[cacheName], [key]: changes[key] }
-      : { [key]: changes[key] }
-    updatedCacheNames.add(cacheName)
+    const initialCacheLength = Object.keys(cache).length
+    for (let key in cache) {
+      if (!cacheKeysByCacheName[cacheName].includes(key)) {
+        console.error(`key "${key}" not in cacheKeysByCacheName for cacheName "${cacheName}"`)
+        delete cache[key]
+      }
+    }
+    if (Object.keys(cache).length !== initialCacheLength) {
+      try {
+        await persistCache({ cacheName, cache })
+      } catch (error) {
+        cacheLogger.error(`initializeCache failed to persist sanitized cache for "${cacheName}"`, {
+          message: error.message,
+          stack: error.stack,
+        })
+      }
+      memoryCache[cacheName] = cache
+    } else {
+      await update({ ...cache })
+    }
   }
 
-  for (const cacheName of [...updatedCacheNames]) {
-    try {
-      await updateCache({ cacheName, cache: updatedCache[cacheName] })
-    } catch (error) {
-      logger.error(`memoryCache.update failed to persist "${cacheName}"`, {
-        message: error.message,
-        stack: error.stack,
-      })
+  async function buildUpdatedCache(changes, { strict = false } = {}) {
+    const updatedCache = { ...memoryCache }
+    const updatedCacheNames = new Set()
+
+    for (const key in changes) {
+      if (changes[key] === undefined) continue
+      let cacheName
+      for (const _cacheName in cacheKeysByCacheName) {
+        if (cacheKeysByCacheName[_cacheName].includes(key)) cacheName = _cacheName
+      }
+      if (!cacheName) {
+        const message = `no cache name in cacheKeysByCacheName matching "${key}"`
+        if (strict) throw new Error(message)
+        console.error(message)
+        continue
+      }
+
+      if (!memoryCache[cacheName] && !updatedCacheNames.has(cacheName)) {
+        let existingCache
+        try {
+          existingCache = await loadCache(cacheName)
+        } catch (error) {
+          cacheLogger.error(`memoryCache.update failed to load existing cache for "${cacheName}"`, {
+            message: error.message,
+            stack: error.stack,
+          })
+          if (strict) throw error
+        }
+        updatedCache[cacheName] = existingCache || {}
+      }
+
+      updatedCache[cacheName] = updatedCache[cacheName]
+        ? { ...updatedCache[cacheName], [key]: changes[key] }
+        : { [key]: changes[key] }
+      updatedCacheNames.add(cacheName)
     }
+
+    return { updatedCache, updatedCacheNames }
   }
-  Object.assign(memoryCache, updatedCache)
+
+  async function update(changes) {
+    const { updatedCache, updatedCacheNames } = await buildUpdatedCache(changes)
+
+    for (const cacheName of [...updatedCacheNames]) {
+      try {
+        await persistCache({ cacheName, cache: updatedCache[cacheName] })
+      } catch (error) {
+        cacheLogger.error(`memoryCache.update failed to persist "${cacheName}"`, {
+          message: error.message,
+          stack: error.stack,
+        })
+      }
+    }
+    Object.assign(memoryCache, updatedCache)
+  }
+
+  async function updateStrict(changes) {
+    const { updatedCache, updatedCacheNames } = await buildUpdatedCache(changes, { strict: true })
+
+    for (const cacheName of [...updatedCacheNames]) {
+      await persistCache({ cacheName, cache: updatedCache[cacheName] })
+    }
+    Object.assign(memoryCache, updatedCache)
+  }
+
+  return { get, update, updateStrict, CACHE_NAMES }
 }
 
-module.exports = { get, update, CACHE_NAMES }
+module.exports = {
+  ...createMemoryCache(),
+  createMemoryCache,
+}
