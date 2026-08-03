@@ -28,7 +28,7 @@ test('strict updates persist the Star Child namespace before advancing memory', 
     }),
     persistCache: async (write) => {
       persisted.push(write)
-      if (persisted.length > 1) await persistence.promise
+      await persistence.promise
     },
     cacheLogger: quietLogger,
   })
@@ -44,7 +44,7 @@ test('strict updates persist the Star Child namespace before advancing memory', 
     starchildPlatformStats: { agentsLaunched: 1 },
     starchildPlatformStatsUpdatedAt: 'old',
   })
-  assert.deepEqual(persisted[1], {
+  assert.deepEqual(persisted[0], {
     cacheName: 'starchild',
     cache: {
       starchildPlatformStats: { agentsLaunched: 2 },
@@ -54,7 +54,7 @@ test('strict updates persist the Star Child namespace before advancing memory', 
 
   persistence.resolve()
   await updatePromise
-  assert.deepEqual(await cache.get('starchild'), persisted[1].cache)
+  assert.deepEqual(await cache.get('starchild'), persisted[0].cache)
 })
 
 test('strict persistence failure throws and leaves the last-good memory unchanged', async () => {
@@ -66,7 +66,7 @@ test('strict persistence failure throws and leaves the last-good memory unchange
     }),
     persistCache: async () => {
       persistCount += 1
-      if (persistCount > 1) throw new Error('database unavailable')
+      throw new Error('database unavailable')
     },
     cacheLogger: quietLogger,
   })
@@ -83,6 +83,48 @@ test('strict persistence failure throws and leaves the last-good memory unchange
     starchildPlatformStats: { agentsLaunched: 1 },
     starchildPlatformStatsUpdatedAt: 'old',
   })
+})
+
+test('a concurrent first read cannot overwrite a newer strict update', async () => {
+  const firstLoad = deferred()
+  const loadStarted = deferred()
+  const persisted = []
+  let loadCount = 0
+  const oldSnapshot = {
+    starchildPlatformStats: { agentsLaunched: 1 },
+    starchildPlatformStatsUpdatedAt: 'old',
+  }
+  const newSnapshot = {
+    starchildPlatformStats: { agentsLaunched: 2 },
+    starchildPlatformStatsUpdatedAt: 'new',
+  }
+  const cache = createMemoryCache({
+    loadCache: async () => {
+      loadCount += 1
+      if (loadCount === 1) {
+        loadStarted.resolve()
+        await firstLoad.promise
+      }
+      return oldSnapshot
+    },
+    persistCache: async (write) => { persisted.push(write) },
+    cacheLogger: quietLogger,
+  })
+
+  const getPromise = cache.get('starchild')
+  await loadStarted.promise
+  const updatePromise = cache.updateStrict(newSnapshot)
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(loadCount, 1)
+  assert.deepEqual(persisted, [])
+
+  firstLoad.resolve()
+  await Promise.all([getPromise, updatePromise])
+
+  assert.equal(loadCount, 1)
+  assert.deepEqual(persisted, [{ cacheName: 'starchild', cache: newSnapshot }])
+  assert.deepEqual(await cache.get('starchild'), newSnapshot)
 })
 
 test('legacy non-strict updates retain their advance-on-persistence-failure behavior', async () => {

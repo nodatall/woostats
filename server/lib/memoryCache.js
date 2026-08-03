@@ -46,10 +46,23 @@ function createMemoryCache({
   cacheLogger = logger,
 } = {}) {
   const memoryCache = {}
+  const initializationPromises = new Map()
 
   async function get(cacheName = 'general') {
-    if (!memoryCache[cacheName]) await initializeCache(cacheName)
+    await ensureInitialized(cacheName)
     return { ...memoryCache[cacheName] }
+  }
+
+  async function ensureInitialized(cacheName) {
+    if (memoryCache[cacheName]) return
+
+    if (!initializationPromises.has(cacheName)) {
+      const initializationPromise = initializeCache(cacheName)
+        .finally(() => initializationPromises.delete(cacheName))
+      initializationPromises.set(cacheName, initializationPromise)
+    }
+
+    await initializationPromises.get(cacheName)
   }
 
   async function initializeCache(cacheName) {
@@ -96,13 +109,12 @@ function createMemoryCache({
       }
       memoryCache[cacheName] = cache
     } else {
-      await update({ ...cache })
+      memoryCache[cacheName] = cache
     }
   }
 
   async function buildUpdatedCache(changes, { strict = false } = {}) {
-    const updatedCache = { ...memoryCache }
-    const updatedCacheNames = new Set()
+    const changesByCacheName = {}
 
     for (const key in changes) {
       if (changes[key] === undefined) continue
@@ -117,24 +129,23 @@ function createMemoryCache({
         continue
       }
 
-      if (!memoryCache[cacheName] && !updatedCacheNames.has(cacheName)) {
-        let existingCache
-        try {
-          existingCache = await loadCache(cacheName)
-        } catch (error) {
-          cacheLogger.error(`memoryCache.update failed to load existing cache for "${cacheName}"`, {
-            message: error.message,
-            stack: error.stack,
-          })
-          if (strict) throw error
-        }
-        updatedCache[cacheName] = existingCache || {}
+      changesByCacheName[cacheName] = {
+        ...changesByCacheName[cacheName],
+        [key]: changes[key],
       }
+    }
 
-      updatedCache[cacheName] = updatedCache[cacheName]
-        ? { ...updatedCache[cacheName], [key]: changes[key] }
-        : { [key]: changes[key] }
-      updatedCacheNames.add(cacheName)
+    const updatedCacheNames = new Set(Object.keys(changesByCacheName))
+    for (const cacheName of updatedCacheNames) {
+      await ensureInitialized(cacheName)
+    }
+
+    const updatedCache = { ...memoryCache }
+    for (const cacheName of updatedCacheNames) {
+      updatedCache[cacheName] = {
+        ...memoryCache[cacheName],
+        ...changesByCacheName[cacheName],
+      }
     }
 
     return { updatedCache, updatedCacheNames }
