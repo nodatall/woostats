@@ -36,12 +36,12 @@ Visual mockup: [ui-mockup-starchild-platform-stats.html](ui-mockup-starchild-pla
 
 ### 2. Add the responsive stats bar
 
-- [ ] Add the approved Star Child profile image as a local optimized asset with a clear accessible label.
-- [ ] Render a compact Star Child card immediately above the WOOFi volume card, with the logo and `STARCHILD` at the top left.
-- [ ] Read the persisted Star Child snapshot from the existing app state so initial socket bootstrap and later `send` events update the card without browser polling.
-- [ ] Show Agents launched, Human queries, Skills available, and Tokens used (30d) as exact comma-formatted values spaced evenly across the large desktop card.
-- [ ] Use a two-column intermediate layout, then stack the four metrics vertically at the existing mobile breakpoint without clipping or horizontal overflow.
-- [ ] Render no Star Child card until a complete valid snapshot exists, and keep showing the last good snapshot through later refresh failures without blocking the existing dashboard.
+- [x] Add the approved Star Child profile image as a local optimized asset with a clear accessible label.
+- [x] Render a compact Star Child card immediately above the WOOFi volume card, with the logo and `STARCHILD` at the top left.
+- [x] Read the persisted Star Child snapshot from the existing app state so initial socket bootstrap and later `send` events update the card without browser polling.
+- [x] Show Agents launched, Human queries, Skills available, and Tokens used (30d) as exact comma-formatted values spaced evenly across the large desktop card.
+- [x] Use a two-column intermediate layout, then stack the four metrics vertically at the existing mobile breakpoint without clipping or horizontal overflow.
+- [x] Render no Star Child card until a complete valid snapshot exists, and keep showing the last good snapshot through later refresh failures without blocking the existing dashboard.
 
 ### 3. Verify the completed dashboard
 
