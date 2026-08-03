@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Star Child platform stats bar mockup</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Maven Pro", Avenir, Helvetica, Arial, sans-serif;
+      background: #181c23;
+      color: #c8c8c8;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #181c23; }
+    main { width: min(100%, 2560px); margin: 0 auto; padding: 32px 16px 56px; }
+    .card {
+      background: #15181d;
+      border-radius: 15px;
+      margin-bottom: 32px;
+      overflow: hidden;
+    }
+    .starchild-card {
+      min-height: 170px;
+      padding: 20px 24px 28px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 25px;
+      color: #f1f1f1;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .14em;
+    }
+    .brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      object-fit: cover;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .metric {
+      min-width: 0;
+      padding: 0 18px;
+      text-align: center;
+    }
+    .value {
+      color: #ff6a2e;
+      font-size: clamp(24px, 2vw, 34px);
+      font-weight: 500;
+      line-height: 1.15;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .label {
+      margin-top: 8px;
+      color: rgba(213,213,213,.62);
+      font-size: 14px;
+      letter-spacing: .02em;
+    }
+    .woofi-card {
+      display: grid;
+      place-items: center;
+      min-height: 125px;
+      padding: 22px;
+      text-align: center;
+    }
+    .woofi-title { margin-bottom: 14px; font-size: 20px; }
+    .woofi-total { color: #73bef4; font-size: 28px; }
+    .woofi-breakdown { color: rgba(213,213,213,.65); font-size: 15px; }
+    .context-note {
+      margin: -12px 0 24px;
+      color: rgba(213,213,213,.38);
+      font-size: 12px;
+      text-align: right;
+    }
+    @media (max-width: 600px) {
+      main { padding: 24px 0 40px; }
+      .card { margin-bottom: 24px; border-radius: 0; }
+      .starchild-card { padding: 18px 20px 10px; }
+      .brand { margin-bottom: 10px; }
+      .metrics { grid-template-columns: 1fr; }
+      .metric {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 15px 0;
+        text-align: left;
+      }
+      .value { order: 2; font-size: 23px; }
+      .label { margin-top: 0; font-size: 14px; }
+      .context-note { display: none; }
+    }
+    @media (min-width: 601px) and (max-width: 1199px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric {
+        padding: 18px 14px;
+      }
+      .value { font-size: clamp(22px, 3.8vw, 30px); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card starchild-card" aria-label="Star Child platform statistics">
+      <div class="brand">
+        <img src="https://pbs.twimg.com/profile_images/1955624196291035136/cDHUqT5s_400x400.jpg" alt="Star Child logo">
+        <span>STARCHILD</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="value">4,170</div><div class="label">Agents launched</div></div>
+        <div class="metric"><div class="value">170,105</div><div class="label">Human queries</div></div>
+        <div class="metric"><div class="value">1,112,534</div><div class="label">Skills available</div></div>
+        <div class="metric"><div class="value">9,762,190,973</div><div class="label">Tokens used (30d)</div></div>
+      </div>
+    </section>
+    <div class="context-note">Resize below 1200px for two columns and below 601px for the mobile stack.</div>
+
+    <section class="card woofi-card" aria-label="Existing WOOFi volume summary">
+      <div>
+        <div class="woofi-title"><span class="woofi-total">$7,240,808</span> &nbsp;24hr WOOFi volume</div>
+        <div class="woofi-breakdown">Pro &nbsp; $960,473 &nbsp;&nbsp;&nbsp; Swap &nbsp; $6,280,335</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
