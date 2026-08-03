@@ -27,6 +27,7 @@ export default function StarChildPlatformStats() {
       component="section"
       aria-label="Star Child platform statistics"
       sx={{
+        boxSizing: 'border-box',
         minHeight: '170px',
         px: 3,
         pt: 2.5,

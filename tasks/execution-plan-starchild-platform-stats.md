@@ -45,7 +45,7 @@ Visual mockup: [ui-mockup-starchild-platform-stats.html](ui-mockup-starchild-pla
 
 ### 3. Verify the completed dashboard
 
-- [ ] Run the focused Node test command and the production frontend build.
-- [ ] Inspect the home page at large desktop, intermediate, 601px, and mobile widths, confirming placement, branding, exact metric labels, equal desktop spacing, two-column flow, mobile stacking, and no overflow.
-- [ ] Verify startup refresh and the 60-second schedule, persistence across a server restart, live socket updates after success, retention of the last good snapshot after upstream or database failure, and no card when the database has no valid Star Child snapshot.
-- [ ] Confirm the existing WOOFi summary and charts still render when Star Child succeeds, fails with cached data, and fails without cached data.
+- [x] Run the focused Node test command and the production frontend build.
+- [x] Inspect the home page at large desktop, intermediate, 601px, and mobile widths, confirming placement, branding, exact metric labels, equal desktop spacing, two-column flow, mobile stacking, and no overflow.
+- [x] Verify startup refresh and the 60-second schedule, persistence across a server restart, live socket updates after success, retention of the last good snapshot after upstream or database failure, and no card when the database has no valid Star Child snapshot.
+- [x] Confirm the existing WOOFi summary and charts still render when Star Child succeeds, fails with cached data, and fails without cached data.
