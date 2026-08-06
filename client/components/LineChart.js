@@ -144,8 +144,8 @@ export default function LineChart({
   const plugins = [
     {
       afterDraw: (chart) => {
-        if (chart.tooltip._active && chart.tooltip._active.length) {
-          const activePoint = chart.tooltip._active[0]
+        const activePoint = chart.tooltip && chart.tooltip._active && chart.tooltip._active[0]
+        if (activePoint && activePoint.element) {
           const { ctx } = chart
           const { x } = activePoint.element
           const topY = chart.scales.y.top
