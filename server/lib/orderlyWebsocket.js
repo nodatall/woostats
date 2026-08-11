@@ -25,30 +25,38 @@ async function openOrderlyWebsocket(socket) {
   }, 5000)
 
   orderlySocket.on('message', async messageStream => {
-    const message = JSON.parse(messageStream.toString())
+    try {
+      const message = JSON.parse(messageStream.toString())
 
-    if (message.event === 'ping') {
-      orderlySocket.send(JSON.stringify({
-        event: 'pong',
-      }))
-    } else if (message.topic === 'woofi_pro$tickers') {
-      if (!orderlySocket.debounce) {
-        orderlySocket.debounce = 1
+      if (message.event === 'ping') {
+        orderlySocket.send(JSON.stringify({
+          event: 'pong',
+        }))
+      } else if (message.topic === 'woofi_pro$tickers') {
+        if (!orderlySocket.debounce) {
+          orderlySocket.debounce = 1
 
-        let totalVolume = 0
+          let totalVolume = 0
 
-        message.data.forEach(ticker => {
-          totalVolume += ticker.amount
-        })
+          message.data.forEach(ticker => {
+            totalVolume += ticker.amount
+          })
 
-        await update24hrExchangeVolume({ exchangeId: 'woofi_pro', volume: totalVolume })
-        await memoryCache.update({ woofiPro24hrVolume: totalVolume })
-        socket.emit('send', { woofiPro24hrVolume: totalVolume })
-        lastUpdate = Date.now()
-        setTimeout(() => {
-          orderlySocket.debounce = null
-        }, 1000)
+          await update24hrExchangeVolume({ exchangeId: 'woofi_pro', volume: totalVolume })
+          await memoryCache.update({ woofiPro24hrVolume: totalVolume })
+          socket.emit('send', { woofiPro24hrVolume: totalVolume })
+          lastUpdate = Date.now()
+          setTimeout(() => {
+            orderlySocket.debounce = null
+          }, 1000)
+        }
       }
+    } catch (error) {
+      orderlySocket.debounce = null
+      logger.error('orderlyWebsocket message handler failed', {
+        message: error.message,
+        stack: error.stack,
+      })
     }
   })
 

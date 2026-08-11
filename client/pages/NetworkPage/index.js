@@ -15,6 +15,7 @@ import TwoColumns from 'components/TwoColumns'
 import ButtonGroupSelector from 'components/ButtonGroupSelector'
 import RangeSliderLineChart from 'components/RangeSliderLineChart'
 import AggregateNetworkVolumeBox from './AggregateNetworkVolumeBox'
+import StarChildPlatformStats from './StarChildPlatformStats'
 
 export default function NetworkPage() {
   const {
@@ -61,6 +62,7 @@ export default function NetworkPage() {
   })
 
   return <Box>
+    <StarChildPlatformStats />
     <AggregateNetworkVolumeBox />
     <TwoColumns>
       <VolumeOrLineChart {...{
