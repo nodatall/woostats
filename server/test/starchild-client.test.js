@@ -35,16 +35,31 @@ test('normalizes the complete Star Child response to client fields', async () =>
   assert.ok(calls[0][1].signal instanceof AbortSignal)
 })
 
-test('rejects missing and additional counters', () => {
-  const { agents_launched, ...missingCounter } = validResponse
+test('rejects missing required counters', () => {
+  for (const field of Object.keys(validResponse)) {
+    const missingCounter = { ...validResponse }
+    delete missingCounter[field]
 
-  assert.throws(
-    () => normalizePlatformStats(missingCounter),
-    /must contain exactly/,
-  )
-  assert.throws(
-    () => normalizePlatformStats({ ...validResponse, extra: 1 }),
-    /must contain exactly/,
+    assert.throws(
+      () => normalizePlatformStats(missingCounter),
+      /must contain all required fields/,
+    )
+  }
+})
+
+test('accepts and ignores additional response fields', () => {
+  assert.deepEqual(
+    normalizePlatformStats({
+      ...validResponse,
+      tokens_30d_detail: { platform: 123, direct: 456 },
+      tokens_30d_total: 579,
+    }),
+    {
+      agentsLaunched: 4170,
+      humanQueries: 170125,
+      skillsAvailable: 1112534,
+      tokensUsed30d: 9763177574,
+    },
   )
 })
 

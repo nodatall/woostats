@@ -12,12 +12,8 @@ function normalizePlatformStats(data) {
   }
 
   const expectedFields = Object.keys(STAR_CHILD_PLATFORM_STAT_FIELDS)
-  const receivedFields = Object.keys(data)
-  if (
-    receivedFields.length !== expectedFields.length
-    || expectedFields.some(field => !receivedFields.includes(field))
-  ) {
-    throw new Error(`Star Child platform stats response must contain exactly: ${expectedFields.join(', ')}`)
+  if (expectedFields.some(field => !Object.prototype.hasOwnProperty.call(data, field))) {
+    throw new Error(`Star Child platform stats response must contain all required fields: ${expectedFields.join(', ')}`)
   }
 
   return expectedFields.reduce((normalized, field) => {
